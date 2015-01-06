@@ -1,5 +1,4 @@
 var $ = require('jquery'),
-    mergeOptions = require('./strats').mergeOptions,
     noop = function () {};
 
 module.exports = {
@@ -11,7 +10,6 @@ module.exports = {
     clone: $.clone,
     extend: $.extend,
     slice: [].slice,
-    mergeOptions: mergeOptions,
     noop: noop,
     /**
      * Add class with compatibility for IE & SVG

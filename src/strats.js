@@ -1,4 +1,4 @@
-var extend = require('jquery').extend;
+var _ = require('./utils');
 
 var strats = {};
 strats.created =
@@ -21,7 +21,7 @@ strats.methods =
 strats.directives = function (parentVal, childVal) {
   if (!childVal) return parentVal;
   if (!parentVal) return childVal;
-  return extend({}, parentVal, childVal);
+  return _.extend({}, parentVal, childVal);
 }
 
 var defaultStrat = function (parentVal, childVal) {
@@ -57,6 +57,8 @@ function mergeOptions(parent, child, vm) {
     }
     return options;
 }
+
+_.extend(_, mergeOptions);
 
 module.exports = {
     strats: strats,
