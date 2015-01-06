@@ -63,7 +63,7 @@ Q.all = function (options) {
 _.extend(Q.prototype, {
     _init: function (options) {
         options = options || {};
-        this.$el = _.find(options.el)[0];
+        this.$el = options.el && _.find(options.el)[0];
         // element references
         this.$$ = {};
         // merge options
@@ -80,14 +80,16 @@ _.extend(Q.prototype, {
         this._events = {};
         this._watchers = {};
         this._data = options.data;
-        // cache the instance
-        _.data(this.$el, 'QI', this);
         // initialize data and scope inheritance.
         this._initScope();
         // call created hook
         this._callHook('created')
         // start compilation
-        this.$mount(this.$el);
+        if (this.$el) {
+            // cache the instance
+            _.data(this.$el, 'QI', this);
+            this.$mount(this.$el);
+        }
     },
 
     /**
