@@ -58,8 +58,6 @@ function mergeOptions(parent, child, vm) {
     return options;
 }
 
-_.extend(_, mergeOptions);
-
 module.exports = {
     strats: strats,
     mergeOptions: mergeOptions

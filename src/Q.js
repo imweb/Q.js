@@ -1,6 +1,7 @@
 var _ = require('./utils'),
     Data = require('./data'),
     MARK = /\{\{(.+?)\}\}/,
+    mergeOptions = require('./strats').mergeOptions,
     _doc = document;
 
 
@@ -67,7 +68,7 @@ _.extend(Q.prototype, {
         // element references
         this.$$ = {};
         // merge options
-        options = this.$options = _.mergeOptions(
+        options = this.$options = mergeOptions(
             this.constructor.options,
             options,
             this
