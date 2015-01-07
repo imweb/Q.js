@@ -171,46 +171,51 @@ var vm = new Q({
 
 ### data
 
-> 所有data操作都应该使用data，才能触发绑定，因为我们没有defineProperty的支持。
+> 所有data的设置操作都应该使用提供的方法来完成，我们提供了`$set`, `$push`, `$pop`, `$unshift`, `$shift`, `$touch`。
 
-* 生成一个data对象：
+* 获取值
+
+> 直接在vm上去就好，例如：
+> vm.list[1]
+
+* 设置一个key为一个值value
 
 ```javascript
-vm.data()
+vm.$set(key, value)
 ```
 
-* 生成一个data对象并将游标指向msg属性：
+* 设置list中的一个key一个value
 
 ```javascript
-vm.data('msg')
+vm.list.$set(key, value)
 ```
 
-* 生成一个data对象，并在msg属性中寻找obj对象，并将游标指向obj对象：
+* 向list push一个value
 
 ```javascript
-vm.data('msg', obj)
+vm.list.$push(value)
 ```
 
-* 得到当前游标的值：
+* 从list pop出一个值
 
 ```javascript
-data.get()
+vm.list.$pop()
 ```
 
-* 设置当前游标的值：
+* 向list unshift一个value
 
 ```javascript
-data.set(value)
+vm.list.$unshift(value)
 ```
 
-* 设置当前游标的子属性msg为value：
+* 从list shift出一个值
 
 ```javascript
-data.set('msg', value)
+vm.list.$shift()
 ```
 
-* 没有改变属性，但是触发下属性改变：
+* 值没有改变只是通知一下
 
 ```javascript
-data.touch()
+vm.$touch()
 ```

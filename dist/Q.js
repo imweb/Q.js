@@ -147,7 +147,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // events bookkeeping
 	        this._events = {};
 	        this._watchers = {};
-	        this._data = options.data;
+	        Data.call(this, options);
+	        // this._data = options.data;
 	        // initialize data and scope inheritance.
 	        this._initScope();
 	        // call created hook
@@ -164,12 +165,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Set data and Element value
 	     *
 	     * @param {String} key
-	     * @param {Object} obj
+	     * @param {*} value
 	     * @returns {Data}
 	     */
-	    data: function (key, obj) {
-	        var d = new Data(this);
-	        return key ? d.find(key, obj) : d;
+	    data: function (key, value) {
+	        var i = 0, l, data = this;
+	        if (~key.indexOf('.')) {
+	            var keys = key.split('.');
+	            for (l = keys.length; i < l - 1; i++) {
+	                key = keys[i];
+	                // key is number
+	                if (+key + '' === key) key = +key;
+	                data = data[key];
+	            }
+	        }
+	        l && (key = keys[i]);
+	        if (value === undefined) return data[key];
+	        data.$set(key, value);
 	    },
 	    /**
 	     * Listen on the given `event` with `fn`.
@@ -249,7 +261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var key = deep ? exp + '**deep**' : exp;
 	        (this._watchers[key] || (this._watchers[key] = []))
 	            .push(cb);
-	        immediate && cb(this.data(exp).get());
+	        immediate && cb(this.data(exp));
 	        return this;
 	    },
 	    /**
@@ -302,12 +314,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args = _.slice.call(arguments, 1),
 	            _emit = this._emit, key;
 	        args.unshift(key);
-	        if (Array.isArray(args[1])) this._clearWatch(key);
+	        // TODO It must use a better way
+	        if (args[1] instanceof Data && 'length' in args[1]) this._clearWatch(key);
 	        _emit.apply(self, args);
 	        for (; keys.length > 0;) {
 	            key = keys.join('.');
 	            args[0] = key + '**deep**';
-	            args[1] = this.data(key).get();
+	            args[1] = this.data(key);
 	            _emit.apply(self, args);
 	            keys.pop();
 	        }
@@ -451,7 +464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        self.$watch(key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
 	                            directive(value, descriptor);
-	                        }, typeof self._data[key] === 'object', true);
+	                        }, typeof self[key] === 'object', true);
 	                    });
 	                }
 	                switch (name) {
@@ -473,7 +486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    itemNode;
 	                                arr.forEach(function (obj, i) {
 	                                    itemNode = _.clone(tpl);
-	                                    self._buildNode(itemNode, obj, { key: key, namespace: self.data(key, obj).namespace() });
+	                                    self._buildNode(itemNode, obj, { key: key, namespace: obj.$namespace() });
 	                                    repeats.push(itemNode);
 	                                    fragment.appendChild(itemNode);
 	                                });
@@ -557,7 +570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                node.value = value;
 	                            }, typeof data[key] === 'object', true);
 	                            _.add(node, 'input onpropertychange change', function (e) {
-	                                self.data(namespace + key).set(node.value);
+	                                self.data(namespace.substring(0, namespace.length - 1)).$set(key, node.value);
 	                            });
 	                        });
 	                        break;
@@ -670,8 +683,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return value;
 	    }
-
 	});
+
+	_.extend(Q.prototype, Data.prototype);
 
 	module.exports = Q;
 
@@ -743,124 +757,111 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(1);
 
 	/**
-	 * Data
-	 * @class
-	 * @param {VM} vm
+	 * prefix data
 	 */
-	function Data(vm) {
-	    this._namespace = '';
-	    this.data = vm._data;
-	    this.vm = vm;
+	function _prefix(up, key, value) {
+	    if (+key + '' === key) key = +key;
+	    up[key] = typeof value === 'object' ? new Data({
+	        data: value,
+	        up: up,
+	        top: up._top,
+	        namespace: [up._namespace, key].join('.')
+	    }) : value;
+	}
+
+	function Data(options) {
+	    var data = options.data,
+	        keys = Object.keys(options.data)
+	            .filter(function (key) { return key.indexOf('_') !== 0; }),
+	        self = this;
+	    _.extend(this, data);
+
+	    // all key need to traverse
+	    this._keys = keys;
+	    // parent data container
+	    this._up = options.up;
+	    // the most top parent data container
+	    this._top = options.top || this;
+	    // the namespace of data
+	    this._namespace = options.namespace || '';
+	    keys.forEach(function (key) {
+	        _prefix(self, key, data[key]);
+	    });
+	    // if it is a array
+	    Array.isArray(data) &&
+	        (this.length = keys.length);
 	}
 	_.extend(Data.prototype, {
 	    /**
-	     * namespace
-	     * get or set the namespace
-	     * @param {String} key
-	     * @returns {String}
+	     * get the namespace
 	     */
-	    namespace: function (key) {
-	        if (key === undefined) return this._namespace.substring(1);
-	        this._namespace += ('.' + key);
+	    $namespace: function (key) {
+	        return (
+	            key !== undefined ?
+	                [this._namespace, key].join('.') :
+	                this._namespace
+	        ).substring(1);
 	    },
 	    /**
-	     * set or get data
-	     */
-	    _value: function (key, value, data) {
-	        // need to fix key
-	        var i = 0, l, data = data || this.data;
-	        if (~key.indexOf('.')) {
-	            var keys = key.split('.');
-	            for (l = keys.length; i < l - 1; i++) {
-	                key = keys[i];
-	                // key is number
-	                if (+key + '' === key) key = +key;
-	                data = data[key];
-	            }
-	        }
-	        l && (key = keys[i]);
-	        if (value === undefined) return data[key];
-	        data[key] = value;
-	    },
-	    /**
-	     * find
-	     * walk to the namespace the user want to
-	     * @param {String} key
-	     * @param {Object} obj
-	     * @example:
-	     *      find(key)
-	     *      find(key, obj)
-	     *      find(obj)
-	     * @returns {Data}
-	     */
-	    find: function (key, obj) {
-	        var i;
-	        if (typeof key !== 'Object') {
-	            this.namespace(key);
-	            this.data = this._value(key);
-	        } else {
-	            obj = key;
-	            key = null;
-	        }
-	        // need to find obj
-	        if (obj) {
-	            if (typeof this.data === 'object') {
-	                if (Array.isArray(this.data)) {
-	                    i = this.data.indexOf(obj);
-	                    if (~i) {
-	                        this.namespace(i);
-	                        this.data = this.data[i];
-	                    }
-	                } else {
-	                    for (i in this.data) {
-	                        if (this.data[i] === obj) {
-	                            this.namespace(i);
-	                            this.data = this.data[i];
-	                            break;
-	                        }
-	                    }
-	                }
-	            } else {
-	                _warn(this.namespace() + ' don\'t have ' + obj);
-	            }
-	        }
-	        return this;
-	    },
-	    /**
-	     * get
-	     * get the value of the key
-	     * @param {String} key
-	     */
-	    get: function (key) {
-	        return key ? this.data[key] : this.data;
-	    },
-	    /**
-	     * set
 	     * set the value of the key
-	     * @param {String} key
-	     * @param {*} value
-	     * @example
-	     *      set(value)
-	     *      set(key, value)
 	     */
-	    set: function (key, value) {
-	        if (value === undefined) {
-	            value = key;
-	            this._value(this.namespace(), value, this.vm._data);
-	        } else {
-	            this.data[key] = value;
-	            this.namespace(key);
-	        }
-	        this.vm.$emit('data:' + this.namespace(), value);
+	    $set: function (key, value) {
+	        _prefix(this, key, value);
+	        this._top.$emit('data:' + this.$namespace(key), value);
 	        return this;
+	    },
+	    /**
+	     * push data
+	     */
+	    $push: function (value) {
+	        if (!this.length) return _.warn(this + ' is not a array');
+	        _prefix(this, this.length, value);
+	        this.length++;
+	        this._top.$emit('data:' + this.$namespace(), this);
+	        return this;
+	    },
+	    /**
+	     * pop data
+	     */
+	    $pop: function () {
+	        if (!this.length) return _.warn(this + ' is not a array');
+	        var res = this[--this.length];
+	        this[this.length] = null;
+	        delete this[this.length];
+	        this._top.$emit('data:' + this.$namespace(), this);
+	        return res;
+	    },
+	    /**
+	     * unshift
+	     */
+	    $unshift: function (value) {
+	        if (!this.length) return _.warn(this + ' is not a array');
+	        this.length++;
+	        for (var l = this.length; l--;) {
+	            this[l] = this[l - 1];
+	        }
+	        _prefix(this, 0, value);
+	        this._top.$emit('data:' + this.$namespace(), this);
+	        return this;
+	    },
+	    /**
+	     * shift
+	     */
+	    $shift: function () {
+	        if (!this.length) return _.warn(this + ' is not a array');
+	        this.length--;
+	        var res = this[0];
+	        for (var i = 0, l = this.length; i < l; i++) {
+	            this[i] = this[i + 1];
+	        }
+	        this._top.$emit('data:' + this.$namespace(), this);
+	        return res;
 	    },
 	    /**
 	     * touch
-	     * just touch it, and make it just like we have modified
 	     */
-	    touch: function () {
-	        this.vm.$emit('data:' + this.namespace(), this.get());
-	        return this;
+	    $touch: function (key) {
+	        this._top.$emit('data:' + this.$namespace(key), this);
 	    }
 	});
 

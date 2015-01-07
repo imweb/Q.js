@@ -15,9 +15,8 @@ describe('data', function () {
             }
         });
 
-        vm.data().find('msg').get().should.equal('hello');
-        vm.data('msg').get().should.equal('hello');
-        vm.data('list.1.text').get().should.equal('donaldyang');
+        vm.msg.should.equal('hello');
+        vm.list[1].text.should.equal('donaldyang');
     });
 
     it('should able to set a vm data', function () {
@@ -36,7 +35,19 @@ describe('data', function () {
             }
         });
 
-        vm.data().set('msg', 'nihao');
-        vm.data('msg').get().should.equal('nihao');
+        vm.$set('msg', 'nihao');
+        vm.msg.should.equal('nihao');
+        vm.list[1].$set('text', 'hello');
+        vm.list[1].text.should.equal('hello');
+        vm.list.$push({ text: 'nihao' });
+        vm.list[2].text.should.equal('nihao');
+        vm.list.length.should.equal(3);
+        vm.list.$pop().text.should.equal('nihao');
+        vm.list.length.should.equal(2);
+        vm.list.$unshift({ text: 'good' });
+        vm.list[0].text.should.equal('good');
+        vm.list.length.should.equal(3);
+        vm.list.$shift().text.should.equal('good');
+        vm.list.length.should.equal(2);
     });
 });

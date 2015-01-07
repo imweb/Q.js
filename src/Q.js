@@ -80,7 +80,8 @@ _.extend(Q.prototype, {
         // events bookkeeping
         this._events = {};
         this._watchers = {};
-        this._data = options.data;
+        Data.call(this, options);
+        // this._data = options.data;
         // initialize data and scope inheritance.
         this._initScope();
         // call created hook
@@ -97,12 +98,23 @@ _.extend(Q.prototype, {
      * Set data and Element value
      *
      * @param {String} key
-     * @param {Object} obj
+     * @param {*} value
      * @returns {Data}
      */
-    data: function (key, obj) {
-        var d = new Data(this);
-        return key ? d.find(key, obj) : d;
+    data: function (key, value) {
+        var i = 0, l, data = this;
+        if (~key.indexOf('.')) {
+            var keys = key.split('.');
+            for (l = keys.length; i < l - 1; i++) {
+                key = keys[i];
+                // key is number
+                if (+key + '' === key) key = +key;
+                data = data[key];
+            }
+        }
+        l && (key = keys[i]);
+        if (value === undefined) return data[key];
+        data.$set(key, value);
     },
     /**
      * Listen on the given `event` with `fn`.
@@ -182,7 +194,7 @@ _.extend(Q.prototype, {
         var key = deep ? exp + '**deep**' : exp;
         (this._watchers[key] || (this._watchers[key] = []))
             .push(cb);
-        immediate && cb(this.data(exp).get());
+        immediate && cb(this.data(exp));
         return this;
     },
     /**
@@ -235,12 +247,13 @@ _.extend(Q.prototype, {
             args = _.slice.call(arguments, 1),
             _emit = this._emit, key;
         args.unshift(key);
-        if (Array.isArray(args[1])) this._clearWatch(key);
+        // TODO It must use a better way
+        if (args[1] instanceof Data && 'length' in args[1]) this._clearWatch(key);
         _emit.apply(self, args);
         for (; keys.length > 0;) {
             key = keys.join('.');
             args[0] = key + '**deep**';
-            args[1] = this.data(key).get();
+            args[1] = this.data(key);
             _emit.apply(self, args);
             keys.pop();
         }
@@ -384,7 +397,7 @@ _.extend(Q.prototype, {
                         self.$watch(key, function (value) {
                             value = self.applyFilters(value, readFilters);
                             directive(value, descriptor);
-                        }, typeof self._data[key] === 'object', true);
+                        }, typeof self[key] === 'object', true);
                     });
                 }
                 switch (name) {
@@ -406,7 +419,7 @@ _.extend(Q.prototype, {
                                     itemNode;
                                 arr.forEach(function (obj, i) {
                                     itemNode = _.clone(tpl);
-                                    self._buildNode(itemNode, obj, { key: key, namespace: self.data(key, obj).namespace() });
+                                    self._buildNode(itemNode, obj, { key: key, namespace: obj.$namespace() });
                                     repeats.push(itemNode);
                                     fragment.appendChild(itemNode);
                                 });
@@ -490,7 +503,7 @@ _.extend(Q.prototype, {
                                 node.value = value;
                             }, typeof data[key] === 'object', true);
                             _.add(node, 'input onpropertychange change', function (e) {
-                                self.data(namespace + key).set(node.value);
+                                self.data(namespace.substring(0, namespace.length - 1)).$set(key, node.value);
                             });
                         });
                         break;
@@ -603,7 +616,8 @@ _.extend(Q.prototype, {
         }
         return value;
     }
-
 });
+
+_.extend(Q.prototype, Data.prototype);
 
 module.exports = Q;
