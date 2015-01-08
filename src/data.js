@@ -13,6 +13,11 @@ function _prefix(up, key, value) {
     }) : value;
 }
 
+/**
+ * Data
+ * @class
+ * @param {Object} options
+ */
 function Data(options) {
     var data = options.data,
         keys = Object.keys(options.data)
@@ -32,8 +37,13 @@ function Data(options) {
         _prefix(self, key, data[key]);
     });
     // if it is a array
-    Array.isArray(data) &&
-        (this.length = keys.length);
+    Array.isArray(data) ?
+        // fix the length
+        (this.length = keys.length) :
+        // if it is a Data Object
+        data instanceof Data && Data.length !== undefined &&
+            // the length should be keys.length - 1
+            (this.length = keys.length - 1);
 }
 _.extend(Data.prototype, {
     /**
