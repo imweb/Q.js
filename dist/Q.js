@@ -919,11 +919,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * splice
 	     */
 	    splice: function (i, l /**, items support later **/) {
-	        for (var j = 0, k = l + i; i < k; i++, j++) {
+	        for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
 	            this[i] = this[k + j];
+	            this[i]._namespace = this[i]._namespace.replace(/\.(\d+?)$/, '.' + i);
+	        }
+	        for (;i < this.length; i++) {
+	            this[i] = null;
+	            delete this[i];
 	        }
 	        this.length -= l;
-	        this._keys.splice(0, this.length - l);
+	        this._keys.splice(this.length, l);
 	        this._top.$emit('data:' + this.$namespace(), this);
 	    },
 	    /**
