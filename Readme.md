@@ -178,44 +178,11 @@ var vm = new Q({
 > 直接在vm上去就好，例如：
 > vm.list[1]
 
-* 设置一个key为一个值value
+* 赋值
 
-```javascript
-vm.$set(key, value)
-```
+> 必须使用$set方法赋值，例如：
+> vm.list[1].$set('title', 'hello');
 
-* 设置list中的一个key一个value
+* 数组方法
 
-```javascript
-vm.list.$set(key, value)
-```
-
-* 向list push一个value
-
-```javascript
-vm.list.$push(value)
-```
-
-* 从list pop出一个值
-
-```javascript
-vm.list.$pop()
-```
-
-* 向list unshift一个value
-
-```javascript
-vm.list.$unshift(value)
-```
-
-* 从list shift出一个值
-
-```javascript
-vm.list.$shift()
-```
-
-* 值没有改变只是通知一下
-
-```javascript
-vm.$touch()
-```
+> 目前支持的数组方法有：push, pop, unshift, shift, indexOf, splice
