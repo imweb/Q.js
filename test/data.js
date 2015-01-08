@@ -39,6 +39,24 @@ describe('data', function () {
         vm.msg.should.equal('nihao');
         vm.list[1].$set('text', 'hello');
         vm.list[1].text.should.equal('hello');
+    });
+
+    it('should able to set a vm data', function () {
+        var vm = new Q({
+            el: null,
+            data: {
+                msg: 'hello',
+                list: [
+                    {
+                        text: 'tencent'
+                    },
+                    {
+                        text: 'donaldyang'
+                    }
+                ]
+            }
+        });
+
         vm.list.push({ text: 'nihao' });
         vm.list[2].text.should.equal('nihao');
         vm.list.length.should.equal(3);
