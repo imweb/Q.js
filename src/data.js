@@ -5,12 +5,22 @@ var _ = require('./utils');
  */
 function _prefix(up, key, value) {
     if (+key + '' === key) key = +key;
-    up[key] = typeof value === 'object' ? new Data({
+    var options = {
         data: value,
         up: up,
         top: up._top,
         namespace: [up._namespace, key].join('.')
-    }) : value;
+    };
+    up[key] =
+        (typeof value === 'object' && value !== null) ?
+            _isArray(value) ?
+                new DataArray(options) :
+                    new Data(options) :
+            value;
+}
+
+function _isArray(obj) {
+    return Array.isArray(obj) || obj instanceof DataArray;
 }
 
 /**
@@ -40,8 +50,8 @@ function Data(options) {
     Array.isArray(data) ?
         // fix the length
         (this.length = keys.length) :
-        // if it is a Data Object
-        data instanceof Data && Data.length !== undefined &&
+        // if it is a DataArray Object
+        data instanceof DataArray &&
             // the length should be keys.length - 1
             (this.length = keys.length - 1);
 }
@@ -65,11 +75,34 @@ _.extend(Data.prototype, {
         return this;
     },
     /**
+     * get the actual value
+     */
+    $get: function () {
+        var res, keys = this._keys, self = this;
+        if (this instanceof Data) {
+            res = {};
+        } else {
+            res = [];
+        }
+        keys.forEach(function (key) {
+            res[key] = self[key].$get ?
+                self[key].$get() :
+                self[key];
+        });
+        return res;
+    }
+});
+
+function DataArray(options) {
+    Data.call(this, options);
+}
+_.extend(DataArray.prototype, Data.prototype, {
+    /**
      * push data
      */
-    $push: function (value) {
-        if (!this.length) return _.warn(this + ' is not a array');
+    push: function (value) {
         _prefix(this, this.length, value);
+        this._keys.push(this.length);
         this.length++;
         this._top.$emit('data:' + this.$namespace(), this);
         return this;
@@ -77,19 +110,19 @@ _.extend(Data.prototype, {
     /**
      * pop data
      */
-    $pop: function () {
-        if (!this.length) return _.warn(this + ' is not a array');
+    pop: function () {
         var res = this[--this.length];
         this[this.length] = null;
         delete this[this.length];
+        this._keys.pop();
         this._top.$emit('data:' + this.$namespace(), this);
         return res;
     },
     /**
      * unshift
      */
-    $unshift: function (value) {
-        if (!this.length) return _.warn(this + ' is not a array');
+    unshift: function (value) {
+        this._keys.push(this.length);
         this.length++;
         for (var l = this.length; l--;) {
             this[l] = this[l - 1];
@@ -101,21 +134,59 @@ _.extend(Data.prototype, {
     /**
      * shift
      */
-    $shift: function () {
-        if (!this.length) return _.warn(this + ' is not a array');
+    shift: function () {
         this.length--;
         var res = this[0];
         for (var i = 0, l = this.length; i < l; i++) {
             this[i] = this[i + 1];
         }
+        this._keys.pop();
         this._top.$emit('data:' + this.$namespace(), this);
         return res;
     },
     /**
      * touch
      */
-    $touch: function (key) {
+    touch: function (key) {
         this._top.$emit('data:' + this.$namespace(key), this);
+    },
+    /**
+     * indexOf
+     */
+    indexOf: function (item) {
+        for (var i = 0, l = this.length; i < l; i++) {
+            if (this[i] === item) return i;
+        }
+        return -1;
+    },
+    /**
+     * splice
+     */
+    splice: function (i, l /**, items support later **/) {
+        for (var j = 0, k = l + i; i < k; i++, j++) {
+            this[i] = this[k + j];
+        }
+        this.length -= l;
+        this._keys.splice(0, this.length - l);
+        this._top.$emit('data:' + this.$namespace(), this);
+    },
+    /**
+     * forEach
+     */
+    forEach: function (foo) {
+        for (var i = 0, l = this.length; i < l; i++) {
+            foo(this[i], i);
+        }
+    },
+    /**
+     * filter
+     */
+    filter: function (foo) {
+        var res = [];
+        this.forEach(function (item, i) {
+            if (foo(item)) res.push(item);
+        });
+        return res;
     }
 });
 
