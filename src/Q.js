@@ -58,7 +58,7 @@ Q.get = function (selector) {
 };
 Q.all = function (options) {
     return _.find(options.el).map(function (ele) {
-        return new Q(options, _.extend({ el: ele }));
+        return new Q(_.extend(options, { el: ele }));
     });
 };
 _.extend(Q.prototype, {
@@ -400,7 +400,7 @@ _.extend(Q.prototype, {
                         self.$watch(key, function (value) {
                             value = self.applyFilters(value, readFilters);
                             directive(value, descriptor);
-                        }, typeof self[key] === 'object', true);
+                        }, typeof self[key] === 'object', self[key] !== undefined);
                     });
                 }
                 switch (name) {
@@ -477,7 +477,7 @@ _.extend(Q.prototype, {
                         self.$watch(namespace + key, function (value) {
                             value = self.applyFilters(value, readFilters);
                             directive(value, descriptor);
-                        }, typeof data[key] === 'object', true);
+                        }, typeof data[key] === 'object', data[key] !== undefined);
                     });
                 }
                 switch (name) {

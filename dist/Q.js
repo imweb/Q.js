@@ -125,13 +125,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	Q.all = function (options) {
 	    return _.find(options.el).map(function (ele) {
-	        return new Q(_.extend({ el: ele }, options));
+	        return new Q(_.extend(options, { el: ele }));
 	    });
 	};
 	_.extend(Q.prototype, {
 	    _init: function (options) {
 	        options = options || {};
-	        this.$el = options.el && _.find(options.el)[0];
+	        this.$el = options.el &&
+	                typeof options.el === 'string' ?
+	                    _.find(options.el)[0] :
+	                    options.el;
 	        // element references
 	        this.$$ = {};
 	        // merge options
@@ -464,7 +467,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        self.$watch(key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
 	                            directive(value, descriptor);
-	                        }, typeof self[key] === 'object', true);
+	                        }, typeof self[key] === 'object', self[key] !== undefined);
 	                    });
 	                }
 	                switch (name) {
@@ -541,7 +544,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        self.$watch(namespace + key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
 	                            directive(value, descriptor);
-	                        }, typeof data[key] === 'object', true);
+	                        }, typeof data[key] === 'object', data[key] !== undefined);
 	                    });
 	                }
 	                switch (name) {
@@ -827,7 +830,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    $set: function (key, value) {
 	        _prefix(this, key, value);
-	        this._top.$emit('data:' + this.$namespace(key), value);
+	        this._top.$emit('data:' + this.$namespace(key), this[key]);
 	        return this;
 	    },
 	    /**

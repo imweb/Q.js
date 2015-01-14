@@ -71,7 +71,7 @@ _.extend(Data.prototype, {
      */
     $set: function (key, value) {
         _prefix(this, key, value);
-        this._top.$emit('data:' + this.$namespace(key), this[this]);
+        this._top.$emit('data:' + this.$namespace(key), this[key]);
         return this;
     },
     /**
