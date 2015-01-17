@@ -18,7 +18,7 @@
 		exports["Q"] = factory(require("jquery"));
 	else
 		root["Q"] = factory(root["jquery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_5__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_6__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -67,8 +67,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1),
 	    Data = __webpack_require__(2),
+	    parse = __webpack_require__(3),
 	    MARK = /\{\{(.+?)\}\}/,
-	    mergeOptions = __webpack_require__(3).mergeOptions,
+	    mergeOptions = __webpack_require__(4).mergeOptions,
 	    _doc = document;
 
 
@@ -113,7 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._init(options);
 	}
 	Q.options = {
-	    directives: __webpack_require__(4)
+	    directives: __webpack_require__(5)
 	};
 	Q.get = function (selector) {
 	    var ele = _.find(selector)[0];
@@ -329,32 +330,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    /**
-	     * Helper to register an event/watch callback.
-	     *
-	     * @param {Vue} vm
-	     * @param {String} action
-	     * @param {String} key
-	     * @param {*} handler
-	     */
-	    register: function (vm, action, key, handler) {
-	        var type = typeof handler;
-	        if (type === 'functioin') {
-	            vm[action](key, hander);
-	        } else if (type === 'string') {
-	            var methods = vm.$options.methods,
-	                method = methods && methods[handler];
-	            if (method) {
-	                vm[action](key, method);
-	            } else {
-	                _.warn(
-	                    'Unknown method: "' + handler + '" when ' +
-	                    'registering callback for ' + action +
-	                    ': "' + key + '".'
-	                );
-	            }
-	        }
-	    },
-	    /**
 	     * Setup the scope of an instance, which contains:
 	     * - observed data
 	     * - computed properties
@@ -458,22 +433,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _findQ(node).forEach(function (obj) {
 	                var name = obj.name.substring(2),
 	                    directive = directives[name],
-	                    descriptors = self._parse(obj.value);
+	                    descriptors = parse(obj.value);
 	                if (directive) {
 	                    descriptors.forEach(function (descriptor) {
 	                        var readFilters = self._makeReadFilters(descriptor.filters),
-	                            key = descriptor.src;
-	                        descriptor.node = node;
-	                        self.$watch(key, function (value) {
+	                            key = descriptor.target,
+	                            update = directive.update || directive;
+	                        descriptor.el = node;
+	                        descriptor.vm = self;
+	                        descriptor.filters = readFilters;
+	                        directive.unwatch || self.$watch(key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
-	                            directive(value, descriptor);
+	                            update.call(descriptor, value);
 	                        }, typeof self[key] === 'object', self[key] !== undefined);
+	                        if (directive.bind) directive.bind.call(descriptor);
 	                    });
 	                }
 	                switch (name) {
 	                    case 'repeat':
 	                        descriptors.forEach(function (descriptor) {
-	                            var key = descriptor.src,
+	                            var key = descriptor.target,
 	                                readFilters = self._makeReadFilters(descriptor.filters),
 	                                repeats = [],
 	                                tpl = node, ref = document.createComment('q-repeat');
@@ -483,6 +462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    repeats.forEach(function (node) {
 	                                        node.parentNode.removeChild(node);
 	                                    });
+	                                    _.clearData(repeats);
 	                                    repeats.length = 0;
 	                                }
 	                                var fragment = _doc.createDocumentFragment(),
@@ -502,24 +482,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            }, false, true);
 	                        });
 	                        break;
-	                    case 'on':
-	                        descriptors.forEach(function (descriptor) {
-	                            var event = descriptor.event,
-	                                key = descriptor.src || descriptor.expression.match(/^[\w\-]+/)[0],
-	                                expression = descriptor.expression,
-	                                readFilters = self._makeReadFilters(descriptor.filters),
-	                                handler = self.applyFilters(self[key], readFilters);
-	                            _.add(node, event, function (e) {
-	                                if (!handler || typeof handler !== 'function') {
-	                                    return _.warn('You need implement the ' + key + ' method.');
-	                                }
-	                                e.triggerTarget = this;
-	                                expression ?
-	                                    handler.call(self, data) :
-	                                    handler.apply(self, arguments);
-	                            });
-	                        });
-	                        break;
 	                }
 	            });
 	        });
@@ -529,90 +491,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var self = this,
 	            key = options.key,
 	            index = options.index,
-	            namespace = options.namespace + '.',
+	            namespace = options.namespace
 	            directives = self.$options.directives;
 	        _walk([node], function (node, arg) {
 	            _findQ(node).forEach(function (obj) {
 	                var name = obj.name.substring(2),
 	                    directive = directives[name],
-	                    descriptors = self._parse(obj.value);
+	                    descriptors = parse(obj.value);
 	                if (directive) {
 	                    descriptors.forEach(function (descriptor) {
 	                        var readFilters = self._makeReadFilters(descriptor.filters),
-	                            key = descriptor.src;
-	                        descriptor.node = node;
-	                        self.$watch(namespace + key, function (value) {
+	                            key = descriptor.target,
+	                            update = directive.update || directive;
+	                        descriptor.el = node;
+	                        descriptor.vm = self;
+	                        descriptor.filters = readFilters;
+	                        descriptor.namespace = namespace;
+	                        directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
-	                            directive(value, descriptor);
+	                            update.call(descriptor, value);
 	                        }, typeof data[key] === 'object', data[key] !== undefined);
+	                        if (directive.bind) directive.bind.call(descriptor);
 	                    });
-	                }
-	                switch (name) {
-	                    case 'on':
-	                        descriptors.forEach(function (descriptor) {
-	                            var event = descriptor.event,
-	                                key = descriptor.src || descriptor.expression.match(/^[\w\-]+/)[0],
-	                                expression = descriptor.expression,
-	                                readFilters = self._makeReadFilters(descriptor.filters),
-	                                handler = self.applyFilters(self[key], readFilters);
-	                            _.add(node, event, function (e) {
-	                                window._node = node;
-	                                if (!handler || typeof handler !== 'function')
-	                                    return _.warn('You need implement the ' + name + ' method.');
-	                                e.triggerTarget = this;
-	                                expression ?
-	                                    handler.call(self, data) :
-	                                    handler.apply(self, arguments);
-	                            });
-	                        });
-	                        break;
-	                    case 'model':
-	                        descriptors.forEach(function (descriptor) {
-	                            var key = descriptor.src;
-	                            self.$watch(namespace + key, function (value) {
-	                                node.value = value;
-	                            }, typeof data[key] === 'object', true);
-	                            _.add(node, 'input onpropertychange change', function (e) {
-	                                self.data(namespace.substring(0, namespace.length - 1)).$set(key, node.value);
-	                            });
-	                        });
-	                        break;
 	                }
 	            });
 	        });
 	    },
 
-	    /**
-	     * click: onclick | filter1 | filter2
-	     * click: onclick , keydown: onkeydown
-	     * value1 | filter1 | filter2
-	     * value - 1 | filter1 | filter2   don't support
-	     */
-	    _parse: function (str) {
-	        var exps = str.trim().split(/ *\, */),
-	            eventReg = /^([\w\-]+)\:/,
-	            keyReg = /^[\w\-]+$/,
-	            arr = [];
-	        exps.forEach(function (exp) {
-	            var res = {},
-	                match = exp.match(eventReg),
-	                filters, src;
-	            if (match) {
-	                res.event = match[1];
-	                exp = exp.substring(match[0].length).trim();
-	            }
-	            filters = exp.split(/ *\| */);
-	            src = filters.shift();
-	            if (keyReg.test(src)) {
-	                res.src = src;
-	            } else {
-	                res.expression = src;
-	            }
-	            res.filters = filters;
-	            arr.push(res);
-	        });
-	        return arr;
-	    },
 	    /**
 	     * bind rendered template
 	     */
@@ -652,23 +557,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    },
 
-	    // _makeWriteFilters: function (names, target) {
-	    //     if (!names.length) return [];
-	    //     var filters = this.$options.filters,
-	    //         self = this;
-	    //     return names.map(function (name) {
-	    //         var args = name.split(' '),
-	    //             writer;
-	    //         name = args.shift();
-	    //         writer = (filters[name] && filters[name].write || _.through);
-	    //         return function (value, oldVal) {
-	    //             return args ?
-	    //                 writer.apply(self, [value, oldVal].concat(args)) :
-	    //                 writer.call(self, value, oldVal);
-	    //         };
-	    //     });
-	    // },
-
 	    /**
 	     * Apply filters to a value
 	     *
@@ -697,13 +585,14 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var $ = __webpack_require__(5),
+	var $ = __webpack_require__(6),
 	    noop = function () {};
 
 	module.exports = {
 	    find: $.find,
 	    contains: $.contains,
 	    data: $.data,
+	    cleanData: $.cleanData,
 	    add: $.event.add,
 	    remove: $.event.remove,
 	    clone: $.clone,
@@ -961,6 +850,45 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/**
+	 * click: onclick | filter1 | filter2
+	 * click: onclick , keydown: onkeydown
+	 * value1 | filter1 | filter2
+	 * value - 1 | filter1 | filter2   don't support
+	 */
+	function parse(str) {
+	    var exps = str.trim().split(/ *\, */),
+	        eventReg = /^([\w\-]+)\:/,
+	        keyReg = /^[\w\-]+$/,
+	        arr = [];
+	    exps.forEach(function (exp) {
+	        var res = {},
+	            match = exp.match(eventReg),
+	            filters, exp;
+	        if (match) {
+	            res.arg = match[1];
+	            exp = exp.substring(match[0].length).trim();
+	        }
+	        filters = exp.split(/ *\| */);
+	        exp = filters.shift();
+	        if (keyReg.test(src)) {
+	            res.target = exp;
+	        } else {
+	            res.exp = exp;
+	        }
+	        res.filters = filters;
+	        arr.push(res);
+	    });
+	    return arr;
+	}
+
+	module.exports = parse;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _ = __webpack_require__(1);
 
 	var strats = {};
@@ -1028,43 +956,78 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
 
 	module.exports = {
-	    show: function (value, options) {
-	        var node = options.node;
-	        if (value) node.style.display = 'block';
-	        else node.style.display = 'none';
+	    show: function (value) {
+	        var el = this.el;
+	        if (value) el.style.display = 'block';
+	        else el.style.display = 'none';
 	    },
-	    'class': function (value, options) {
-	        var node = options.node,
-	            event = options.event;
+	    'class': function (value) {
+	        var el = this.el,
+	            arg = options.arg;
 	        value ?
-	            _.addClass(node, event) :
-	            _.removeClass(node, event);
+	            _.addClass(el, arg) :
+	            _.removeClass(el, arg);
 	    },
-	    value: function (value, options) {
-	        var node = options.node;
-	        if (node.type === 'checkbox') {
-	            node.checked = value;
+	    value: function (value) {
+	        var el = this.el;
+	        if (el.type === 'checkbox') {
+	            el.checked = value;
 	        } else {
-	            node.value = value;
+	            el.value = value;
 	        }
 	    },
-	    text: function (value, options) {
-	        options.node.innerText = value;
+	    text: function (value) {
+	        this.el.innerText = value;
+	    },
+	    on: {
+	        unwatch: true,
+	        bind: function () {
+	            var key = this.target || this.exp.match(/^[\w\-]+/)[0],
+	                expression = this.exp,
+	                filters = this.filters,
+	                vm = this.vm,
+	                handler = vm.applyFilters(this.vm[key], filters),
+	                data = this.namespace ?
+	                    vm.data(namespace) :
+	                    vm;
+	            _.add(this.el, this.arg, function (e) {
+	                if (!handler || typeof handler !== 'function') {
+	                    return _.warn('You need implement the ' + key + ' method.');
+	                }
+	                expression ?
+	                    handler.call(vm, data) :
+	                    handler.apply(vm, arguments);
+	            });
+	        }
+	    },
+	    model: {
+	        bind: function () {
+	            var key = this.target,
+	                namespace = this.namespace || '',
+	                el = this.el,
+	                vm = this.vm;
+	            _.add(node, 'input onpropertychange change', function (e) {
+	                vm.data(namespace).$set(key, el.value);
+	            });
+	        },
+	        update: function (value) {
+	            el.value = value;
+	        }
 	    }
 	};
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
 
 /***/ }
 /******/ ])

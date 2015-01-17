@@ -1,27 +1,62 @@
 var _ = require('./utils');
 
 module.exports = {
-    show: function (value, options) {
-        var node = options.node;
-        if (value) node.style.display = 'block';
-        else node.style.display = 'none';
+    show: function (value) {
+        var el = this.el;
+        if (value) el.style.display = 'block';
+        else el.style.display = 'none';
     },
-    'class': function (value, options) {
-        var node = options.node,
-            event = options.event;
+    'class': function (value) {
+        var el = this.el,
+            arg = options.arg;
         value ?
-            _.addClass(node, event) :
-            _.removeClass(node, event);
+            _.addClass(el, arg) :
+            _.removeClass(el, arg);
     },
-    value: function (value, options) {
-        var node = options.node;
-        if (node.type === 'checkbox') {
-            node.checked = value;
+    value: function (value) {
+        var el = this.el;
+        if (el.type === 'checkbox') {
+            el.checked = value;
         } else {
-            node.value = value;
+            el.value = value;
         }
     },
-    text: function (value, options) {
-        options.node.innerText = value;
+    text: function (value) {
+        this.el.innerText = value;
+    },
+    on: {
+        unwatch: true,
+        bind: function () {
+            var key = this.target || this.exp.match(/^[\w\-]+/)[0],
+                expression = this.exp,
+                filters = this.filters,
+                vm = this.vm,
+                handler = vm.applyFilters(this.vm[key], filters),
+                data = this.namespace ?
+                    vm.data(namespace) :
+                    vm;
+            _.add(this.el, this.arg, function (e) {
+                if (!handler || typeof handler !== 'function') {
+                    return _.warn('You need implement the ' + key + ' method.');
+                }
+                expression ?
+                    handler.call(vm, data) :
+                    handler.apply(vm, arguments);
+            });
+        }
+    },
+    model: {
+        bind: function () {
+            var key = this.target,
+                namespace = this.namespace || '',
+                el = this.el,
+                vm = this.vm;
+            _.add(node, 'input onpropertychange change', function (e) {
+                vm.data(namespace).$set(key, el.value);
+            });
+        },
+        update: function (value) {
+            el.value = value;
+        }
     }
 };

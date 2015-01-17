@@ -1,5 +1,6 @@
 var _ = require('./utils'),
     Data = require('./data'),
+    parse = require('./parse'),
     MARK = /\{\{(.+?)\}\}/,
     mergeOptions = require('./strats').mergeOptions,
     _doc = document;
@@ -262,32 +263,6 @@ _.extend(Q.prototype, {
         }
     },
     /**
-     * Helper to register an event/watch callback.
-     *
-     * @param {Vue} vm
-     * @param {String} action
-     * @param {String} key
-     * @param {*} handler
-     */
-    register: function (vm, action, key, handler) {
-        var type = typeof handler;
-        if (type === 'functioin') {
-            vm[action](key, hander);
-        } else if (type === 'string') {
-            var methods = vm.$options.methods,
-                method = methods && methods[handler];
-            if (method) {
-                vm[action](key, method);
-            } else {
-                _.warn(
-                    'Unknown method: "' + handler + '" when ' +
-                    'registering callback for ' + action +
-                    ': "' + key + '".'
-                );
-            }
-        }
-    },
-    /**
      * Setup the scope of an instance, which contains:
      * - observed data
      * - computed properties
@@ -391,22 +366,26 @@ _.extend(Q.prototype, {
             _findQ(node).forEach(function (obj) {
                 var name = obj.name.substring(2),
                     directive = directives[name],
-                    descriptors = self._parse(obj.value);
+                    descriptors = parse(obj.value);
                 if (directive) {
                     descriptors.forEach(function (descriptor) {
                         var readFilters = self._makeReadFilters(descriptor.filters),
-                            key = descriptor.src;
-                        descriptor.node = node;
-                        self.$watch(key, function (value) {
+                            key = descriptor.target,
+                            update = directive.update || directive;
+                        descriptor.el = node;
+                        descriptor.vm = self;
+                        descriptor.filters = readFilters;
+                        directive.unwatch || self.$watch(key, function (value) {
                             value = self.applyFilters(value, readFilters);
-                            directive(value, descriptor);
+                            update.call(descriptor, value);
                         }, typeof self[key] === 'object', self[key] !== undefined);
+                        if (directive.bind) directive.bind.call(descriptor);
                     });
                 }
                 switch (name) {
                     case 'repeat':
                         descriptors.forEach(function (descriptor) {
-                            var key = descriptor.src,
+                            var key = descriptor.target,
                                 readFilters = self._makeReadFilters(descriptor.filters),
                                 repeats = [],
                                 tpl = node, ref = document.createComment('q-repeat');
@@ -416,6 +395,7 @@ _.extend(Q.prototype, {
                                     repeats.forEach(function (node) {
                                         node.parentNode.removeChild(node);
                                     });
+                                    _.clearData(repeats);
                                     repeats.length = 0;
                                 }
                                 var fragment = _doc.createDocumentFragment(),
@@ -435,24 +415,6 @@ _.extend(Q.prototype, {
                             }, false, true);
                         });
                         break;
-                    case 'on':
-                        descriptors.forEach(function (descriptor) {
-                            var event = descriptor.event,
-                                key = descriptor.src || descriptor.expression.match(/^[\w\-]+/)[0],
-                                expression = descriptor.expression,
-                                readFilters = self._makeReadFilters(descriptor.filters),
-                                handler = self.applyFilters(self[key], readFilters);
-                            _.add(node, event, function (e) {
-                                if (!handler || typeof handler !== 'function') {
-                                    return _.warn('You need implement the ' + key + ' method.');
-                                }
-                                e.triggerTarget = this;
-                                expression ?
-                                    handler.call(self, data) :
-                                    handler.apply(self, arguments);
-                            });
-                        });
-                        break;
                 }
             });
         });
@@ -462,90 +424,33 @@ _.extend(Q.prototype, {
         var self = this,
             key = options.key,
             index = options.index,
-            namespace = options.namespace + '.',
+            namespace = options.namespace
             directives = self.$options.directives;
         _walk([node], function (node, arg) {
             _findQ(node).forEach(function (obj) {
                 var name = obj.name.substring(2),
                     directive = directives[name],
-                    descriptors = self._parse(obj.value);
+                    descriptors = parse(obj.value);
                 if (directive) {
                     descriptors.forEach(function (descriptor) {
                         var readFilters = self._makeReadFilters(descriptor.filters),
-                            key = descriptor.src;
-                        descriptor.node = node;
-                        self.$watch(namespace + key, function (value) {
+                            key = descriptor.target,
+                            update = directive.update || directive;
+                        descriptor.el = node;
+                        descriptor.vm = self;
+                        descriptor.filters = readFilters;
+                        descriptor.namespace = namespace;
+                        directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
                             value = self.applyFilters(value, readFilters);
-                            directive(value, descriptor);
+                            update.call(descriptor, value);
                         }, typeof data[key] === 'object', data[key] !== undefined);
+                        if (directive.bind) directive.bind.call(descriptor);
                     });
-                }
-                switch (name) {
-                    case 'on':
-                        descriptors.forEach(function (descriptor) {
-                            var event = descriptor.event,
-                                key = descriptor.src || descriptor.expression.match(/^[\w\-]+/)[0],
-                                expression = descriptor.expression,
-                                readFilters = self._makeReadFilters(descriptor.filters),
-                                handler = self.applyFilters(self[key], readFilters);
-                            _.add(node, event, function (e) {
-                                window._node = node;
-                                if (!handler || typeof handler !== 'function')
-                                    return _.warn('You need implement the ' + name + ' method.');
-                                e.triggerTarget = this;
-                                expression ?
-                                    handler.call(self, data) :
-                                    handler.apply(self, arguments);
-                            });
-                        });
-                        break;
-                    case 'model':
-                        descriptors.forEach(function (descriptor) {
-                            var key = descriptor.src;
-                            self.$watch(namespace + key, function (value) {
-                                node.value = value;
-                            }, typeof data[key] === 'object', true);
-                            _.add(node, 'input onpropertychange change', function (e) {
-                                self.data(namespace.substring(0, namespace.length - 1)).$set(key, node.value);
-                            });
-                        });
-                        break;
                 }
             });
         });
     },
 
-    /**
-     * click: onclick | filter1 | filter2
-     * click: onclick , keydown: onkeydown
-     * value1 | filter1 | filter2
-     * value - 1 | filter1 | filter2   don't support
-     */
-    _parse: function (str) {
-        var exps = str.trim().split(/ *\, */),
-            eventReg = /^([\w\-]+)\:/,
-            keyReg = /^[\w\-]+$/,
-            arr = [];
-        exps.forEach(function (exp) {
-            var res = {},
-                match = exp.match(eventReg),
-                filters, src;
-            if (match) {
-                res.event = match[1];
-                exp = exp.substring(match[0].length).trim();
-            }
-            filters = exp.split(/ *\| */);
-            src = filters.shift();
-            if (keyReg.test(src)) {
-                res.src = src;
-            } else {
-                res.expression = src;
-            }
-            res.filters = filters;
-            arr.push(res);
-        });
-        return arr;
-    },
     /**
      * bind rendered template
      */
@@ -584,23 +489,6 @@ _.extend(Q.prototype, {
             };
         });
     },
-
-    // _makeWriteFilters: function (names, target) {
-    //     if (!names.length) return [];
-    //     var filters = this.$options.filters,
-    //         self = this;
-    //     return names.map(function (name) {
-    //         var args = name.split(' '),
-    //             writer;
-    //         name = args.shift();
-    //         writer = (filters[name] && filters[name].write || _.through);
-    //         return function (value, oldVal) {
-    //             return args ?
-    //                 writer.apply(self, [value, oldVal].concat(args)) :
-    //                 writer.call(self, value, oldVal);
-    //         };
-    //     });
-    // },
 
     /**
      * Apply filters to a value
