@@ -379,7 +379,7 @@ _.extend(Q.prototype, {
                             value = self.applyFilters(value, readFilters);
                             update.call(descriptor, value);
                         }, typeof self[key] === 'object', self[key] !== undefined);
-                        if (directive.bind) directive.bind.call(descriptor);
+                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
                     });
                 }
                 switch (name) {
@@ -444,7 +444,7 @@ _.extend(Q.prototype, {
                             value = self.applyFilters(value, readFilters);
                             update.call(descriptor, value);
                         }, typeof data[key] === 'object', data[key] !== undefined);
-                        if (directive.bind) directive.bind.call(descriptor);
+                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
                     });
                 }
             });

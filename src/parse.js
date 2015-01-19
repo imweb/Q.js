@@ -19,7 +19,7 @@ function parse(str) {
         }
         filters = exp.split(/ *\| */);
         exp = filters.shift();
-        if (keyReg.test(src)) {
+        if (keyReg.test(exp)) {
             res.target = exp;
         } else {
             res.exp = exp;

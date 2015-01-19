@@ -446,7 +446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            value = self.applyFilters(value, readFilters);
 	                            update.call(descriptor, value);
 	                        }, typeof self[key] === 'object', self[key] !== undefined);
-	                        if (directive.bind) directive.bind.call(descriptor);
+	                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
 	                    });
 	                }
 	                switch (name) {
@@ -511,7 +511,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            value = self.applyFilters(value, readFilters);
 	                            update.call(descriptor, value);
 	                        }, typeof data[key] === 'object', data[key] !== undefined);
-	                        if (directive.bind) directive.bind.call(descriptor);
+	                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
 	                    });
 	                }
 	            });
@@ -638,6 +638,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return (window.console && console.error) ? function (msg) {
 	                console.error(msg);
 	            } : noop;
+	    },
+	    isObject: function (o) {
+	        return typeof o === 'object';
 	    }
 	};
 
@@ -871,7 +874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        filters = exp.split(/ *\| */);
 	        exp = filters.shift();
-	        if (keyReg.test(src)) {
+	        if (keyReg.test(exp)) {
 	            res.target = exp;
 	        } else {
 	            res.exp = exp;

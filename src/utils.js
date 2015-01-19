@@ -51,5 +51,8 @@ module.exports = {
         return (window.console && console.error) ? function (msg) {
                 console.error(msg);
             } : noop;
+    },
+    isObject: function (o) {
+        return typeof o === 'object';
     }
 };
