@@ -446,7 +446,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            value = self.applyFilters(value, readFilters);
 	                            update.call(descriptor, value);
 	                        }, typeof self[key] === 'object', self[key] !== undefined);
-	                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
+	                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
 	                    });
 	                }
 	                switch (name) {
@@ -462,7 +462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                    repeats.forEach(function (node) {
 	                                        node.parentNode.removeChild(node);
 	                                    });
-	                                    _.clearData(repeats);
+	                                    _.cleanData(repeats);
 	                                    repeats.length = 0;
 	                                }
 	                                var fragment = _doc.createDocumentFragment(),
@@ -478,6 +478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            self.$watch(key, function (value) {
 	                                setTimeout(function () {
 	                                    self.applyFilters(value, readFilters);
+	                                    self.$emit('repeat-render');
 	                                }, 0);
 	                            }, false, true);
 	                        });
@@ -510,8 +511,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
 	                            update.call(descriptor, value);
-	                        }, typeof data[key] === 'object', data[key] !== undefined);
-	                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
+	                        }, typeof data[key] === 'object', true);
+	                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
 	                    });
 	                }
 	            });
@@ -986,7 +987,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    text: function (value) {
-	        this.el.innerText = value;
+	        value !== undefined &&
+	            (this.el.innerText = value);
 	    },
 	    on: {
 	        unwatch: true,

@@ -22,7 +22,8 @@ module.exports = {
         }
     },
     text: function (value) {
-        this.el.innerText = value;
+        value !== undefined &&
+            (this.el.innerText = value);
     },
     on: {
         unwatch: true,

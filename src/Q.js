@@ -379,7 +379,7 @@ _.extend(Q.prototype, {
                             value = self.applyFilters(value, readFilters);
                             update.call(descriptor, value);
                         }, typeof self[key] === 'object', self[key] !== undefined);
-                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
+                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
                     });
                 }
                 switch (name) {
@@ -395,7 +395,7 @@ _.extend(Q.prototype, {
                                     repeats.forEach(function (node) {
                                         node.parentNode.removeChild(node);
                                     });
-                                    _.clearData(repeats);
+                                    _.cleanData(repeats);
                                     repeats.length = 0;
                                 }
                                 var fragment = _doc.createDocumentFragment(),
@@ -411,6 +411,7 @@ _.extend(Q.prototype, {
                             self.$watch(key, function (value) {
                                 setTimeout(function () {
                                     self.applyFilters(value, readFilters);
+                                    self.$emit('repeat-render');
                                 }, 0);
                             }, false, true);
                         });
@@ -443,8 +444,8 @@ _.extend(Q.prototype, {
                         directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
                             value = self.applyFilters(value, readFilters);
                             update.call(descriptor, value);
-                        }, typeof data[key] === 'object', data[key] !== undefined);
-                        if (isObject(directive) && directive.bind) directive.bind.call(descriptor);
+                        }, typeof data[key] === 'object', true);
+                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
                     });
                 }
             });
