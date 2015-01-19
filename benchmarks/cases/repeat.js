@@ -13,80 +13,34 @@ function tpl(list) {
     return res.join('');
 }
 
+function prepare(n) {
+    var res = [];
+    for (; n--;) {
+        res.push({
+            msg: 'hehe' + Math.random()
+        });
+    }
+    return res;
+}
+
 // add tests
 suite.add('Q.js#repeat', {
     defer: 'true',
     fn: function(defer) {
-        q.$set('list', [
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() },
-            { msg: 'hehe' + Math.random() }
-        ]);
+        q.$set('list', prepare(1000));
         q.$once('repeat-render', function () {
             defer.resolve();
         });
     }
 })
-.add('template#render', function() {
-    $('#test').html(tpl([
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() },
-        { msg: 'hehe' + Math.random() }
-    ]));
+.add('template#render', {
+    defer: true,
+    fn: function(defer) {
+        setTimeout(function () {
+            $('#test').html(tpl(prepare(1000)));
+            defer.resolve();
+        }, 0);
+    }
 })
 // .add('Native#innerText', function() {
 //     //node.innerText = Math.random() * 1000 | 0;
