@@ -67,44 +67,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1),
 	    Data = __webpack_require__(2),
-	    parse = __webpack_require__(3),
 	    MARK = /\{\{(.+?)\}\}/,
-	    mergeOptions = __webpack_require__(4).mergeOptions,
+	    mergeOptions = __webpack_require__(3).mergeOptions,
 	    _doc = document;
-
-
-	function _checkQ(el) {
-	    var atts = el.attributes, i = 0 , l = atts.length;
-	    for (; i < l; i++) {
-	        if (atts[i].name.indexOf('q-') === 0) return true;
-	    }
-	    return false;
-	}
-
-	function _checkRepeat(el) {
-	    return el.hasAttribute('q-repeat');
-	}
-
-	function _walk($el, cb, isFirst) {
-	    var i, j, l, el, atts, res;
-	    for (i = 0; el = $el[i++];) {
-	        if (el.nodeType === 1) {
-	            atts = el.attributes;
-	            l = atts.length;
-	            res = [];
-	            for (j = 0; j < l; j++) {
-	                atts[j].name.indexOf('q-') === 0 &&
-	                    res.push({
-	                        name: atts[j].name,
-	                        value: atts[j].value
-	                    })
-	            }
-	            res.length > 0 &&
-	                cb(el, res, isFirst);
-	        }
-	        if (el.childNodes.length) _walk(el.childNodes, cb);
-	    }
-	}
 
 	function _inDoc(ele) {
 	    return _.contains(_doc.documentElement, ele);
@@ -114,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._init(options);
 	}
 	Q.options = {
-	    directives: __webpack_require__(5)
+	    directives: __webpack_require__(4)
 	};
 	Q.get = function (selector) {
 	    var ele = _.find(selector)[0];
@@ -427,81 +392,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * bind rendered template
 	     */
-	    _templateBind: function (el, options) {
-	        options = options || {};
-
-	        var self = this,
-	            directives = self.$options.directives,
-	            index = options.index,
-	            data = options.data || self,
-	            namespace = options.namespace;
-
-	        _walk([el], function (node, res, isFirst) {
-	            res.forEach(function (obj) {
-	                var name = obj.name.substring(2),
-	                    directive = directives[name],
-	                    descriptors = parse(obj.value);
-	                directive &&
-	                    descriptors.forEach(function (descriptor) {
-	                        var readFilters = self._makeReadFilters(descriptor.filters),
-	                            key = descriptor.target,
-	                            target = namespace ? ([namespace, key].join('.')) : key,
-	                            update = directive.update || directive,
-	                            that = _.extend({
-	                                el: node,
-	                                vm: self,
-	                                namespace: namespace
-	                            }, descriptor, {
-	                                filters: readFilters
-	                            });
-	                        directive.unwatch || self.$watch(target, function (value) {
-	                            value = self.applyFilters(value, readFilters);
-	                            update.call(that, value);
-	                        }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
-	                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
-	                    });
-
-	                name === 'repeat' && !isFirst &&
-	                    descriptors.forEach(function (descriptor) {
-	                        var key = descriptor.target,
-	                            target = namespace ? ([namespace, key].join('.')) : key,
-	                            readFilters = self._makeReadFilters(descriptor.filters),
-	                            repeats = [],
-	                            tpl = node,
-	                            ref = document.createComment('q-repeat');
-	                        node.parentNode.replaceChild(ref, tpl);
-	                        readFilters.push(function (arr) {
-	                            if (repeats.length) {
-	                                repeats.forEach(function (node) {
-	                                    node.parentNode.removeChild(node);
-	                                });
-	                                _.cleanData(repeats);
-	                                repeats.length = 0;
-	                            }
-	                            var fragment = _doc.createDocumentFragment(),
-	                                itemNode;
-	                            arr.forEach(function (obj, i) {
-	                                itemNode = _.clone(tpl);
-	                                self._templateBind(itemNode, {
-	                                    data: obj,
-	                                    namespace: obj.$namespace(),
-	                                    immediate: true
-	                                });
-	                                repeats.push(itemNode);
-	                                fragment.appendChild(itemNode);
-	                            });
-	                            ref.parentNode.insertBefore(fragment, ref);
-	                        });
-	                        self.$watch(target, function (value) {
-	                            _.nextTick(function () {
-	                                self.applyFilters(value, readFilters);
-	                                self.$emit('repeat-render');
-	                            });
-	                        }, false, true);
-	                    });
-	            });
-	        }, true);
-	    },
+	    _templateBind: __webpack_require__(5),
 
 	    /**
 	     * bind rendered template
@@ -846,50 +737,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(1),
-	    cache = new (__webpack_require__(7))(1000);
-	/**
-	 * click: onclick | filter1 | filter2
-	 * click: onclick , keydown: onkeydown
-	 * value1 | filter1 | filter2
-	 * value - 1 | filter1 | filter2   don't support
-	 */
-	function parse(str) {
-	    var hit = cache.get(str);
-	    if (hit) return hit;
-	    var exps = str.trim().split(/ *\, */),
-	        eventReg = /^([\w\-]+)\:/,
-	        keyReg = /^[\w\-]+$/,
-	        arr = [];
-	    exps.forEach(function (exp) {
-	        var res = {},
-	            match = exp.match(eventReg),
-	            filters, exp;
-	        if (match) {
-	            res.arg = match[1];
-	            exp = exp.substring(match[0].length).trim();
-	        }
-	        filters = exp.split(/ *\| */);
-	        exp = filters.shift();
-	        if (keyReg.test(exp)) {
-	            res.target = exp;
-	        } else {
-	            res.exp = exp;
-	        }
-	        res.filters = filters;
-	        arr.push(res);
-	    });
-	    cache.put(str, arr);
-	    return arr;
-	}
-
-	module.exports = parse;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var _ = __webpack_require__(1);
 
 	var strats = {};
@@ -957,7 +804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1026,6 +873,125 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var parse = __webpack_require__(7),
+	    _ = __webpack_require__(1),
+	    cache = new (__webpack_require__(8))(1000),
+	    _qtid = 0;
+
+	function _walk($el, cb, isTemplate, isFirst) {
+	    var i, j, l, el, atts, res, qtid;
+	    for (i = 0; el = $el[i++];) {
+	        if (el.nodeType === 1) {
+	            if (
+	                isTemplate &&
+	                    (qtid = el.getAttribute('qtid')) &&
+	                    (res = cache.get(qtid))
+	            ) {
+	                el.removeAttribute('qtid');
+	            } else {
+	                atts = el.attributes;
+	                l = atts.length;
+	                res = [];
+	                for (j = 0; j < l; j++) {
+	                    atts[j].name.indexOf('q-') === 0 &&
+	                        res.push({
+	                            name: atts[j].name,
+	                            value: atts[j].value
+	                        })
+	                }
+	                qtid = qtid || ++_qtid;
+	                el.setAttribute('qtid', qtid);
+	                cache.put(qtid, res);
+	            }
+	            res.length > 0 &&
+	                cb(el, res, isFirst);
+	        }
+	        if (el.childNodes.length) _walk(el.childNodes, cb, isTemplate);
+	    }
+	}
+
+	module.exports = function (el, options) {
+	    options = options || {};
+
+	    var self = this,
+	        directives = self.$options.directives,
+	        index = options.index,
+	        data = options.data || self,
+	        namespace = options.namespace;
+
+	    _walk([el], function (node, res, isFirst) {
+	        res.forEach(function (obj) {
+	            var name = obj.name.substring(2),
+	                directive = directives[name],
+	                descriptors = parse(obj.value);
+	            directive &&
+	                descriptors.forEach(function (descriptor) {
+	                    var readFilters = self._makeReadFilters(descriptor.filters),
+	                        key = descriptor.target,
+	                        target = namespace ? ([namespace, key].join('.')) : key,
+	                        update = directive.update || directive,
+	                        that = _.extend({
+	                            el: node,
+	                            vm: self,
+	                            namespace: namespace
+	                        }, descriptor, {
+	                            filters: readFilters
+	                        });
+	                    directive.unwatch || self.$watch(target, function (value) {
+	                        value = self.applyFilters(value, readFilters);
+	                        update.call(that, value);
+	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
+	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
+	                });
+
+	            name === 'repeat' && !isFirst &&
+	                descriptors.forEach(function (descriptor) {
+	                    var key = descriptor.target,
+	                        target = namespace ? ([namespace, key].join('.')) : key,
+	                        readFilters = self._makeReadFilters(descriptor.filters),
+	                        repeats = [],
+	                        tpl = node,
+	                        ref = document.createComment('q-repeat');
+	                    node.parentNode.replaceChild(ref, tpl);
+	                    readFilters.push(function (arr) {
+	                        if (repeats.length) {
+	                            repeats.forEach(function (node) {
+	                                node.parentNode.removeChild(node);
+	                            });
+	                            _.cleanData(repeats);
+	                            repeats.length = 0;
+	                        }
+	                        var fragment = document.createDocumentFragment(),
+	                            itemNode;
+	                        arr.forEach(function (obj, i) {
+	                            itemNode = _.clone(tpl);
+	                            self._templateBind(itemNode, {
+	                                data: obj,
+	                                namespace: obj.$namespace(),
+	                                immediate: true,
+	                                isTemplate: true
+	                            });
+	                            repeats.push(itemNode);
+	                            fragment.appendChild(itemNode);
+	                        });
+	                        ref.parentNode.insertBefore(fragment, ref);
+	                    });
+	                    self.$watch(target, function (value) {
+	                        _.nextTick(function () {
+	                            self.applyFilters(value, readFilters);
+	                            self.$emit('repeat-render');
+	                        });
+	                    }, false, true);
+	                });
+	        });
+	    }, options.isTemplate, true);
+	};
+
+
+/***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1033,6 +999,50 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1),
+	    cache = new (__webpack_require__(8))(1000);
+	/**
+	 * click: onclick | filter1 | filter2
+	 * click: onclick , keydown: onkeydown
+	 * value1 | filter1 | filter2
+	 * value - 1 | filter1 | filter2   don't support
+	 */
+	function parse(str) {
+	    var hit = cache.get(str);
+	    if (hit) return hit;
+	    var exps = str.trim().split(/ *\, */),
+	        eventReg = /^([\w\-]+)\:/,
+	        keyReg = /^[\w\-]+$/,
+	        arr = [];
+	    exps.forEach(function (exp) {
+	        var res = {},
+	            match = exp.match(eventReg),
+	            filters, exp;
+	        if (match) {
+	            res.arg = match[1];
+	            exp = exp.substring(match[0].length).trim();
+	        }
+	        filters = exp.split(/ *\| */);
+	        exp = filters.shift();
+	        if (keyReg.test(exp)) {
+	            res.target = exp;
+	        } else {
+	            res.exp = exp;
+	        }
+	        res.filters = filters;
+	        arr.push(res);
+	    });
+	    cache.put(str, arr);
+	    return arr;
+	}
+
+	module.exports = parse;
+
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
