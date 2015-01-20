@@ -902,9 +902,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            value: atts[j].value
 	                        })
 	                }
-	                qtid = qtid || ++_qtid;
-	                el.setAttribute('qtid', qtid);
-	                cache.put(qtid, res);
+	                if (isTemplate && !qtid) {
+	                    qtid = qtid || ++_qtid;
+	                    el.setAttribute('qtid', qtid);
+	                    cache.put(qtid, res);
+	                }
 	            }
 	            res.length > 0 &&
 	                cb(el, res, isFirst);
@@ -956,6 +958,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        tpl = node,
 	                        ref = document.createComment('q-repeat');
 	                    node.parentNode.replaceChild(ref, tpl);
+	                    _walk([tpl], _.noop, true, true);
 	                    readFilters.push(function (arr) {
 	                        if (repeats.length) {
 	                            repeats.forEach(function (node) {
