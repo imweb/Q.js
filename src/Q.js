@@ -361,7 +361,13 @@ _.extend(Q.prototype, {
      * bind rendered template
      */
     _templateBind: function (el, options) {
-        var self = this, directives = self.$options.directives;
+        options = options || {};
+        var self = this,
+            directives = self.$options.directives,
+            index = options.index,
+            data = options.data || self,
+            namespace = options.namespace;
+
         _walk([el], function (node, arg) {
             _findQ(node).forEach(function (obj) {
                 var name = obj.name.substring(2),
@@ -371,21 +377,24 @@ _.extend(Q.prototype, {
                     descriptors.forEach(function (descriptor) {
                         var readFilters = self._makeReadFilters(descriptor.filters),
                             key = descriptor.target,
+                            target = namespace ? [namespace, key].join('.') : key,
                             update = directive.update || directive,
                             that = _.extend({
                                 el: node,
-                                vm: self
+                                vm: self,
+                                namespace, namespace
                             }, descriptor, {
                                 filters: readFilters
                             });
-                        directive.unwatch || self.$watch(key, function (value) {
+                        directive.unwatch || self.$watch(target, function (value) {
                             value = self.applyFilters(value, readFilters);
                             update.call(that, value);
-                        }, typeof self[key] === 'object', self[key] !== undefined);
+                        }, typeof data[key] === 'object', options.immediate || data[key] !== undefined);
                         if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                     });
                 }
-                if (name === 'repeat') {
+
+                name === 'repeat' &&
                     descriptors.forEach(function (descriptor) {
                         var key = descriptor.target,
                             readFilters = self._makeReadFilters(descriptor.filters),
@@ -404,54 +413,23 @@ _.extend(Q.prototype, {
                                 itemNode;
                             arr.forEach(function (obj, i) {
                                 itemNode = _.clone(tpl);
-                                self._buildNode(itemNode, obj, { key: key, namespace: obj.$namespace() });
+                                self._templateBind(itemNode, {
+                                    data: obj,
+                                    namespace: obj.$namespace(),
+                                    immediate: true
+                                });
                                 repeats.push(itemNode);
                                 fragment.appendChild(itemNode);
                             });
                             ref.parentNode.insertBefore(fragment, ref);
                         });
                         self.$watch(key, function (value) {
-                            setTimeout(function () {
+                            _.nextTick(function () {
                                 self.applyFilters(value, readFilters);
                                 self.$emit('repeat-render');
-                            }, 0);
+                            });
                         }, false, true);
                     });
-                }
-        });
-    },
-
-    _buildNode: function (node, data, options) {
-        var self = this,
-            key = options.key,
-            index = options.index,
-            namespace = options.namespace
-            directives = self.$options.directives;
-        _walk([node], function (node, arg) {
-            _findQ(node).forEach(function (obj) {
-                var name = obj.name.substring(2),
-                    directive = directives[name],
-                    descriptors = parse(obj.value);
-                if (directive) {
-                    descriptors.forEach(function (descriptor) {
-                        var readFilters = self._makeReadFilters(descriptor.filters),
-                            key = descriptor.target,
-                            update = directive.update || directive,
-                            that = _.extend({
-                                el: node,
-                                vm: self,
-                                namespace: namespace
-                            }, descriptor, {
-                                filters: readFilters
-                            });
-                        directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
-                            value = self.applyFilters(value, readFilters);
-                            update.call(that, value);
-                        }, typeof data[key] === 'object', true);
-                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
-                    });
-                }
-            });
         });
     },
 
