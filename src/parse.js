@@ -1,3 +1,5 @@
+var _ = require('./utils'),
+    cache = new (require('./cache'))(1000);
 /**
  * click: onclick | filter1 | filter2
  * click: onclick , keydown: onkeydown
@@ -5,6 +7,8 @@
  * value - 1 | filter1 | filter2   don't support
  */
 function parse(str) {
+    var hit = cache.get(str);
+    if (hit) return hit;
     var exps = str.trim().split(/ *\, */),
         eventReg = /^([\w\-]+)\:/,
         keyReg = /^[\w\-]+$/,
@@ -27,6 +31,7 @@ function parse(str) {
         res.filters = filters;
         arr.push(res);
     });
+    cache.put(str, arr);
     return arr;
 }
 

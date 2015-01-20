@@ -438,15 +438,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    descriptors.forEach(function (descriptor) {
 	                        var readFilters = self._makeReadFilters(descriptor.filters),
 	                            key = descriptor.target,
-	                            update = directive.update || directive;
-	                        descriptor.el = node;
-	                        descriptor.vm = self;
-	                        descriptor.filters = readFilters;
+	                            update = directive.update || directive,
+	                            that = _.extend({
+	                                el: node,
+	                                vm: self
+	                            }, descriptor, {
+	                                filters: readFilters
+	                            });
 	                        directive.unwatch || self.$watch(key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
-	                            update.call(descriptor, value);
+	                            update.call(that, value);
 	                        }, typeof self[key] === 'object', self[key] !== undefined);
-	                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
+	                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                    });
 	                }
 	                switch (name) {
@@ -503,16 +506,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    descriptors.forEach(function (descriptor) {
 	                        var readFilters = self._makeReadFilters(descriptor.filters),
 	                            key = descriptor.target,
-	                            update = directive.update || directive;
-	                        descriptor.el = node;
-	                        descriptor.vm = self;
-	                        descriptor.filters = readFilters;
-	                        descriptor.namespace = namespace;
+	                            update = directive.update || directive,
+	                            that = _.extend({
+	                                el: node,
+	                                vm: self,
+	                                namespace: namespace
+	                            }, descriptor, {
+	                                filters: readFilters
+	                            });
 	                        directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
 	                            value = self.applyFilters(value, readFilters);
-	                            update.call(descriptor, value);
+	                            update.call(that, value);
 	                        }, typeof data[key] === 'object', true);
-	                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
+	                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                    });
 	                }
 	            });
@@ -854,6 +860,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1),
+	    cache = new (__webpack_require__(7))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown
@@ -861,6 +869,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * value - 1 | filter1 | filter2   don't support
 	 */
 	function parse(str) {
+	    var hit = cache.get(str);
+	    if (hit) return hit;
 	    var exps = str.trim().split(/ *\, */),
 	        eventReg = /^([\w\-]+)\:/,
 	        keyReg = /^[\w\-]+$/,
@@ -883,6 +893,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        res.filters = filters;
 	        arr.push(res);
 	    });
+	    cache.put(str, arr);
 	    return arr;
 	}
 
@@ -1033,6 +1044,118 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
+	 *
+	 * @param {Number} limit
+	 * @constructor
+	 */
+
+	function Cache (limit) {
+	    this.size = 0;
+	    this.limit = limit;
+	    this.head = this.tail = undefined;
+	    this._keymap = {};
+	}
+
+	var p = Cache.prototype;
+
+	/**
+	 * Put <value> into the cache associated with <key>.
+	 * Returns the entry which was removed to make room for
+	 * the new entry. Otherwise undefined is returned.
+	 * (i.e. if there was enough room already).
+	 *
+	 * @param {String} key
+	 * @param {*} value
+	 * @return {Entry|undefined}
+	 */
+
+	p.put = function (key, value) {
+	    var entry = {
+	        key:key,
+	        value:value
+	    }
+	    this._keymap[key] = entry;
+	    if (this.tail) {
+	        this.tail.newer = entry;
+	        entry.older = this.tail;
+	    } else {
+	        this.head = entry;
+	    }
+	    this.tail = entry;
+	    if (this.size === this.limit) {
+	        return this.shift();
+	    } else {
+	        this.size++;
+	    }
+	};
+
+	/**
+	 * Purge the least recently used (oldest) entry from the
+	 * cache. Returns the removed entry or undefined if the
+	 * cache was empty.
+	 */
+
+	p.shift = function () {
+	    var entry = this.head;
+	    if (entry) {
+	        this.head = this.head.newer;
+	        this.head.older = undefined;
+	        entry.newer = entry.older = undefined;
+	        this._keymap[entry.key] = undefined;
+	    }
+	    return entry;
+	};
+
+	/**
+	 * Get and register recent use of <key>. Returns the value
+	 * associated with <key> or undefined if not in cache.
+	 *
+	 * @param {String} key
+	 * @param {Boolean} returnEntry
+	 * @return {Entry|*}
+	 */
+
+	p.get = function (key, returnEntry) {
+	    var entry = this._keymap[key];
+	    if (entry === undefined) return;
+	    if (entry === this.tail) {
+	        return returnEntry ?
+	            entry :
+	            entry.value;
+	    }
+	  // HEAD--------------TAIL
+	  //   <.older   .newer>
+	  //  <--- add direction --
+	  //   A  B  C  <D>  E
+	    if (entry.newer) {
+	        if (entry === this.head) {
+	            this.head = entry.newer;
+	        }
+	        entry.newer.older = entry.older; // C <-- E.
+	    }
+	    if (entry.older) {
+	        entry.older.newer = entry.newer; // C. --> E
+	    }
+	    entry.newer = undefined; // D --x
+	    entry.older = this.tail; // D. --> E
+	    if (this.tail) {
+	        this.tail.newer = entry; // E. <-- D
+	    }
+	    this.tail = entry;
+	    return returnEntry ?
+	        entry :
+	        entry.value;
+	}
+
+	module.exports = Cache;
+
 
 /***/ }
 /******/ ])

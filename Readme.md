@@ -185,4 +185,18 @@ var vm = new Q({
 
 * 数组方法
 
-> 目前支持的数组方法有：push, pop, unshift, shift, indexOf, splice
+> 目前支持的数组方法有：push, pop, unshift, shift, indexOf,
+
+
+优化性能对比
+----------
+
+* 未优化前
+
+Q.js#repeat x 7.83 ops/sec ±5.34% (34 runs sampled)
+template#render x 30.13 ops/sec ±9.34% (55 runs sampled)
+
+* parse缓存化
+
+Q.js#repeat x 10.31 ops/sec ±3.40% (40 runs sampled)
+repeat.js:50 template#render x 27.40 ops/sec ±1.38% (40 runs sampled)

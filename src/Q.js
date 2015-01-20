@@ -371,53 +371,53 @@ _.extend(Q.prototype, {
                     descriptors.forEach(function (descriptor) {
                         var readFilters = self._makeReadFilters(descriptor.filters),
                             key = descriptor.target,
-                            update = directive.update || directive;
-                        descriptor.el = node;
-                        descriptor.vm = self;
-                        descriptor.filters = readFilters;
+                            update = directive.update || directive,
+                            that = _.extend({
+                                el: node,
+                                vm: self
+                            }, descriptor, {
+                                filters: readFilters
+                            });
                         directive.unwatch || self.$watch(key, function (value) {
                             value = self.applyFilters(value, readFilters);
-                            update.call(descriptor, value);
+                            update.call(that, value);
                         }, typeof self[key] === 'object', self[key] !== undefined);
-                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
+                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                     });
                 }
-                switch (name) {
-                    case 'repeat':
-                        descriptors.forEach(function (descriptor) {
-                            var key = descriptor.target,
-                                readFilters = self._makeReadFilters(descriptor.filters),
-                                repeats = [],
-                                tpl = node, ref = document.createComment('q-repeat');
-                            node.parentNode.replaceChild(ref, tpl);
-                            readFilters.push(function (arr) {
-                                if (repeats.length) {
-                                    repeats.forEach(function (node) {
-                                        node.parentNode.removeChild(node);
-                                    });
-                                    _.cleanData(repeats);
-                                    repeats.length = 0;
-                                }
-                                var fragment = _doc.createDocumentFragment(),
-                                    itemNode;
-                                arr.forEach(function (obj, i) {
-                                    itemNode = _.clone(tpl);
-                                    self._buildNode(itemNode, obj, { key: key, namespace: obj.$namespace() });
-                                    repeats.push(itemNode);
-                                    fragment.appendChild(itemNode);
+                if (name === 'repeat') {
+                    descriptors.forEach(function (descriptor) {
+                        var key = descriptor.target,
+                            readFilters = self._makeReadFilters(descriptor.filters),
+                            repeats = [],
+                            tpl = node, ref = document.createComment('q-repeat');
+                        node.parentNode.replaceChild(ref, tpl);
+                        readFilters.push(function (arr) {
+                            if (repeats.length) {
+                                repeats.forEach(function (node) {
+                                    node.parentNode.removeChild(node);
                                 });
-                                ref.parentNode.insertBefore(fragment, ref);
+                                _.cleanData(repeats);
+                                repeats.length = 0;
+                            }
+                            var fragment = _doc.createDocumentFragment(),
+                                itemNode;
+                            arr.forEach(function (obj, i) {
+                                itemNode = _.clone(tpl);
+                                self._buildNode(itemNode, obj, { key: key, namespace: obj.$namespace() });
+                                repeats.push(itemNode);
+                                fragment.appendChild(itemNode);
                             });
-                            self.$watch(key, function (value) {
-                                setTimeout(function () {
-                                    self.applyFilters(value, readFilters);
-                                    self.$emit('repeat-render');
-                                }, 0);
-                            }, false, true);
+                            ref.parentNode.insertBefore(fragment, ref);
                         });
-                        break;
+                        self.$watch(key, function (value) {
+                            setTimeout(function () {
+                                self.applyFilters(value, readFilters);
+                                self.$emit('repeat-render');
+                            }, 0);
+                        }, false, true);
+                    });
                 }
-            });
         });
     },
 
@@ -436,16 +436,19 @@ _.extend(Q.prototype, {
                     descriptors.forEach(function (descriptor) {
                         var readFilters = self._makeReadFilters(descriptor.filters),
                             key = descriptor.target,
-                            update = directive.update || directive;
-                        descriptor.el = node;
-                        descriptor.vm = self;
-                        descriptor.filters = readFilters;
-                        descriptor.namespace = namespace;
+                            update = directive.update || directive,
+                            that = _.extend({
+                                el: node,
+                                vm: self,
+                                namespace: namespace
+                            }, descriptor, {
+                                filters: readFilters
+                            });
                         directive.unwatch || self.$watch(namespace + '.' + key, function (value) {
                             value = self.applyFilters(value, readFilters);
-                            update.call(descriptor, value);
+                            update.call(that, value);
                         }, typeof data[key] === 'object', true);
-                        if (_.isObject(directive) && directive.bind) directive.bind.call(descriptor);
+                        if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                     });
                 }
             });

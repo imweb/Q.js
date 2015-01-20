@@ -1,5 +1,8 @@
 var $ = require('jquery'),
-    noop = function () {};
+    noop = function () {},
+    defer = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        setTimeout;
 
 module.exports = {
     find: $.find,
@@ -54,5 +57,10 @@ module.exports = {
     },
     isObject: function (o) {
         return typeof o === 'object';
+    },
+    nextTick: function (cb, ctx) {
+        ctx ?
+            defer(function () { cb.call(ctx) }, 0) :
+            defer(cb, 0);
     }
 };
