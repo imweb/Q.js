@@ -807,7 +807,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	    },
 	    'class': function (value) {
 	        var el = this.el,
-	            arg = options.arg;
+	            arg = this.arg;
 	        value ?
 	            _.addClass(el, arg) :
 	            _.removeClass(el, arg);
@@ -833,7 +833,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	                vm = this.vm,
 	                handler = vm.applyFilters(this.vm[key], filters),
 	                data = this.namespace ?
-	                    vm.data(namespace) :
+	                    vm.data(this.namespace) :
 	                    vm;
 	            _.add(this.el, this.arg, function (e) {
 	                if (!handler || typeof handler !== 'function') {
@@ -851,12 +851,12 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	                namespace = this.namespace || '',
 	                el = this.el,
 	                vm = this.vm;
-	            _.add(node, 'input onpropertychange change', function (e) {
+	            _.add(el, 'input onpropertychange change', function (e) {
 	                vm.data(namespace).$set(key, el.value);
 	            });
 	        },
 	        update: function (value) {
-	            el.value = value;
+	            this.el.value = value;
 	        }
 	    }
 	};
