@@ -9,17 +9,7 @@
  * https://github.com/es-shims/es5-shim
  */
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("jquery"));
-	else if(typeof define === 'function' && define.amd)
-		define(["jquery"], factory);
-	else if(typeof exports === 'object')
-		exports["Q"] = factory(require("jquery"));
-	else
-		root["Q"] = factory(root["jquery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_6__) {
-return /******/ (function(modules) { // webpackBootstrap
+define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1157,5 +1147,4 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }
-/******/ ])
-});
+/******/ ])});

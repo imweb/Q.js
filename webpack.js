@@ -17,7 +17,7 @@ webpack({
     path: './dist',
     filename: 'Q.js',
     library: 'Q',
-    libraryTarget: 'umd'
+    libraryTarget: 'amd'
   },
   externals: { jquery: "jquery" },
   plugins: [
