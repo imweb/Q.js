@@ -30,7 +30,7 @@ function _isArray(obj) {
  */
 function Data(options) {
     var data = options.data,
-        keys = Object.keys(options.data)
+        keys = Object.keys(options.data || {})
             .filter(function (key) { return key.indexOf('_') !== 0; }),
         self = this;
     _.extend(this, data);
