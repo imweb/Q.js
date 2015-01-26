@@ -19,7 +19,7 @@ Q.get = function (selector) {
     if (ele) {
         return _.data(ele, 'QI');
     } else {
-        return null;
+        return new Q({ el: selector });
     }
 };
 Q.all = function (options) {
