@@ -103,7 +103,7 @@ module.exports = function (el, options) {
                                     data: obj,
                                     namespace: obj.$namespace(),
                                     immediate: true,
-                                    getTemplate: true
+                                    useCache: true
                                 });
                                 repeats.push(itemNode);
                                 fragment.appendChild(itemNode);

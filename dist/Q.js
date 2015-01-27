@@ -971,7 +971,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	                                    data: obj,
 	                                    namespace: obj.$namespace(),
 	                                    immediate: true,
-	                                    getTemplate: true
+	                                    useCache: true
 	                                });
 	                                repeats.push(itemNode);
 	                                fragment.appendChild(itemNode);
