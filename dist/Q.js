@@ -977,6 +977,8 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	                cb(el, res, setting);
 	        }
 	        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
+	        // reset stop
+	        setting.stop = false;
 	    }
 	}
 

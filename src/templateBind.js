@@ -34,6 +34,8 @@ function _walk($el, cb, setting) {
                 cb(el, res, setting);
         }
         if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
+        // reset stop
+        setting.stop = false;
     }
 }
 
