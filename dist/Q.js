@@ -73,16 +73,18 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    directives: __webpack_require__(5)
 	};
 	Q.get = function (selector) {
-	    var ele = _.find(selector)[0];
+	    var self = this,
+	        ele = _.find(selector)[0];
 	    if (ele) {
 	        return _.data(ele, 'QI');
 	    } else {
-	        return new Q({ el: selector });
+	        return new self({ el: selector });
 	    }
 	};
 	Q.all = function (options) {
+	    var self = this;
 	    return _.find(options.el).map(function (ele) {
-	        return new Q(_.extend(options, { el: ele }));
+	        return new self(_.extend(options, { el: ele }));
 	    });
 	};
 	_.extend(Q, clas);
@@ -822,6 +824,8 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    );
 	    Sub['super'] = Super;
 	    Sub.extend = Super.extend;
+	    Sub.get = Super.get;
+	    Sub.all = Super.all;
 	    return Sub;
 	}
 

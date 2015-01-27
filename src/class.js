@@ -21,6 +21,8 @@ function extend(extendOptions) {
     );
     Sub['super'] = Super;
     Sub.extend = Super.extend;
+    Sub.get = Super.get;
+    Sub.all = Super.all;
     return Sub;
 }
 

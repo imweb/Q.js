@@ -16,16 +16,18 @@ Q.options = {
     directives: require('./directives')
 };
 Q.get = function (selector) {
-    var ele = _.find(selector)[0];
+    var self = this,
+        ele = _.find(selector)[0];
     if (ele) {
         return _.data(ele, 'QI');
     } else {
-        return new Q({ el: selector });
+        return new self({ el: selector });
     }
 };
 Q.all = function (options) {
+    var self = this;
     return _.find(options.el).map(function (ele) {
-        return new Q(_.extend(options, { el: ele }));
+        return new self(_.extend(options, { el: ele }));
     });
 };
 _.extend(Q, clas);
