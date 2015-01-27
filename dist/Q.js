@@ -805,6 +805,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 
 	function define(name, options) {
 	    subs[name] = this.extend(options);
+	    return subs[name];
 	}
 
 	function require(name) {
