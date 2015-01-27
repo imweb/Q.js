@@ -2,6 +2,7 @@ var _ = require('./utils'),
     Data = require('./data'),
     MARK = /\{\{(.+?)\}\}/,
     mergeOptions = require('./strats').mergeOptions,
+    clas = require('./class'),
     _doc = document;
 
 function _inDoc(ele) {
@@ -27,6 +28,7 @@ Q.all = function (options) {
         return new Q(_.extend(options, { el: ele }));
     });
 };
+_.extend(Q, clas);
 _.extend(Q.prototype, {
     _init: function (options) {
         options = options || {};

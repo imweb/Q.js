@@ -26,7 +26,6 @@ module.exports = {
             (this.el.innerText = value);
     },
     on: {
-        unwatch: true,
         bind: function () {
             var key = this.target || this.exp.match(/^[\w\-]+/)[0],
                 expression = this.exp,
@@ -58,6 +57,32 @@ module.exports = {
         },
         update: function (value) {
             this.el.value = value;
+        }
+    },
+    vm: {
+        bind: function () {
+            // remove q-vm
+            this.el.removeAttribute('q-vm');
+            // stop walk
+            this.setting.stop = true;
+
+            var arg = this.arg,
+                vm = this.vm,
+                key = this.target,
+                namespace = this.namespace,
+                target = namespace ? ([namespace, key].join('.')) : key,
+                data = vm.data(target),
+                childVm = new (vm.constructor.require(arg))({
+                    el: this.el,
+                    data: data.$get()
+                });
+            vm._children = vm._children || [];
+            vm._children.push(childVm);
+
+            // unidirectional binding
+            vm.$watch(target, function (value) {
+                vm.$set(key, value);
+            }, true, false);
         }
     }
 };

@@ -9,7 +9,7 @@
  * https://github.com/es-shims/es5-shim
  */
 
-define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******/ (function(modules) { // webpackBootstrap
+define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -59,6 +59,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	    Data = __webpack_require__(2),
 	    MARK = /\{\{(.+?)\}\}/,
 	    mergeOptions = __webpack_require__(3).mergeOptions,
+	    clas = __webpack_require__(4),
 	    _doc = document;
 
 	function _inDoc(ele) {
@@ -69,7 +70,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	    this._init(options);
 	}
 	Q.options = {
-	    directives: __webpack_require__(4)
+	    directives: __webpack_require__(5)
 	};
 	Q.get = function (selector) {
 	    var ele = _.find(selector)[0];
@@ -84,6 +85,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	        return new Q(_.extend(options, { el: ele }));
 	    });
 	};
+	_.extend(Q, clas);
 	_.extend(Q.prototype, {
 	    _init: function (options) {
 	        options = options || {};
@@ -382,7 +384,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	    /**
 	     * bind rendered template
 	     */
-	    _templateBind: __webpack_require__(5),
+	    _templateBind: __webpack_require__(6),
 
 	    /**
 	     * bind rendered template
@@ -451,7 +453,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var $ = __webpack_require__(6),
+	var $ = __webpack_require__(7),
 	    noop = function () {},
 	    defer = window.requestAnimationFrame ||
 	        window.webkitRequestAnimationFrame ||
@@ -797,6 +799,50 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var subs = {},
+	    mergeOptions = __webpack_require__(3).mergeOptions;
+
+	function define(name, options) {
+	    subs[name] = this.extend(options);
+	}
+
+	function require(name) {
+	    return subs[name] || this;
+	}
+
+	function extend(extendOptions) {
+	    extendOptions = extendOptions || {};
+	    var Super = this,
+	        Sub = createClass(extendOptions.name || 'QComponent');
+	    Sub.prototype = Object.create(Super.prototype);
+	    Sub.prototype.constructor = Sub;
+	    Sub.options = mergeOptions(
+	        Super.options,
+	        extendOptions
+	    );
+	    Sub['super'] = Super;
+	    Sub.extend = Super.extend;
+	    return Sub;
+	}
+
+	function createClass (name) {
+	    return new Function(
+	        'return function ' + name +
+	        ' (options) { this._init(options) }'
+	    )();
+	}
+
+	module.exports = {
+	    define: define,
+	    require: require,
+	    extend: extend
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _ = __webpack_require__(1);
 
 	module.exports = {
@@ -825,7 +871,6 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	            (this.el.innerText = value);
 	    },
 	    on: {
-	        unwatch: true,
 	        bind: function () {
 	            var key = this.target || this.exp.match(/^[\w\-]+/)[0],
 	                expression = this.exp,
@@ -858,17 +903,43 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	        update: function (value) {
 	            this.el.value = value;
 	        }
+	    },
+	    vm: {
+	        bind: function () {
+	            // remove q-vm
+	            this.el.removeAttribute('q-vm');
+	            // stop walk
+	            this.setting.stop = true;
+
+	            var arg = this.arg,
+	                vm = this.vm,
+	                key = this.target,
+	                namespace = this.namespace,
+	                target = namespace ? ([namespace, key].join('.')) : key,
+	                data = vm.data(target),
+	                childVm = new (vm.constructor.require(arg))({
+	                    el: this.el,
+	                    data: data.$get()
+	                });
+	            vm._children = vm._children || [];
+	            vm._children.push(childVm);
+
+	            // unidirectional binding
+	            vm.$watch(target, function (value) {
+	                vm.$set(key, value);
+	            }, true, false);
+	        }
 	    }
 	};
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(7),
+	var parse = __webpack_require__(8),
 	    _ = __webpack_require__(1),
-	    cache = new (__webpack_require__(8))(1000),
+	    cache = new (__webpack_require__(9))(1000),
 	    _qtid = 0;
 
 	function _walk($el, cb, setting) {
@@ -901,7 +972,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	            res.length > 0 &&
 	                cb(el, res, setting);
 	        }
-	        if (el.childNodes.length) _walk(el.childNodes, cb, setting);
+	        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
 	    }
 	}
 
@@ -924,24 +995,30 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 	                    var readFilters = self._makeReadFilters(descriptor.filters),
 	                        key = descriptor.target,
 	                        target = namespace ? ([namespace, key].join('.')) : key,
-	                        update = directive.update || directive,
+	                        update = _.isObject(directive) ? directive.update : directive
+	                        // update = directive.update || directive,
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
-	                            namespace: namespace
+	                            namespace: namespace,
+	                            setting: setting
 	                        }, descriptor, {
 	                            filters: readFilters
 	                        });
-	                    directive.unwatch || self.$watch(target, function (value) {
+	                    update && self.$watch(target, function (value) {
 	                        value = self.applyFilters(value, readFilters);
 	                        update.call(that, value);
 	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 
+	            // directive is repeat
 	            name === 'repeat' &&
+	                // has parentNode, so this is not a template
 	                node.parentNode &&
+	                // don't unrepeat
 	                !setting.unrepeat &&
+	                // set uprepeat, if the has repeat
 	                (setting.unrepeat = true) &&
 	                    descriptors.forEach(function (descriptor) {
 	                        var key = descriptor.target,
@@ -993,17 +1070,17 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
-
-/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _ = __webpack_require__(1),
-	    cache = new (__webpack_require__(8))(1000);
+	    cache = new (__webpack_require__(9))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown
@@ -1043,7 +1120,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_6__) { return /******
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
