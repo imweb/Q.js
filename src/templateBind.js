@@ -3,12 +3,12 @@ var parse = require('./parse'),
     cache = new (require('./cache'))(1000),
     _qtid = 0;
 
-function _walk($el, cb, isTemplate, isFirst) {
+function _walk($el, cb, setting) {
     var i, j, l, el, atts, res, qtid;
     for (i = 0; el = $el[i++];) {
         if (el.nodeType === 1) {
             if (
-                isTemplate &&
+                setting.useCache &&
                     (qtid = el.getAttribute('qtid')) &&
                     (res = cache.get(qtid))
             ) {
@@ -24,16 +24,16 @@ function _walk($el, cb, isTemplate, isFirst) {
                             value: atts[j].value
                         })
                 }
-                if (isTemplate && !qtid) {
+                if (setting.useCache && !qtid) {
                     qtid = qtid || ++_qtid;
                     el.setAttribute('qtid', qtid);
                     cache.put(qtid, res);
                 }
             }
             res.length > 0 &&
-                cb(el, res, isFirst);
+                cb(el, res, setting);
         }
-        if (el.childNodes.length) _walk(el.childNodes, cb, isTemplate);
+        if (el.childNodes.length) _walk(el.childNodes, cb, setting);
     }
 }
 
@@ -46,7 +46,7 @@ module.exports = function (el, options) {
         data = options.data || self,
         namespace = options.namespace;
 
-    _walk([el], function (node, res, isFirst) {
+    _walk([el], function (node, res, setting) {
         res.forEach(function (obj) {
             var name = obj.name.substring(2),
                 directive = directives[name],
@@ -71,46 +71,54 @@ module.exports = function (el, options) {
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
 
-            name === 'repeat' && !isFirst &&
-                descriptors.forEach(function (descriptor) {
-                    var key = descriptor.target,
-                        target = namespace ? ([namespace, key].join('.')) : key,
-                        readFilters = self._makeReadFilters(descriptor.filters),
-                        repeats = [],
-                        tpl = node,
-                        ref = document.createComment('q-repeat');
-                    node.parentNode.replaceChild(ref, tpl);
-                    _walk([tpl], _.noop, true, true);
-                    readFilters.push(function (arr) {
-                        if (repeats.length) {
-                            repeats.forEach(function (node) {
-                                node.parentNode.removeChild(node);
-                            });
-                            _.cleanData(repeats);
-                            repeats.length = 0;
-                        }
-                        var fragment = document.createDocumentFragment(),
-                            itemNode;
-                        arr.forEach(function (obj, i) {
-                            itemNode = _.clone(tpl);
-                            self._templateBind(itemNode, {
-                                data: obj,
-                                namespace: obj.$namespace(),
-                                immediate: true,
-                                isTemplate: true
-                            });
-                            repeats.push(itemNode);
-                            fragment.appendChild(itemNode);
+            name === 'repeat' &&
+                node.parentNode &&
+                !setting.unrepeat &&
+                (setting.unrepeat = true) &&
+                    descriptors.forEach(function (descriptor) {
+                        var key = descriptor.target,
+                            target = namespace ? ([namespace, key].join('.')) : key,
+                            readFilters = self._makeReadFilters(descriptor.filters),
+                            repeats = [],
+                            tpl = node,
+                            ref = document.createComment('q-repeat');
+                        node.parentNode.replaceChild(ref, tpl);
+                        _walk([tpl], _.noop, {
+                            useCache: true,
+                            unrepeat: true
                         });
-                        ref.parentNode.insertBefore(fragment, ref);
+                        readFilters.push(function (arr) {
+                            if (repeats.length) {
+                                repeats.forEach(function (node) {
+                                    node.parentNode.removeChild(node);
+                                });
+                                _.cleanData(repeats);
+                                repeats.length = 0;
+                            }
+                            var fragment = document.createDocumentFragment(),
+                                itemNode;
+                            arr.forEach(function (obj, i) {
+                                itemNode = _.clone(tpl);
+                                self._templateBind(itemNode, {
+                                    data: obj,
+                                    namespace: obj.$namespace(),
+                                    immediate: true,
+                                    getTemplate: true
+                                });
+                                repeats.push(itemNode);
+                                fragment.appendChild(itemNode);
+                            });
+                            ref.parentNode.insertBefore(fragment, ref);
+                        });
+                        self.$watch(target, function (value) {
+                            _.nextTick(function () {
+                                self.applyFilters(value, readFilters);
+                                self.$emit('repeat-render');
+                            });
+                        }, false, true);
                     });
-                    self.$watch(target, function (value) {
-                        _.nextTick(function () {
-                            self.applyFilters(value, readFilters);
-                            self.$emit('repeat-render');
-                        });
-                    }, false, true);
-                });
         });
-    }, options.isTemplate, true);
+    }, {
+        useCache: options.useCache
+    });
 };

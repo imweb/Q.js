@@ -8,6 +8,11 @@
 <body>
 
 <div id="mocha"></div>
+<div id="tpl">
+	<div q-repeat="items">
+		<p q-repeat="msgs" q-text="text"></p>
+	</div>
+</div>
 <script src="../node_modules/jquery/dist/jquery.js"></script>
 <script>
 var define = function (name, deps, factory) {
@@ -23,7 +28,7 @@ var define = function (name, deps, factory) {
     mocha.ui('bdd');
     mocha.reporter('html');
 </script>
-<script src="./data.js"></script>
+<script src="./repeat.js"></script>
 <script>
     setTimeout(function () {
         if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
