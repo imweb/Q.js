@@ -3,6 +3,7 @@ var subs = {},
 
 function define(name, options) {
     subs[name] = this.extend(options);
+    return subs[name];
 }
 
 function require(name) {
