@@ -71,9 +71,13 @@ module.exports = function (el, options) {
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
 
+            // directive is repeat
             name === 'repeat' &&
+                // has parentNode, so this is not a template
                 node.parentNode &&
+                // don't unrepeat
                 !setting.unrepeat &&
+                // set uprepeat, if the has repeat
                 (setting.unrepeat = true) &&
                     descriptors.forEach(function (descriptor) {
                         var key = descriptor.target,
