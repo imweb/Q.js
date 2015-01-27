@@ -2,6 +2,7 @@ var _ = require('./utils'),
     Data = require('./data'),
     MARK = /\{\{(.+?)\}\}/,
     mergeOptions = require('./strats').mergeOptions,
+    clas = require('./class'),
     _doc = document;
 
 function _inDoc(ele) {
@@ -19,14 +20,16 @@ Q.get = function (selector) {
     if (ele) {
         return _.data(ele, 'QI');
     } else {
-        return new Q({ el: selector });
+        return new this({ el: selector });
     }
 };
 Q.all = function (options) {
+    var self = this;
     return _.find(options.el).map(function (ele) {
-        return new Q(_.extend(options, { el: ele }));
+        return new self(_.extend(options, { el: ele }));
     });
 };
+_.extend(Q, clas);
 _.extend(Q.prototype, {
     _init: function (options) {
         options = options || {};

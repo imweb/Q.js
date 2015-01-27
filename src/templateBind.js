@@ -33,7 +33,7 @@ function _walk($el, cb, setting) {
             res.length > 0 &&
                 cb(el, res, setting);
         }
-        if (el.childNodes.length) _walk(el.childNodes, cb, setting);
+        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
     }
 }
 
@@ -56,15 +56,17 @@ module.exports = function (el, options) {
                     var readFilters = self._makeReadFilters(descriptor.filters),
                         key = descriptor.target,
                         target = namespace ? ([namespace, key].join('.')) : key,
-                        update = directive.update || directive,
+                        update = _.isObject(directive) ? directive.update : directive
+                        // update = directive.update || directive,
                         that = _.extend({
                             el: node,
                             vm: self,
-                            namespace: namespace
+                            namespace: namespace,
+                            setting: setting
                         }, descriptor, {
                             filters: readFilters
                         });
-                    directive.unwatch || self.$watch(target, function (value) {
+                    update && self.$watch(target, function (value) {
                         value = self.applyFilters(value, readFilters);
                         update.call(that, value);
                     }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
