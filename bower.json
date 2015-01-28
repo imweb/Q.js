@@ -1,0 +1,20 @@
+{
+  "name": "Q.js",
+  "version": "0.0.10",
+  "main": "dist/Q.js",
+  "description": "fake-MVVM library",
+  "authors": ["Daniel Yang <miniflycn@justany.net>"],
+  "license": "MIT",
+  "ignore": [
+    ".*",
+    "examples",
+    "benchmarks",
+    "node_modules",
+    "test",
+    "gulpfile.js",
+    "webpack.config.js",
+    "*.json",
+    "src",
+    "*.md"
+  ]
+}
