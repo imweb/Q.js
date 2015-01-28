@@ -1,8 +1,11 @@
-/**
- * Q.js v0.0.9
+/*!
+ * Q.js v0.0.10
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
+ */
+
+/**
  * from: http://kangax.github.io/compat-table/es5
  * We can find almost all es5 features have been supported after IE9,
  * so we suggest under IE8 just use:
