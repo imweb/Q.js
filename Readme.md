@@ -30,10 +30,7 @@ var vm = new Q({
 当使用.data方法修改data时候会触发节点数据修改：
 
 ```
-// 得到msg数据的处理方法
-vm.data('msg')
-    // 设置值为"你好"
-    .set('你好');
+vm.$set('msg', '你好');
 ```
 
 则会展示：
@@ -75,13 +72,13 @@ vm.data('msg')
 
 ```
 directives: {
-    'todo-focus': function (value, options) {
+    'todo-focus': function (value) {
         // 如果editing的值为false，则不处理
         if (!value) {
             return;
         }
         // 为true则，对该节点focus()一下
-        var el = options.node;
+        var el = this.el;
         setTimeout(function () {
             el.focus();
         }, 0);
@@ -100,6 +97,7 @@ directives: {
 * repeat - 重复节点
 * on - 事件绑定
 * model - 双向绑定（只支持input、textarea）
+* vm - 创建子VM
 
 ### filter
 
@@ -161,7 +159,7 @@ var vm = new Q({
     },
     methods: {
         showMsg: function () {
-            alert(this.data('msg').get());
+            alert(this.msg);
         }
     }
 });
@@ -171,32 +169,18 @@ var vm = new Q({
 
 ### data
 
-> 所有data的设置操作都应该使用提供的方法来完成，我们提供了`$set`, `$push`, `$pop`, `$unshift`, `$shift`, `$touch`。
+> 大部分操作都和对象与数组的操作相同，只有当设置值的时候需要使用`.$set`方法，因为我们没有defineProperty的支持。
 
-* 获取值
+* 得到一个msg的值：
 
-> 直接在vm上去就好，例如：
-> vm.list[1]
+```javascript
+vm.msg
+```
 
-* 赋值
+* 设置msg的值
 
-> 必须使用$set方法赋值，例如：
-> vm.list[1].$set('title', 'hello');
+```javascript
+vm.$set('msg', obj);
+```
 
-* 数组方法
-
-> 目前支持的数组方法有：push, pop, unshift, shift, indexOf,
-
-
-优化性能对比
-----------
-
-* 未优化前
-
-Q.js#repeat x 7.83 ops/sec ±5.34% (34 runs sampled)
-template#render x 30.13 ops/sec ±9.34% (55 runs sampled)
-
-* parse缓存化
-
-Q.js#repeat x 10.31 ops/sec ±3.40% (40 runs sampled)
-repeat.js:50 template#render x 27.40 ops/sec ±1.38% (40 runs sampled)
+* 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`
