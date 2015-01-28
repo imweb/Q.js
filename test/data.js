@@ -142,7 +142,7 @@ describe('data', function () {
         vm.list.indexOf(vm.list[1]).should.equal(1);
     });
 
-    it('should able to call indexOf for a DataArray', function () {
+    it('should able to call splice for a DataArray', function () {
         var vm = new Q({
             el: null,
             data: {
