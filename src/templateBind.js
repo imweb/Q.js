@@ -58,8 +58,7 @@ module.exports = function (el, options) {
                     var readFilters = self._makeReadFilters(descriptor.filters),
                         key = descriptor.target,
                         target = namespace ? ([namespace, key].join('.')) : key,
-                        update = _.isObject(directive) ? directive.update : directive
-                        // update = directive.update || directive,
+                        update = _.isObject(directive) ? directive.update : directive,
                         that = _.extend({
                             el: node,
                             vm: self,

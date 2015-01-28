@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="bower_components/todomvc-common/base.css">
+        <style></style>
+    </head>
+    <body>
+        <section id="todoapp">
+            <header id="header">
+                <h1>todos</h1>
+                <input id="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?" q-on="keyup:addTodo | key enter">
+            </header>
+            <section id="main" class="hide" q-show="todos | size">
+                <input id="toggle-all" type="checkbox" q-value="todos | isAllSelect" q-on="click: toggleAll">
+                <ul id="todo-list">
+                    <li class="todo" q-repeat="todos | filterTodos" q-class="completed: completed, editing: editing">
+                        <div class="view">
+                            <input class="toggle" type="checkbox" q-value="completed" q-on="click:toggleItem(this)">
+                            <label q-text="title" q-on="dblclick:editTodo(this)"></label>
+                            <button class="destroy" q-on="click:removeTodo(this)"></button>
+                        </div>
+                        <input class="edit" type="text" q-model="title" q-todo-focus="editing" q-on="blur: doneEdit(this)">
+                    </li>
+                </ul>
+            </section>
+            <footer id="footer" class="hide" q-show="todos | size">
+                <span id="todo-count">
+                    <strong q-text="todos | calRemaining"></strong> <i q-text="todos | calRemaining | pluralize item"></i> left
+                </span>
+                <ul id="filters">
+                    <li><a href="#/all" q-class="selected: activeFilter | checkActive all">All</a></li>
+                    <li><a href="#/active" q-class="selected: activeFilter |  checkActive active">Active</a></li>
+                    <li><a href="#/completed" q-class="selected: activeFilter |  checkActive completed">Completed</a></li>
+                </ul>
+                <button id="clear-completed" q-show="todos | calCompleted" q-on="click:removeCompleted">
+                    Clear completed (<i q-text="todos | calCompleted"></i>)
+                </button>
+            </footer>
+        </section>
+        <footer id="info">
+            <p>Double-click to edit a todo</p>
+            <p>Powered by <a href="http://vuejs.org">Vue.js</a></p>
+            <p>Created by <a href="http://evanyou.me">Evan You</a></p>
+        </footer>
+
+        <script src="../../node_modules/jquery/dist/jquery.js"></script>
+        <script>
+        var define = function (name, deps, factory) {
+            window[name] = factory.apply(this, deps.map(function (dep) {
+                return dep === 'jquery' ? window.jQuery : window[dep];
+            }));
+        }
+        </script>
+        <script src="../../dist/Q.js"></script>
+        <script src="bower_components/director/director.js"></script>
+        <script src="js/store.js"></script>
+        <script src="js/filters.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/routes.js"></script>
+
+    </body>
+</html>

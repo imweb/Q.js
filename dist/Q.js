@@ -59,7 +59,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    Data = __webpack_require__(2),
 	    MARK = /\{\{(.+?)\}\}/,
 	    mergeOptions = __webpack_require__(3).mergeOptions,
-	    clas = __webpack_require__(5),
+	    clas = __webpack_require__(4),
 	    _doc = document;
 
 	function _inDoc(ele) {
@@ -70,7 +70,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    this._init(options);
 	}
 	Q.options = {
-	    directives: __webpack_require__(4)
+	    directives: __webpack_require__(5)
 	};
 	Q.get = function (selector) {
 	    var ele = _.find(selector)[0];
@@ -800,6 +800,53 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var subs = {},
+	    mergeOptions = __webpack_require__(3).mergeOptions;
+
+	function define(name, options) {
+	    subs[name] = this.extend(options);
+	    return subs[name];
+	}
+
+	function require(name) {
+	    return subs[name] || this;
+	}
+
+	function extend(extendOptions) {
+	    extendOptions = extendOptions || {};
+	    var Super = this,
+	        Sub = createClass(extendOptions.name || 'QComponent');
+	    Sub.prototype = Object.create(Super.prototype);
+	    Sub.prototype.constructor = Sub;
+	    Sub.options = mergeOptions(
+	        Super.options,
+	        extendOptions
+	    );
+	    Sub['super'] = Super;
+	    Sub.extend = Super.extend;
+	    Sub.get = Super.get;
+	    Sub.all = Super.all;
+	    return Sub;
+	}
+
+	function createClass (name) {
+	    return new Function(
+	        'return function ' + name +
+	        ' (options) { this._init(options) }'
+	    )();
+	}
+
+	module.exports = {
+	    define: define,
+	    require: require,
+	    extend: extend
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _ = __webpack_require__(1);
 
 	module.exports = {
@@ -891,53 +938,6 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 
 
 /***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var subs = {},
-	    mergeOptions = __webpack_require__(3).mergeOptions;
-
-	function define(name, options) {
-	    subs[name] = this.extend(options);
-	    return subs[name];
-	}
-
-	function require(name) {
-	    return subs[name] || this;
-	}
-
-	function extend(extendOptions) {
-	    extendOptions = extendOptions || {};
-	    var Super = this,
-	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = Object.create(Super.prototype);
-	    Sub.prototype.constructor = Sub;
-	    Sub.options = mergeOptions(
-	        Super.options,
-	        extendOptions
-	    );
-	    Sub['super'] = Super;
-	    Sub.extend = Super.extend;
-	    Sub.get = Super.get;
-	    Sub.all = Super.all;
-	    return Sub;
-	}
-
-	function createClass (name) {
-	    return new Function(
-	        'return function ' + name +
-	        ' (options) { this._init(options) }'
-	    )();
-	}
-
-	module.exports = {
-	    define: define,
-	    require: require,
-	    extend: extend
-	};
-
-
-/***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1001,8 +1001,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	                    var readFilters = self._makeReadFilters(descriptor.filters),
 	                        key = descriptor.target,
 	                        target = namespace ? ([namespace, key].join('.')) : key,
-	                        update = _.isObject(directive) ? directive.update : directive
-	                        // update = directive.update || directive,
+	                        update = _.isObject(directive) ? directive.update : directive,
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
