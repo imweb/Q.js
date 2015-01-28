@@ -1,5 +1,5 @@
 /**
- * Q.js v0.0.0
+ * Q.js v0.0.9
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -59,7 +59,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    Data = __webpack_require__(2),
 	    MARK = /\{\{(.+?)\}\}/,
 	    mergeOptions = __webpack_require__(3).mergeOptions,
-	    clas = __webpack_require__(4),
+	    clas = __webpack_require__(5),
 	    _doc = document;
 
 	function _inDoc(ele) {
@@ -70,7 +70,7 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	    this._init(options);
 	}
 	Q.options = {
-	    directives: __webpack_require__(5)
+	    directives: __webpack_require__(4)
 	};
 	Q.get = function (selector) {
 	    var ele = _.find(selector)[0];
@@ -800,53 +800,6 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var subs = {},
-	    mergeOptions = __webpack_require__(3).mergeOptions;
-
-	function define(name, options) {
-	    subs[name] = this.extend(options);
-	    return subs[name];
-	}
-
-	function require(name) {
-	    return subs[name] || this;
-	}
-
-	function extend(extendOptions) {
-	    extendOptions = extendOptions || {};
-	    var Super = this,
-	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = Object.create(Super.prototype);
-	    Sub.prototype.constructor = Sub;
-	    Sub.options = mergeOptions(
-	        Super.options,
-	        extendOptions
-	    );
-	    Sub['super'] = Super;
-	    Sub.extend = Super.extend;
-	    Sub.get = Super.get;
-	    Sub.all = Super.all;
-	    return Sub;
-	}
-
-	function createClass (name) {
-	    return new Function(
-	        'return function ' + name +
-	        ' (options) { this._init(options) }'
-	    )();
-	}
-
-	module.exports = {
-	    define: define,
-	    require: require,
-	    extend: extend
-	};
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var _ = __webpack_require__(1);
 
 	module.exports = {
@@ -934,6 +887,53 @@ define("Q", ["jquery"], function(__WEBPACK_EXTERNAL_MODULE_7__) { return /******
 	            }, true, false);
 	        }
 	    }
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var subs = {},
+	    mergeOptions = __webpack_require__(3).mergeOptions;
+
+	function define(name, options) {
+	    subs[name] = this.extend(options);
+	    return subs[name];
+	}
+
+	function require(name) {
+	    return subs[name] || this;
+	}
+
+	function extend(extendOptions) {
+	    extendOptions = extendOptions || {};
+	    var Super = this,
+	        Sub = createClass(extendOptions.name || 'QComponent');
+	    Sub.prototype = Object.create(Super.prototype);
+	    Sub.prototype.constructor = Sub;
+	    Sub.options = mergeOptions(
+	        Super.options,
+	        extendOptions
+	    );
+	    Sub['super'] = Super;
+	    Sub.extend = Super.extend;
+	    Sub.get = Super.get;
+	    Sub.all = Super.all;
+	    return Sub;
+	}
+
+	function createClass (name) {
+	    return new Function(
+	        'return function ' + name +
+	        ' (options) { this._init(options) }'
+	    )();
+	}
+
+	module.exports = {
+	    define: define,
+	    require: require,
+	    extend: extend
 	};
 
 
