@@ -1,4 +1,4 @@
-Q.js
+Q.js(test)
 ====
 
 > 模仿Vuejs的`伪MVVM`库，下面是使用说明
