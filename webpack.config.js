@@ -1,4 +1,4 @@
-var webpack = require('webpack')
+var webpack = require('webpack');
 var banner =
   '/**\n' +
   ' * Q.js v' + require('./package').version + '\n' +
@@ -11,24 +11,21 @@ var banner =
   ' * https://github.com/es-shims/es5-shim\n' +
   ' */\n'
 
-webpack({
-  entry: './src/Q',
+module.exports = {
   output: {
-    path: './dist',
     filename: 'Q.js',
     library: 'Q',
-    libraryTarget: 'amd'
+    libraryTarget: 'umd'
   },
-  externals: { jquery: "jquery" },
+  externals: {
+    'jquery': {
+      root: 'jQuery',
+      amd: 'jquery',
+      commonjs2: 'jquery',
+      commonjs: 'jquery'
+    }
+  },
   plugins: [
-    new webpack.BannerPlugin(banner, { raw: true }),
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'windows.jQuery': 'jquery'
-    })
+    new webpack.BannerPlugin(banner, { raw: true })
   ]
-}, function (err, stats) {
-  if (err) return console.error(err);
-  console.log('done!');
-});
+};
