@@ -15,7 +15,7 @@ describe('class', function () {
 
     it('should able to create a child component', function (done) {
         var vm = new Q({
-            el: '#tpl3',
+            el: '#component',
             data: {
                 msg: 'hello',
                 obj: {
@@ -25,8 +25,8 @@ describe('class', function () {
         });
         setTimeout(function () {
             vm._children.length.should.equal(1);
-            $('#msg1', '#tpl3').text().should.equal('hello');
-            $('#msg2', '#tpl3').text().should.equal('hello world');
+            $('#msg1', '#component').text().should.equal('hello');
+            $('#msg2', '#component').text().should.equal('hello world');
             done();
         }, 100);
     });

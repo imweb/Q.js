@@ -1,4 +1,5 @@
 describe('repeat', function () {
+
     it('should able repeat', function (done) {
         new Q({
             el: '#tpl1',
@@ -40,5 +41,32 @@ describe('repeat', function () {
             ps[1].innerText.should.equal('qq');
             done();
         }, 100);
+    });
+
+    it('should able bind event', function (done) {
+        new Q({
+            el: '#tpl3',
+            methods: {
+                onclick: function () {
+                    done();
+                }
+            }
+        });
+        $('a', '#tpl3').click();
+    });
+
+    it('should able to toggle class', function () {
+        var vm = new Q({
+            el: '#tpl4',
+            data: {
+                toggle: true
+            }
+        });
+
+        var toggle = $('.toggle-me', '#tpl4');
+        toggle.length.should.equal(1);
+
+        vm.$set('toggle', false);
+        toggle.hasClass('toggle-me').should.equal(false);
     });
 });
