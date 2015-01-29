@@ -85,7 +85,7 @@ module.exports = function (_) {
                 }
             }
             l && (key = keys[i]);
-            if (value === undefined) return data[key];
+            if (value === undefined) return key ? data[key] : data;
             data.$set(key, value);
         },
         /**
