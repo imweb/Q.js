@@ -1,3 +1,4 @@
+
 describe('repeat', function () {
 
     it('should able repeat', function (done) {
@@ -52,7 +53,7 @@ describe('repeat', function () {
                 }
             }
         });
-        $('a', '#tpl3').click();
+        $('a', '#tpl3')[0].click();
     });
 
     it('should able to toggle class', function () {

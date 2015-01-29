@@ -1,18 +1,9 @@
-var $ = require('jquery'),
-    noop = function () {},
+var noop = function () {},
     defer = window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         setTimeout;
 
 module.exports = {
-    find: $.find,
-    contains: $.contains,
-    data: $.data,
-    cleanData: $.cleanData,
-    add: $.event.add,
-    remove: $.event.remove,
-    clone: $.clone,
-    extend: $.extend,
     slice: [].slice,
     noop: noop,
     /**

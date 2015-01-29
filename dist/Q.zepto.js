@@ -14,13 +14,13 @@
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("jquery"));
+		module.exports = factory(require("zepto"));
 	else if(typeof define === 'function' && define.amd)
-		define(["jquery"], factory);
+		define(["zepto"], factory);
 	else if(typeof exports === 'object')
-		exports["Q"] = factory(require("jquery"));
+		exports["Q"] = factory(require("zepto"));
 	else
-		root["Q"] = factory(root["jQuery"]);
+		root["Q"] = factory(root["Zepto"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -543,17 +543,33 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var $ = __webpack_require__(4);
+	var $ = __webpack_require__(4),
+	    _extend = $.extend,
+	    _expando = 'QDataUid',
+	    _uid = 0,
+	    _map = {};
 
 	module.exports = {
-	    find: $.find,
+	    find: $,
 	    contains: $.contains,
-	    data: $.data,
-	    cleanData: $.cleanData,
+	    data: function (el, key, value) {
+	        var uid = el[_expando] = el[_expando] || ++_uid,
+	            data = _map[uid] = _map[uid] || {};
+	        // set Data
+	        if (value === undefined) return data[key];
+	        return (data[key] = value);
+	    },
+	    // TODO
+	    cleanData: function () {},
 	    add: $.event.add,
 	    remove: $.event.remove,
-	    clone: $.clone,
-	    extend: $.extend
+	    clone: function (ele) {
+	        return ele.cloneNode(true);
+	    },
+	    extend: function (target) {
+	        if (arguments.length === 1) return _extend(this, target);
+	        return _extend.apply(this, arguments);
+	    }
 	};
 
 

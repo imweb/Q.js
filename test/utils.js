@@ -18,7 +18,7 @@ describe('utils', function () {
         var container = _.find('#container')[0],
             item = _.find('#item')[0];
 
-        _.contains(container, item).should.equal(true);
+        _.contains(container, item).should.ok;
     });
 
     it('should able to set and get data', function () {
@@ -54,5 +54,16 @@ describe('utils', function () {
         container.className.should.equal('test');
         _.removeClass(container, 'test');
         container.className.should.equal('');
+    });
+
+    it('should able to check a object', function () {
+        _.isObject({}).should.ok;
+        _.isObject('hello').should.not.ok;
+        _.isObject(new String()).should.ok;
+        _.isObject(123).should.not.ok;
+        _.isObject(new Number).should.ok;
+        _.isObject(function () {}).should.not.ok;
+        _.isObject(new Function()).should.not.ok;
+        _.isObject([]).should.ok;
     });
 });

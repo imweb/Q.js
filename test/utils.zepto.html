@@ -11,12 +11,12 @@
 <div id="container">
     <p id="item"></p>
 </div>
-<script src="../node_modules/jquery/dist/jquery.js"></script>
+<script src="../node_modules/zepto/zepto.min.js"></script>
 <script>
 var require = function (name) {
     name = name.replace(/\.\//, '');
-    return name === 'jquery' ?
-        window.jQuery :
+    return name === 'zepto' ?
+        window.Zepto :
         window[name];
 };
 var module = { exports: {} };
@@ -26,7 +26,7 @@ var module = { exports: {} };
 window['utils'] = module.exports;
 module.exports = {};
 </script>
-<script src="../src/adapter/utils.jquery.js"></script>
+<script src="../src/adapter/utils.zepto.js"></script>
 <script>
 module.exports.extend(require('./utils'), module.exports);
 </script>

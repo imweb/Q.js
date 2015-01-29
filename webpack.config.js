@@ -15,20 +15,53 @@ var banner =
   ' */\n'
 
 module.exports = {
-  output: {
-    filename: 'Q.js',
-    library: 'Q',
-    libraryTarget: 'umd'
+  jquery: {
+    output: {
+      filename: 'Q.js',
+      library: 'Q',
+      libraryTarget: 'umd'
+    },
+    externals: {
+      'jquery': {
+        root: 'jQuery',
+        amd: 'jquery',
+        commonjs2: 'jquery',
+        commonjs: 'jquery'
+      }
+    },
+    plugins: [
+      new webpack.BannerPlugin(banner, { raw: true })
+    ]
   },
-  externals: {
-    'jquery': {
-      root: 'jQuery',
-      amd: 'jquery',
-      commonjs2: 'jquery',
-      commonjs: 'jquery'
-    }
+  zepto: {
+    output: {
+      filename: 'Q.zepto.js',
+      library: 'Q',
+      libraryTarget: 'umd'
+    },
+    externals : {
+      'zepto': {
+        root: 'Zepto',
+        amd: 'zepto',
+        commonjs2: 'zepto',
+        commonjs: 'zepto'
+      }
+    },
+    plugins: [
+      new webpack.BannerPlugin(banner, { raw: true }),
+      new webpack.ProvidePlugin({
+          Zepto: 'zepto',
+      })
+    ]
   },
-  plugins: [
-    new webpack.BannerPlugin(banner, { raw: true })
-  ]
+  'native': {
+    output: {
+      filename: 'Q.native.js',
+      library: 'Q',
+      libraryTarget: 'umd'
+    },
+    plugins: [
+      new webpack.BannerPlugin(banner, { raw: true })
+    ]
+  }
 };
