@@ -5,7 +5,8 @@ var gulp = require('gulp')
   , webpack = require('gulp-webpack')
   , config = require('./webpack.config');
 
-function Size() {
+function Size(name) {
+  this._name = name;
   this._max = undefined;
   this._min = undefined;
 }
@@ -28,13 +29,13 @@ Size.prototype.min = function (rename) {
 Size.prototype.print = function () {
   var self = this;
   setTimeout(function () {
-    console.log(maxmin(self._max, self._min, true));
+    console.log(self._name, maxmin(self._max, self._min, true));
   }, 0);
 }
 
-var jqSize = new Size()
-  , zeSize = new Size()
-  , naSize = new Size();
+var jqSize = new Size('Q.js')
+  , zeSize = new Size('Q.zepto.js')
+  , naSize = new Size('Q.native.js');
 
 
 gulp.task('jquery', function (done) {

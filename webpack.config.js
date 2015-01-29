@@ -5,14 +5,22 @@ var banner =
   ' * Inspired from vue.js\n' +
   ' * (c) ' + new Date().getFullYear() + ' Daniel Yang\n' +
   ' * Released under the MIT License.\n' +
-  ' */\n' +
-  '\n' +
+  ' */\n';
+var jqueryPrompt =
   '/**\n' +
   ' * from: http://kangax.github.io/compat-table/es5\n' +
   ' * We can find almost all es5 features have been supported after IE9,\n' +
   ' * so we suggest under IE8 just use:\n' +
   ' * https://github.com/es-shims/es5-shim\n' +
-  ' */\n'
+  ' */\n';
+var zeptoPrompt =
+  '/**\n' +
+  ' * Depend on zepto & support mobile browser\n' +
+  ' */\n';
+var nativePrompt =
+  '/**\n' +
+  ' * Just support modern browser\n' +
+  ' */\n';
 
 module.exports = {
   jquery: {
@@ -30,7 +38,7 @@ module.exports = {
       }
     },
     plugins: [
-      new webpack.BannerPlugin(banner, { raw: true })
+      new webpack.BannerPlugin([banner, jqueryPrompt].join('\n'), { raw: true })
     ]
   },
   zepto: {
@@ -48,7 +56,7 @@ module.exports = {
       }
     },
     plugins: [
-      new webpack.BannerPlugin(banner, { raw: true }),
+      new webpack.BannerPlugin([banner, zeptoPrompt].join('\n'), { raw: true }),
       new webpack.ProvidePlugin({
           Zepto: 'zepto',
       })
@@ -61,7 +69,7 @@ module.exports = {
       libraryTarget: 'umd'
     },
     plugins: [
-      new webpack.BannerPlugin(banner, { raw: true })
+      new webpack.BannerPlugin([banner, nativePrompt].join('\n'), { raw: true })
     ]
   }
 };

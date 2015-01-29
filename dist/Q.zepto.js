@@ -6,10 +6,7 @@
  */
 
 /**
- * from: http://kangax.github.io/compat-table/es5
- * We can find almost all es5 features have been supported after IE9,
- * so we suggest under IE8 just use:
- * https://github.com/es-shims/es5-shim
+ * Depend on zepto & support mobile browser
  */
 
 (function webpackUniversalModuleDefinition(root, factory) {
