@@ -16,7 +16,7 @@
 var require = function (name) {
     return name === 'jquery' ?
         window.jQuery :
-        name === 'utils' ?
+        name === './utils' ?
             module.exports :
             window[name];
 };

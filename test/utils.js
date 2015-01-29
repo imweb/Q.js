@@ -1,4 +1,4 @@
-var _ = require('utils');
+var _ = require('./utils');
 
 describe('utils', function () {
     it('should find a element', function () {
