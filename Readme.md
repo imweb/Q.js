@@ -1,4 +1,4 @@
-Q.js(test)
+Q.js
 ====
 
 > 模仿Vuejs的`伪MVVM`库，下面是使用说明
@@ -27,7 +27,7 @@ var vm = new Q({
 <a href="javascript:void(0)">hello</a>
 ```
 
-当使用.data方法修改data时候会触发节点数据修改：
+当使用.$set()方法修改data时候会触发节点数据修改：
 
 ```
 vm.$set('msg', '你好');
@@ -58,7 +58,7 @@ vm.$set('msg', '你好');
 <div q-text="message"></div>
 ```
 
-这里表示`message`对应的数据，用`text`指令进行操作，`text`指令是在该节点塞入文字。
+这里表示`message`(key)对应的数据(value)，用`text`指令进行操作，`text`指令是在该节点塞入文字。
 
 ### 自定义`directive`
 
@@ -105,21 +105,21 @@ directives: {
 
 模版：
 ```
-<input q-model="msg" q-on="keyup: showMsg | key enter" />
+<input id="demo" q-model="msg" q-on="keyup: showMsg | key enter" />
 ```
 
 `key`是其中一个通用filter，基本实现是：
 
 ```
 var keyCodes = {
-        enter    : 13,
-        tab      : 9,
+        'enter'    : 13,
+        'tab'      : 9,
         'delete' : 46,
-        up       : 38,
-        left     : 37,
-        right    : 39,
-        down     : 40,
-        esc      : 27
+        'up'       : 38,
+        'left'     : 37,
+        'right'    : 39,
+        'down'     : 40,
+        'esc'      : 27
     };
 
 /**
@@ -130,7 +130,7 @@ var keyCodes = {
  * @param {String} key
  */
 function key(handler, key) {
-    if (!handler) return;
+    if (!handler || key === undefined) return;
     var code = keyCodes[key];
     if (!code) {
         code = parseInt(key, 10);
@@ -154,6 +154,9 @@ function key(handler, key) {
 ```
 var vm = new Q({
     el: '#demo',
+    filters: {
+        key: key
+    },
     data: {
         msg: 'hello'
     },
