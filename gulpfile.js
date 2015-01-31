@@ -41,6 +41,11 @@ var jqSize = new Size('Q.js')
 
 gulp.task('test', function () {
   gulp.src('test/*.html')
+    .pipe(mochaPhantomJS());
+});
+
+gulp.task('report', function () {
+  gulp.src('test/*.html')
     .pipe(mochaPhantomJS({
       'reporter': 'xunit',
       'output': 'tests/results/result.xml'
