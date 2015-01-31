@@ -1,6 +1,8 @@
 Q.js
 ====
 
+[![Build Status](https://travis-ci.org/miniflycn/Q.js.svg?branch=master)](https://travis-ci.org/miniflycn/Q.js)
+
 > 模仿Vuejs的`伪MVVM`库，下面是使用说明
 
 一个简单例子
