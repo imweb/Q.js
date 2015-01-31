@@ -48,6 +48,12 @@ describe('utils', function () {
         target.should.have.property('hello');
     });
 
+    it('should able to extend from multiple srouces', function () {
+        var target = _.extend({}, { test: 'test' }, { hello: 'hello' });
+        target.should.have.property('test');
+        target.should.have.property('hello');
+    });
+
     it('should able to add & remove class', function () {
         var container = _.find('#container')[0];
         _.addClass(container, 'test');

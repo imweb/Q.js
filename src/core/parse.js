@@ -1,5 +1,4 @@
-var _ = require('./utils'),
-    cache = new (require('./cache'))(1000);
+var cache = new (require('./cache'))(1000);
 /**
  * click: onclick | filter1 | filter2
  * click: onclick , keydown: onkeydown
