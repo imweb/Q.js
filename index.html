@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Q.js by miniflycn</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Q.js</h1>
+        <h2>fake-MVVM library</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/miniflycn/Q.js/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/miniflycn/Q.js/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/miniflycn/Q.js" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="qjs" class="anchor" href="#qjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Q.js</h1>
+
+<blockquote>
+<p>模仿Vuejs的<code>伪MVVM</code>库，下面是使用说明</p>
+</blockquote>
+
+<h2>
+<a id="一个简单例子" class="anchor" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E4%BE%8B%E5%AD%90" aria-hidden="true"><span class="octicon octicon-link"></span></a>一个简单例子</h2>
+
+<p>模版：</p>
+
+<pre lang="template"><code>&lt;a href="javascript:void(0)" q-text="msg"&gt;&lt;/a&gt;
+</code></pre>
+
+<p>脚本：</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> vm <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Q</span>({
+    el<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>#demo<span class="pl-pds">'</span></span>,
+    data<span class="pl-k">:</span> {
+        msg<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>hello<span class="pl-pds">'</span></span>
+    }
+});</pre></div>
+
+<p>则会展示：</p>
+
+<pre><code>&lt;a href="javascript:void(0)"&gt;hello&lt;/a&gt;
+</code></pre>
+
+<p>当使用.data方法修改data时候会触发节点数据修改：</p>
+
+<pre><code>vm.$set('msg', '你好');
+</code></pre>
+
+<p>则会展示：</p>
+
+<pre><code>&lt;a href="javascript:void(0)"&gt;你好&lt;/a&gt;
+</code></pre>
+
+<h2>
+<a id="基本概念" class="anchor" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5" aria-hidden="true"><span class="octicon octicon-link"></span></a>基本概念</h2>
+
+<h3>
+<a id="directive" class="anchor" href="#directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>directive</h3>
+
+<p>告知<code>libaray</code>如何对节点进行操作，遵循Vuejs写法：</p>
+
+<pre><code>&lt;element
+  prefix-directiveId="[argument:] expression [| filters...]"&gt;
+&lt;/element&gt;
+</code></pre>
+
+<p>简单例子：</p>
+
+<pre><code>&lt;div q-text="message"&gt;&lt;/div&gt;
+</code></pre>
+
+<p>这里表示<code>message</code>对应的数据，用<code>text</code>指令进行操作，<code>text</code>指令是在该节点塞入文字。</p>
+
+<h3>
+<a id="自定义directive" class="anchor" href="#%E8%87%AA%E5%AE%9A%E4%B9%89directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义<code>directive</code>
+</h3>
+
+<p>举一个我们在todoMVC的例子：</p>
+
+<pre><code>&lt;input q-todo-focus="editing" /&gt;
+</code></pre>
+
+<p>则表示<code>editing</code>对应的数据变化时执行<code>todo-focus</code>指令，看看我们<code>todo-focus</code>指令怎么写的：</p>
+
+<pre><code>directives: {
+    'todo-focus': function (value) {
+        // 如果editing的值为false，则不处理
+        if (!value) {
+            return;
+        }
+        // 为true则，对该节点focus()一下
+        var el = this.el;
+        setTimeout(function () {
+            el.focus();
+        }, 0);
+    }
+}
+</code></pre>
+
+<h3>
+<a id="通用directive" class="anchor" href="#%E9%80%9A%E7%94%A8directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>通用<code>directive</code>
+</h3>
+
+<blockquote>
+<p>目前只提供了极少的通用<code>directive</code>，未来可拓展</p>
+</blockquote>
+
+<ul>
+<li>show - 显示与否</li>
+<li>class - 是否添加class</li>
+<li>value - 改变值</li>
+<li>text - 插入文本</li>
+<li>repeat - 重复节点</li>
+<li>on - 事件绑定</li>
+<li>model - 双向绑定（只支持input、textarea）</li>
+<li>vm - 创建子VM</li>
+</ul>
+
+<h3>
+<a id="filter" class="anchor" href="#filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>filter</h3>
+
+<blockquote>
+<p>如果设置了<code>filter</code>，则绑定的数据会经过<code>filter</code>才执行对应的<code>directive</code>，这是我们可以在塞入数据前做输出处理，或事件触发前做数据处理。</p>
+</blockquote>
+
+<p>模版：</p>
+
+<pre><code>&lt;input q-model="msg" q-on="keyup: showMsg | key enter" /&gt;
+</code></pre>
+
+<p><code>key</code>是其中一个通用filter，基本实现是：</p>
+
+<pre><code>var keyCodes = {
+        enter    : 13,
+        tab      : 9,
+        'delete' : 46,
+        up       : 38,
+        left     : 37,
+        right    : 39,
+        down     : 40,
+        esc      : 27
+    };
+
+/**
+ * A special filter that takes a handler function,
+ * wraps it so it only gets triggered on specific
+ * keypresses. v-on only.
+ *
+ * @param {String} key
+ */
+function key(handler, key) {
+    if (!handler) return;
+    var code = keyCodes[key];
+    if (!code) {
+        code = parseInt(key, 10);
+    }
+    return function (e) {
+        if (e.keyCode === code) {
+            return handler.call(this, e);
+        }
+    };
+}
+</code></pre>
+
+<p>则，当keyup发生，keyCode为13(即enter)时候，才会触发showMsg方法。</p>
+
+<h3>
+<a id="method" class="anchor" href="#method" aria-hidden="true"><span class="octicon octicon-link"></span></a>method</h3>
+
+<blockquote>
+<p>特制<code>on</code>指令会调用的方法，例如：上面讲到的showMsg。</p>
+</blockquote>
+
+<p>设置方法：</p>
+
+<pre><code>var vm = new Q({
+    el: '#demo',
+    data: {
+        msg: 'hello'
+    },
+    methods: {
+        showMsg: function () {
+            alert(this.msg);
+        }
+    }
+});
+</code></pre>
+
+<p>则那个input框会在初始化时自动设值为hello，当改变时候<code>msg</code>值也会改变，当按下<code>回车键</code>，则会触发showMsg方法打印值。</p>
+
+<h3>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>data</h3>
+
+<blockquote>
+<p>大部分操作都和对象与数组的操作相同，只有当设置值的时候需要使用<code>.$set</code>方法，因为我们没有defineProperty的支持。</p>
+</blockquote>
+
+<ul>
+<li>得到一个msg的值：</li>
+</ul>
+
+<div class="highlight highlight-javascript"><pre>vm.msg</pre></div>
+
+<ul>
+<li>设置msg的值</li>
+</ul>
+
+<div class="highlight highlight-javascript"><pre>vm.$set(<span class="pl-s1"><span class="pl-pds">'</span>msg<span class="pl-pds">'</span></span>, obj);</pre></div>
+
+<ul>
+<li>对于数组可使用大部分数组方法，目前已经支持了：<code>push</code>、<code>pop</code>、<code>unshift</code>、<code>shift</code>、<code>indexOf</code>、<code>splice</code>、<code>forEach</code>、<code>filter</code>
+</li>
+</ul>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
