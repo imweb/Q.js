@@ -28,13 +28,13 @@ describe('utils', function () {
     });
 
     it('should able to add & remove event', function (done) {
-        var container = _.find('#container')[0],
+        var button = _.find('#button')[0],
             handle = function () {
-                _.remove(container, 'click', handle);
+                _.remove(button, 'click', handle);
                 done();
             };
-        _.add(container, 'click', handle);
-        container.click();
+        _.add(button, 'click', handle);
+        button.click();
     });
 
     it('should able to extend objects', function () {

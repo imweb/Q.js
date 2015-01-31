@@ -16,8 +16,8 @@
 <script>
 var require = function (name) {
     name = name.replace(/\.\//, '');
-    return name === 'jquery' ?
-        window.jQuery :
+    return name === 'zepto' ?
+        window.Zepto :
         window[name];
 };
 var module = { exports: {} };
@@ -27,7 +27,7 @@ var module = { exports: {} };
 window['utils'] = module.exports;
 module.exports = {};
 </script>
-<script src="../src/adapter/utils.jquery.js"></script>
+<script src="../src/adapter/utils.native.js"></script>
 <script>
 module.exports.extend(require('./utils'), module.exports);
 </script>

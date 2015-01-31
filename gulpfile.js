@@ -3,7 +3,8 @@ var gulp = require('gulp')
   , maxmin = require('maxmin')
   , map = require('map-stream')
   , webpack = require('gulp-webpack')
-  , config = require('./webpack.config');
+  , config = require('./webpack.config')
+  , mochaPhantomJS = require('gulp-mocha-phantomjs');
 
 function Size(name) {
   this._name = name;
@@ -37,6 +38,14 @@ var jqSize = new Size('Q.js')
   , zeSize = new Size('Q.zepto.js')
   , naSize = new Size('Q.native.js');
 
+
+gulp.task('test', function () {
+  gulp.src('test/*.html')
+    .pipe(mochaPhantomJS({
+      'reporter': 'xunit',
+      'output': 'tests/results/result.xml'
+    }));
+});
 
 gulp.task('jquery', function (done) {
   gulp.src(['./src/Q.js'])

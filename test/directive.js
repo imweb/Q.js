@@ -53,7 +53,9 @@ describe('repeat', function () {
                 }
             }
         });
-        $('a', '#tpl3')[0].click();
+        // just button has click method in phantomjs
+        // https://github.com/ariya/phantomjs/issues/10795
+        $('button', '#tpl3')[0].click();
     });
 
     it('should able to toggle class', function () {

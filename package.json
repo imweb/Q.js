@@ -10,6 +10,7 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.8.10",
+    "gulp-mocha-phantomjs": "^0.5.3",
     "gulp-uglify": "^1.1.0",
     "gulp-webpack": "^1.1.2",
     "jquery": "^2.1.3",
