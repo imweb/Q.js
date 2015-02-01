@@ -27,7 +27,6 @@ module.exports = {
         if (value === undefined) return data[key];
         return (data[key] = value);
     },
-    // TODO
     cleanData: function (els) {
         var uid
         els.forEach(function (el) {

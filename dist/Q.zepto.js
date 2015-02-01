@@ -541,18 +541,29 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var $ = __webpack_require__(4),
-	    _extend = $.extend;
+	    _extend = $.extend,
+	    _expando = 'QDataUid',
+	    _uid = 0,
+	    _map = {};
 
 	module.exports = {
 	    find: $,
 	    contains: $.contains,
 	    data: function (el, key, value) {
-	        return $(el).data(key, value);
+	        var uid = el[_expando] = el[_expando] || ++_uid,
+	            data = _map[uid] = _map[uid] || {};
+	        // set Data
+	        if (value === undefined) return data[key];
+	        return (data[key] = value);
 	    },
-	    cleanData: function (eles) {
-	        for (var i = 0, l = eles.length; i < l; i++) {
-	            $(eles[i]).removeData();
-	        }
+	    cleanData: function (els) {
+	        var uid
+	        els.forEach(function (el) {
+	            var uid = el[_expando];
+	            // has data
+	            uid && (uid in _map) &&
+	                (delete _map[uid]);
+	        });
 	    },
 	    add: $.event.add,
 	    remove: $.event.remove,
