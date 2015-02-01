@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.0.11
+ * Q.js v0.1.0
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1160,8 +1160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(1),
-	    cache = new (__webpack_require__(11))(1000);
+	var cache = new (__webpack_require__(11))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown

@@ -8,26 +8,6 @@
 <body>
 
 <div id="mocha"></div>
-<ul id="tpl1" style="display: none">
-    <li q-repeat="items" q-text="msg"></li>
-</ul>
-<div id="tpl2" style="display: none">
-    <div q-repeat="items">
-        <p q-repeat="msgs" q-text="text"></p>
-    </div>
-</div>
-<div id="tpl3" style="display: none">
-    <a href="javascript:void(0)" q-on="click: onclick">hello</a>
-</div>
-<div id="tpl4" style="display: none">
-    <div class="toggle-me" q-class="toggle-me: toggle"></div>
-</div>
-<div id="component" style="display: none">
-    <p q-text="msg" id="msg1"></p>
-    <div q-vm="hello: obj">
-        <p q-text="msg | prepend" id="msg2"></p>
-    </div>
-</div>
 <script src="../node_modules/jquery/dist/jquery.js"></script>
 <script>
 var require = function (name) {

@@ -28,7 +28,15 @@ module.exports = {
         return (data[key] = value);
     },
     // TODO
-    cleanData: function () {},
+    cleanData: function (els) {
+        var uid
+        els.forEach(function (el) {
+            var uid = el[_expando];
+            // has data
+            uid && (uid in _map) &&
+                (delete _map[uid]);
+        });
+    },
     add: function (el, evt, fn) {
         el.addEventListener(evt, fn, false);
     },

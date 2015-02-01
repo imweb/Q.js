@@ -25,6 +25,8 @@ describe('utils', function () {
         var container = _.find('#container')[0];
         _.data(container, 'test', 'test');
         _.data(container, 'test').should.equal('test');
+        _.cleanData([container]);
+        (_.data(container, 'test') === undefined).should.be.ok;
     });
 
     it('should able to add & remove event', function (done) {
