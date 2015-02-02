@@ -270,4 +270,7 @@ var vm = new Q({
 
 则那个input框会在初始化时自动设值为hello，当改变时候`msg`值也会改变，当按下`回车键`，则会触发showMsg方法打印值。
 
+用户
+----
 
+![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)
