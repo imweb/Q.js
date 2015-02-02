@@ -8,7 +8,7 @@ Q.js
 
 模版：
 ```template
-<a href="javascript:void(0)" q-text="msg"></a>
+<a id="demo" href="javascript:void(0)" q-text="msg"></a>
 ```
 
 脚本：
@@ -42,12 +42,68 @@ vm.$set('msg', '你好');
 基本概念
 --------
 
+## The Q Constructor
+
+> Q的构造函数是Q.js的核心。你能用它创建一个Q的实例：
+
+```
+var vm = new Q({ /* options */ });
+
+```
+
+## Options
+
+### data
+
+* 类型：`Object`
+
+> 用于初始化Q对象元数据：
+
+```
+var data = {
+    msg: 'hello'
+};
+var vm = new Q({
+    data: data
+})
+vm.$options.data === data // -> true
+```
+
+> 大部分操作都和对象与数组的操作相同，只有当设置值的时候需要使用`.$set`方法，因为我们没有defineProperty的支持。
+
+* 得到data中msg的值：
+
+```javascript
+vm.msg // -> hello
+```
+
+* 设置msg的值
+
+```javascript
+var obj = {
+    msg: 'hello world!'
+};
+vm.$set('msg', obj.msg); // -> hello world!
+```
+
+* 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`
+
+### el
+
+* 类型：`String | HTMLElement | Function`
+
+`//TODO`
+
+Provide the Q instance with an existing DOM element. It can be a CSS selector string, an actual HTMLElement, or a function that returns an HTMLElement. The resolved element will be accessible as `q.$el`.
+
 ### directive
+
+* 类型：Object
 
 告知`libaray`如何对节点进行操作，遵循Vuejs写法：
 
 ```
-<element
+<element>
   prefix-directiveId="[argument:] expression [| filters...]">
 </element>
 ```
@@ -55,10 +111,13 @@ vm.$set('msg', '你好');
 简单例子：
 
 ```
-<div q-text="message"></div>
+<div id="myText" q-text="message"></div>
 ```
 
-这里表示`message`(key)对应的数据(value)，用`text`指令进行操作，`text`指令是在该节点塞入文字。
+Q.js中，默认的prefix是`q`，directiveId是`text`，expression是`message`。这个directive的作用是，当Q实例中`message`这一属性的值发生变化时，告知Q.js去更新这个节点的文本内容。这里表示`message`(key)对应的数据(value)，用`text`指令进行操作，`text`指令是在该节点塞入文字。例如：
+```javascript
+var myText = Q.get('#myText'); //Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息
+```
 
 ### 自定义`directive`
 
@@ -91,13 +150,52 @@ directives: {
 > 目前只提供了极少的通用`directive`，未来可拓展
 
 * show - 显示与否
+
+```
+<div q-show="isShow">show!<div>
+```
+Q实例的data中`isShow`的布尔值决定了这个节点是否显示
+```
+data: {
+    isShow: true;
+}
+```
+
 * class - 是否添加class
+
+```
+<div q-class="active: isActive"></div>
+```
+
+```
+data: {
+    isActive: true;
+}
+```
+
 * value - 改变值
+
+用法与text类似，支持input等有value属性的标签
+
 * text - 插入文本
 * repeat - 重复节点
+
+```
+<li q-repeat="list">xxx</li>
+```
+
+```
+data: {
+    list: [];
+}
+```
 * on - 事件绑定
+
+```
+<div q-on="click: showMsg"></div>
+```
 * model - 双向绑定（只支持input、textarea）
-* vm - 创建子VM
+* vm - 创建子VM(ViewModel,一个Q对象的实例)
 
 ### filter
 
@@ -112,14 +210,14 @@ directives: {
 
 ```
 var keyCodes = {
-        'enter'    : 13,
-        'tab'      : 9,
-        'delete' : 46,
-        'up'       : 38,
-        'left'     : 37,
-        'right'    : 39,
-        'down'     : 40,
-        'esc'      : 27
+        enter    : 13,
+        tab      : 9,
+        'delete' : 46, // delete是关键字，需要用引号包起来
+        up       : 38,
+        left     : 37,
+        right    : 39,
+        down     : 40,
+        esc      : 27
     };
 
 /**
@@ -170,20 +268,4 @@ var vm = new Q({
 
 则那个input框会在初始化时自动设值为hello，当改变时候`msg`值也会改变，当按下`回车键`，则会触发showMsg方法打印值。
 
-### data
 
-> 大部分操作都和对象与数组的操作相同，只有当设置值的时候需要使用`.$set`方法，因为我们没有defineProperty的支持。
-
-* 得到一个msg的值：
-
-```javascript
-vm.msg
-```
-
-* 设置msg的值
-
-```javascript
-vm.$set('msg', obj);
-```
-
-* 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`
