@@ -92,11 +92,9 @@ vm.$set('msg', obj.msg); // -> hello world!
 
 ### el
 
-* 类型：`String | HTMLElement | Function`
+* 类型：`String | HTMLElement`
 
-`//TODO`
-
-Provide the Q instance with an existing DOM element. It can be a CSS selector string, an actual HTMLElement, or a function that returns an HTMLElement. The resolved element will be accessible as `q.$el`.
+通过一个给定的DOM元素生成一个Q实例。可以是一个CSS选择器字符串，一个实际存在的HTML元素，最终会在`q.$el`中。
 
 ### directive
 
