@@ -15,7 +15,7 @@ var _extend = function (target, srcs) {
 
 module.exports = {
     find: function (selector) {
-        return document.querySelectorAll(selector);
+        return this.slice.call(document.querySelectorAll(selector), 0);
     },
     contains: function (a, b){
         return a !== b && a.contains(b);

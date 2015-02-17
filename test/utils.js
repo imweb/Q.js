@@ -3,6 +3,7 @@ var _ = require('./utils');
 describe('utils', function () {
     it('should find a element', function () {
         var els = _.find('#container');
+        Object.prototype.toString.call(els).should.equal('[object Array]');
         els.length.should.equal(1);
         els[0].should.equal(document.getElementById('container'));
     });

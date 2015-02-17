@@ -1,34 +1,22 @@
 // Modules map
 var modules = {},
     mergeOptions = require('./strats').mergeOptions,
-    define = window.define,
-    require = window.require,
-    _define,
-    _require;
+    listeners = {};
 
-if (define && require) {
-    _define = function (name, options) {
-        var res = this.extend(options);
-        define(name, res);
-        return res;
-    };
-    _require = function (name, callback) {
-        return require(name, callback);
-    };
-} else {
-    _define = function (name, options) {
-        modules[name] = this.extend(options);
-        return modules[name];
-    };
-    _require = function (name, callback) {
-        var self = this;
-        if (callback)
-            return callback.apply(
-                window,
-                name.map(function (name) { return modules[name] || self; })
-            );
-        return modules[name] || this;
-    };
+function _define(name, options) {
+    var module = modules[name] = this.extend(options || {});
+    listeners[name] &&
+        listeners[name].forEach(function (cb) {
+            cb(module);
+        });
+    return module;
+}
+
+function _require(name, callback) {
+    var module = modules[name];
+    if (module) return callback(module);
+    (listeners[name] || (listeners[name] = []))
+        .push(callback);
 }
 
 function _extend(extendOptions) {

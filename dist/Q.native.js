@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.1.0
+ * Q.js v0.1.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -216,6 +216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @returns {Data}
 	         */
 	        data: function (key, value) {
+	            if (key === undefined) return this;
 	            var i = 0, l, data = this;
 	            if (~key.indexOf('.')) {
 	                var keys = key.split('.');
@@ -371,6 +372,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _emit.apply(self, args);
 	                keys.pop();
 	            }
+	            // emit vm is change
+	            _emit.apply(self, ['**deep**', this]);
 	        },
 	        /**
 	         * Setup the scope of an instance, which contains:
@@ -557,7 +560,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	    find: function (selector) {
-	        return document.querySelectorAll(selector);
+	        return this.slice.call(document.querySelectorAll(selector), 0);
 	    },
 	    contains: function (a, b){
 	        return a !== b && a.contains(b);
@@ -875,34 +878,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Modules map
 	var modules = {},
 	    mergeOptions = __webpack_require__(5).mergeOptions,
-	    define = window.define,
-	    require = window.require,
-	    _define,
-	    _require;
+	    listeners = {};
 
-	if (define && require) {
-	    _define = function (name, options) {
-	        var res = this.extend(options);
-	        define(name, res);
-	        return res;
-	    };
-	    _require = function (name, callback) {
-	        return require(name, callback);
-	    };
-	} else {
-	    _define = function (name, options) {
-	        modules[name] = this.extend(options);
-	        return modules[name];
-	    };
-	    _require = function (name, callback) {
-	        var self = this;
-	        if (callback)
-	            return callback.apply(
-	                window,
-	                name.map(function (name) { return modules[name] || self; })
-	            );
-	        return modules[name] || this;
-	    };
+	function _define(name, options) {
+	    var module = modules[name] = this.extend(options || {});
+	    listeners[name] &&
+	        listeners[name].forEach(function (cb) {
+	            cb(module);
+	        });
+	    return module;
+	}
+
+	function _require(name, callback) {
+	    var module = modules[name];
+	    if (module) return callback(module);
+	    (listeners[name] || (listeners[name] = []))
+	        .push(callback);
 	}
 
 	function _extend(extendOptions) {
@@ -1030,21 +1021,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var arg = this.arg,
 	                vm = this.vm,
+	                el = this.el,
 	                key = this.target,
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
-	                childVm = new (vm.constructor.require(arg))({
-	                    el: this.el,
+	                childVm;
+
+	            // async bind
+	            vm.constructor.require(arg, function (VM) {
+	                childVm = new VM({
+	                    el: el,
 	                    data: data.$get()
 	                });
-	            vm._children = vm._children || [];
-	            vm._children.push(childVm);
 
-	            // unidirectional binding
-	            vm.$watch(target, function (value) {
-	                vm.$set(key, value);
-	            }, true, false);
+	                vm._children = vm._children || [];
+	                vm._children.push(childVm);
+
+	                // unidirectional binding
+	                vm.$watch(target || '', function (value) {
+	                    vm.$set(key, value);
+	                }, true, false);
+	            });
 	        }
 	    }
 	};

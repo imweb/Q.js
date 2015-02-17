@@ -74,6 +74,7 @@ module.exports = function (_) {
          * @returns {Data}
          */
         data: function (key, value) {
+            if (key === undefined) return this;
             var i = 0, l, data = this;
             if (~key.indexOf('.')) {
                 var keys = key.split('.');
@@ -229,6 +230,8 @@ module.exports = function (_) {
                 _emit.apply(self, args);
                 keys.pop();
             }
+            // emit vm is change
+            _emit.apply(self, ['**deep**', this]);
         },
         /**
          * Setup the scope of an instance, which contains:
