@@ -66,10 +66,13 @@ module.exports = {
             // stop walk
             this.setting.stop = true;
 
+            // which component
             var arg = this.arg,
                 vm = this.vm,
                 el = this.el,
-                key = this.target,
+                // component name
+                name = this.target,
+                key = this.el.getAttribute('q-with') || '',
                 namespace = this.namespace,
                 target = namespace ? ([namespace, key].join('.')) : key,
                 data = vm.data(target),
@@ -82,11 +85,11 @@ module.exports = {
                     data: data.$get()
                 });
 
-                vm._children = vm._children || [];
                 vm._children.push(childVm);
+                name && (vm._components[name] = childVm);
 
                 // unidirectional binding
-                vm.$watch(target || '', function (value) {
+                vm.$watch(target, function (value) {
                     vm.$set(key, value);
                 }, true, false);
             });

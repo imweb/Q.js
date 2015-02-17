@@ -52,6 +52,11 @@ module.exports = function (_) {
             // events bookkeeping
             this._events = {};
             this._watchers = {};
+
+            // components
+            this._children = [];
+            this._components = {};
+
             Data.call(this, options);
             // this._data = options.data;
             // initialize data and scope inheritance.

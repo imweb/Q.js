@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.1.1
+ * Q.js v0.2.0
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -194,6 +194,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // events bookkeeping
 	            this._events = {};
 	            this._watchers = {};
+
+	            // components
+	            this._children = [];
+	            this._components = {};
+
 	            Data.call(this, options);
 	            // this._data = options.data;
 	            // initialize data and scope inheritance.
@@ -1019,10 +1024,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // stop walk
 	            this.setting.stop = true;
 
+	            // which component
 	            var arg = this.arg,
 	                vm = this.vm,
 	                el = this.el,
-	                key = this.target,
+	                // component name
+	                name = this.target,
+	                key = this.el.getAttribute('q-with') || '',
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
@@ -1035,11 +1043,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    data: data.$get()
 	                });
 
-	                vm._children = vm._children || [];
 	                vm._children.push(childVm);
+	                name && (vm._components[name] = childVm);
 
 	                // unidirectional binding
-	                vm.$watch(target || '', function (value) {
+	                vm.$watch(target, function (value) {
 	                    vm.$set(key, value);
 	                }, true, false);
 	            });
