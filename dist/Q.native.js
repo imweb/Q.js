@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.0
+ * Q.js v0.2.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -197,7 +197,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // components
 	            this._children = [];
-	            this._components = {};
+	            // components references
+	            this.$ = {};
 
 	            Data.call(this, options);
 	            // this._data = options.data;
@@ -1025,26 +1026,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.setting.stop = true;
 
 	            // which component
-	            var arg = this.arg,
+	            var name = this.target,
 	                vm = this.vm,
 	                el = this.el,
-	                // component name
-	                name = this.target,
-	                key = this.el.getAttribute('q-with') || '',
+	                // component reference
+	                ref = el.getAttribute('q-ref') || false,
+	                key = el.getAttribute('q-with') || '',
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
 	                childVm;
 
 	            // async bind
-	            vm.constructor.require(arg, function (VM) {
+	            vm.constructor.require(name, function (VM) {
 	                childVm = new VM({
 	                    el: el,
 	                    data: data.$get()
 	                });
 
 	                vm._children.push(childVm);
-	                name && (vm._components[name] = childVm);
+	                ref && !function () {
+	                    var refs = vm.$[ref];
+	                    refs ?
+	                        refs.length ?
+	                            (refs.push(childVm)) :
+	                            (vm.$[ref] = [refs, childVm]) :
+	                        (vm.$[ref] = childVm);
+	                }();
 
 	                // unidirectional binding
 	                vm.$watch(target, function (value) {

@@ -28,7 +28,7 @@ describe('class', function () {
         setTimeout(function () {
             vm._children.length.should.equal(1);
             Q.require('hello', function (VM) {
-                (vm._components['test'] instanceof VM)
+                (vm.$['test'] instanceof VM)
                     .should.be.ok;
             });
             $('#msg1', '#component').text().should.equal('hello');

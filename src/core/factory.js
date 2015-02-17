@@ -55,7 +55,8 @@ module.exports = function (_) {
 
             // components
             this._children = [];
-            this._components = {};
+            // components references
+            this.$ = {};
 
             Data.call(this, options);
             // this._data = options.data;
