@@ -271,4 +271,4 @@ var vm = new Q({
 用户
 ----
 
-![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)
+[![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)](http://www.qxiu.com/)
