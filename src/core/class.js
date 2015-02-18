@@ -5,18 +5,11 @@ var modules = {},
 
 function _define(name, options) {
     var module = modules[name] = this.extend(options || {});
-    listeners[name] &&
-        listeners[name].forEach(function (cb) {
-            cb(module);
-        });
     return module;
 }
 
 function _require(name, callback) {
-    var module = modules[name];
-    if (module) return callback(module);
-    (listeners[name] || (listeners[name] = []))
-        .push(callback);
+    return modules[name] || this;
 }
 
 function _extend(extendOptions) {

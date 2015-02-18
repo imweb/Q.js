@@ -76,30 +76,25 @@ module.exports = {
                 namespace = this.namespace,
                 target = namespace ? ([namespace, key].join('.')) : key,
                 data = vm.data(target),
-                childVm;
-
-            // async bind
-            vm.constructor.require(name, function (VM) {
-                childVm = new VM({
+                childVm = new (vm.constructor.require(name))({
                     el: el,
                     data: data.$get()
                 });
 
-                vm._children.push(childVm);
-                ref && !function () {
-                    var refs = vm.$[ref];
-                    refs ?
-                        refs.length ?
-                            (refs.push(childVm)) :
-                            (vm.$[ref] = [refs, childVm]) :
-                        (vm.$[ref] = childVm);
-                }();
+            vm._children.push(childVm);
+            ref && !function () {
+                var refs = vm.$[ref];
+                refs ?
+                    refs.length ?
+                        (refs.push(childVm)) :
+                        (vm.$[ref] = [refs, childVm]) :
+                    (vm.$[ref] = childVm);
+            }();
 
-                // unidirectional binding
-                vm.$watch(target, function (value) {
-                    vm.$set(key, value);
-                }, true, false);
-            });
+            // unidirectional binding
+            vm.$watch(target, function (value) {
+                vm.$set(key, value);
+            }, true, false);
         }
     }
 };

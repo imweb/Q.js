@@ -1,8 +1,9 @@
 
 describe('repeat', function () {
+    var tpl1
 
     it('should able repeat', function (done) {
-        new Q({
+        tpl1 = new Q({
             el: '#tpl1',
             data: {
                 items: [
@@ -42,6 +43,23 @@ describe('repeat', function () {
             ps[1].innerText.should.equal('qq');
             done();
         }, 100);
+    });
+
+    it('should not throw a error when repeat element has been modified', function (done) {
+        var container = document.getElementById('tpl1'), i = 0, l,
+            nodes = container.childNodes;
+        // remove repeat element
+        for (l = nodes.length; i < l; i++) {
+            if (nodes[i].tagName === 'LI') {
+                container.removeChild(nodes[i]);
+                break;
+            }
+        }
+        tpl1.$set('items', [
+            { msg: 'hello' },
+            { msg: 'world' }
+        ]);
+        done();
     });
 
     it('should able bind event', function (done) {

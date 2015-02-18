@@ -1,5 +1,5 @@
 describe('class', function () {
-    it('should able to define & require a hello component', function (done) {
+    it('should able to define & require a hello component', function () {
         // define hello component
         Q.define('hello', {
             filters: {
@@ -9,10 +9,7 @@ describe('class', function () {
             }
         });
         // require hello component
-        Q.require('hello', function (VM) {
-            VM.options.filters.should.have.property('prepend');
-            done();
-        });
+        Q.require('hello').options.filters.should.have.property('prepend')
     });
 
     it('should able to create a child component', function (done) {

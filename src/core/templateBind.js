@@ -88,8 +88,9 @@ module.exports = function (el, options) {
                             readFilters = self._makeReadFilters(descriptor.filters),
                             repeats = [],
                             tpl = node,
-                            ref = document.createComment('q-repeat');
-                        node.parentNode.replaceChild(ref, tpl);
+                            ref = document.createComment('q-repeat'),
+                            parentNode = node.parentNode;
+                        parentNode.replaceChild(ref, tpl);
                         _walk([tpl], _.noop, {
                             useCache: true,
                             unrepeat: true
@@ -97,7 +98,9 @@ module.exports = function (el, options) {
                         readFilters.push(function (arr) {
                             if (repeats.length) {
                                 repeats.forEach(function (node) {
-                                    node.parentNode.removeChild(node);
+                                    // repeat element may has been remove
+                                    node.parentNode === parentNode &&
+                                        parentNode.removeChild(node);
                                 });
                                 _.cleanData(repeats);
                                 repeats.length = 0;
@@ -115,7 +118,7 @@ module.exports = function (el, options) {
                                 repeats.push(itemNode);
                                 fragment.appendChild(itemNode);
                             });
-                            ref.parentNode.insertBefore(fragment, ref);
+                            parentNode.insertBefore(fragment, ref);
                         });
                         self.$watch(target, function (value) {
                             _.nextTick(function () {

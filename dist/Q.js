@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.1
+ * Q.js v0.2.2
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -857,18 +857,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _define(name, options) {
 	    var module = modules[name] = this.extend(options || {});
-	    listeners[name] &&
-	        listeners[name].forEach(function (cb) {
-	            cb(module);
-	        });
 	    return module;
 	}
 
 	function _require(name, callback) {
-	    var module = modules[name];
-	    if (module) return callback(module);
-	    (listeners[name] || (listeners[name] = []))
-	        .push(callback);
+	    return modules[name] || this;
 	}
 
 	function _extend(extendOptions) {
@@ -1004,30 +997,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
-	                childVm;
-
-	            // async bind
-	            vm.constructor.require(name, function (VM) {
-	                childVm = new VM({
+	                childVm = new (vm.constructor.require(name))({
 	                    el: el,
 	                    data: data.$get()
 	                });
 
-	                vm._children.push(childVm);
-	                ref && !function () {
-	                    var refs = vm.$[ref];
-	                    refs ?
-	                        refs.length ?
-	                            (refs.push(childVm)) :
-	                            (vm.$[ref] = [refs, childVm]) :
-	                        (vm.$[ref] = childVm);
-	                }();
+	            vm._children.push(childVm);
+	            ref && !function () {
+	                var refs = vm.$[ref];
+	                refs ?
+	                    refs.length ?
+	                        (refs.push(childVm)) :
+	                        (vm.$[ref] = [refs, childVm]) :
+	                    (vm.$[ref] = childVm);
+	            }();
 
-	                // unidirectional binding
-	                vm.$watch(target, function (value) {
-	                    vm.$set(key, value);
-	                }, true, false);
-	            });
+	            // unidirectional binding
+	            vm.$watch(target, function (value) {
+	                vm.$set(key, value);
+	            }, true, false);
 	        }
 	    }
 	};
@@ -1127,8 +1115,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            readFilters = self._makeReadFilters(descriptor.filters),
 	                            repeats = [],
 	                            tpl = node,
-	                            ref = document.createComment('q-repeat');
-	                        node.parentNode.replaceChild(ref, tpl);
+	                            ref = document.createComment('q-repeat'),
+	                            parentNode = node.parentNode;
+	                        parentNode.replaceChild(ref, tpl);
 	                        _walk([tpl], _.noop, {
 	                            useCache: true,
 	                            unrepeat: true
@@ -1136,7 +1125,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        readFilters.push(function (arr) {
 	                            if (repeats.length) {
 	                                repeats.forEach(function (node) {
-	                                    node.parentNode.removeChild(node);
+	                                    // repeat element may has been remove
+	                                    node.parentNode === parentNode &&
+	                                        parentNode.removeChild(node);
 	                                });
 	                                _.cleanData(repeats);
 	                                repeats.length = 0;
@@ -1154,7 +1145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                repeats.push(itemNode);
 	                                fragment.appendChild(itemNode);
 	                            });
-	                            ref.parentNode.insertBefore(fragment, ref);
+	                            parentNode.insertBefore(fragment, ref);
 	                        });
 	                        self.$watch(target, function (value) {
 	                            _.nextTick(function () {
