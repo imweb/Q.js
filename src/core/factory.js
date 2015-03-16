@@ -13,7 +13,8 @@ module.exports = function (_) {
         this._init(options);
     }
     Q.options = {
-        directives: require('./directives')
+        directives: require('./directives'),
+        filters: {}
     };
     Q.get = function (selector) {
         var ele = _.find(selector)[0];
@@ -369,7 +370,7 @@ module.exports = function (_) {
                 var args = name.split(' '),
                     reader;
                 name = args.shift();
-                reader = (filters[name] ? (filters[name].read || filters[name]) : _.through);
+                reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
                 return function (value) {
                     return args ?
                         reader.apply(self, [value].concat(args)) :

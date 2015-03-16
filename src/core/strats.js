@@ -22,7 +22,7 @@ strats.directives = function (parentVal, childVal) {
   if (!childVal) return parentVal;
   if (!parentVal) return childVal;
   return _.extend({}, parentVal, childVal);
-}
+};
 
 var defaultStrat = function (parentVal, childVal) {
     return childVal === undefined ?

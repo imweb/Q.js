@@ -90,4 +90,15 @@ describe('repeat', function () {
         vm.$set('toggle', false);
         toggle.hasClass('toggle-me').should.equal(false);
     });
+
+    it('should throw a error when a filter hasn\'t implemented', function () {
+        (function () {
+            var vm = new Q({
+                el: '#tpl5',
+                data: {
+                    msg: 'hello'
+                }
+            });
+        }).should.throw('Filter noexist hasn\'t implemented.');
+    });
 });

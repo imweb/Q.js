@@ -40,7 +40,7 @@ module.exports = {
             el.setAttribute('class', trim(cur));
         }
     },
-    through: function (s) { return s; },
+    noexist: function (name) { throw new Error('Filter ' + name + ' hasn\'t implemented.'); },
     warn: function () {
         return (window.console && console.error) ? function (msg) {
                 console.error(msg);

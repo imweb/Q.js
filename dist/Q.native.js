@@ -119,7 +119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            el.setAttribute('class', trim(cur));
 	        }
 	    },
-	    through: function (s) { return s; },
+	    noexist: function (name) { throw new Error('Filter ' + name + ' hasn\'t implemented.'); },
 	    warn: function () {
 	        return (window.console && console.error) ? function (msg) {
 	                console.error(msg);
@@ -155,7 +155,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._init(options);
 	    }
 	    Q.options = {
-	        directives: __webpack_require__(7)
+	        directives: __webpack_require__(7),
+	        filters: {}
 	    };
 	    Q.get = function (selector) {
 	        var ele = _.find(selector)[0];
@@ -511,7 +512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var args = name.split(' '),
 	                    reader;
 	                name = args.shift();
-	                reader = (filters[name] ? (filters[name].read || filters[name]) : _.through);
+	                reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
 	                return function (value) {
 	                    return args ?
 	                        reader.apply(self, [value].concat(args)) :
@@ -835,7 +836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!childVal) return parentVal;
 	  if (!parentVal) return childVal;
 	  return _.extend({}, parentVal, childVal);
-	}
+	};
 
 	var defaultStrat = function (parentVal, childVal) {
 	    return childVal === undefined ?
