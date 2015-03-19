@@ -180,15 +180,17 @@ module.exports = function (_) {
         /**
          * Trigger an event on self.
          *
-         * @param {String} event
+         * @param {String} e
          */
-        $emit: function (event) {
+        $emit: function (e) {
             this._emit.apply(this, arguments);
             // emit data change
-            if (event.indexOf('data:') === 0) {
+            if (e.indexOf('data:') === 0) {
                 var args = _.slice.call(arguments, 1);
-                args.unshift(event.substring(5));
+                e = e.substring(5);
+                args.unshift(e);
                 this._callDataChange.apply(this, args);
+                this._emit('datachange', e);
             }
             return this;
         },
