@@ -94,8 +94,12 @@ module.exports = {
             // unidirectional binding
             vm.$on('datachange', function (prop) {
                 if (!target || ~prop.indexOf(target)) {
-                    var nProp = prop.substring(target.length, prop.length);
-                    childVm.$set(nProp, vm.data(prop));
+                    var start = target.length,
+                        childProp;
+
+                    start && (start += 1);
+                    childProp = prop.substring(start, prop.length);
+                    childVm.$set(childProp, vm.data(prop));
                 }
             });
         }

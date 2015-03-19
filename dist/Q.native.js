@@ -322,15 +322,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Trigger an event on self.
 	         *
-	         * @param {String} event
+	         * @param {String} e
 	         */
-	        $emit: function (event) {
+	        $emit: function (e) {
 	            this._emit.apply(this, arguments);
 	            // emit data change
-	            if (event.indexOf('data:') === 0) {
+	            if (e.indexOf('data:') === 0) {
 	                var args = _.slice.call(arguments, 1);
-	                args.unshift(event.substring(5));
+	                e = e.substring(5);
+	                args.unshift(e);
 	                this._callDataChange.apply(this, args);
+	                this._emit('datachange', e);
 	            }
 	            return this;
 	        },
@@ -1045,9 +1047,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }();
 
 	            // unidirectional binding
-	            vm.$watch(target, function (value) {
-	                vm.$set(key, value);
-	            }, true, false);
+	            vm.$on('datachange', function (prop) {
+	                if (!target || ~prop.indexOf(target)) {
+	                    var start = target.length,
+	                        childProp;
+
+	                    start && (start += 1);
+	                    childProp = prop.substring(start, prop.length);
+	                    childVm.$set(childProp, vm.data(prop));
+	                }
+	            });
 	        }
 	    }
 	};
