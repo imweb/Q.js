@@ -109,6 +109,9 @@ describe('repeat', function () {
                 msgs: [
                     {
                         text: 'hello'
+                    },
+                    {
+                        text: 'hello'
                     }
                 ]
             }
