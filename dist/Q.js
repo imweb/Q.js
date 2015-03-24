@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.2
+ * Q.js v0.2.4
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1070,9 +1070,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            res.length > 0 &&
 	                cb(el, res, setting);
 	        }
-	        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
+	        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, { useCache: setting.useCache, norepeat: setting.unrepeat });
 	        // reset stop
 	        setting.stop = false;
+	        // reset unrepeat
+	        setting.unrepeat = false;
 	    }
 	}
 
@@ -1115,9 +1117,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            name === 'repeat' &&
 	                // has parentNode, so this is not a template
 	                node.parentNode &&
-	                // don't unrepeat
-	                !setting.unrepeat &&
+	                // don't norepeat
+	                // norepeat is the real flag for ignore repeat
+	                !setting.norepeat &&
 	                // set uprepeat, if the has repeat
+	                // unrepeat will make node's childNodes ignore repeat
 	                (setting.unrepeat = true) &&
 	                    descriptors.forEach(function (descriptor) {
 	                        var key = descriptor.target,
@@ -1129,8 +1133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            parentNode = node.parentNode;
 	                        parentNode.replaceChild(ref, tpl);
 	                        _walk([tpl], _.noop, {
-	                            useCache: true,
-	                            unrepeat: true
+	                            useCache: true
 	                        });
 	                        readFilters.push(function (arr) {
 	                            if (repeats.length) {

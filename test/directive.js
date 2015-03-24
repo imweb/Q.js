@@ -101,4 +101,28 @@ describe('repeat', function () {
             });
         }).should.throw('Filter noexist hasn\'t implemented.');
     });
+
+    it('should able to use multi-repeat', function (done) {
+        var vm = new Q({
+            el: '#multi-repeat',
+            data: {
+                msgs: [
+                    {
+                        text: 'hello'
+                    },
+                    {
+                        text: 'hello'
+                    }
+                ]
+            }
+        });
+
+        setTimeout(function () {
+            var ps = $('#multi-repeat div p');
+            for (var i = 0, l = ps.length; i < l; i++) {
+                ps[i].innerText.should.equal('hello');
+            }
+            done();
+        }, 200);
+    });
 });
