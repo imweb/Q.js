@@ -23,6 +23,12 @@ function _isArray(obj) {
     return Array.isArray(obj) || obj instanceof DataArray;
 }
 
+function _getLength(keys) {
+    return keys.filter(function (key) {
+        return +key + '' === key;
+    }).length;
+}
+
 /**
  * Data
  * @class
@@ -47,13 +53,9 @@ function Data(options) {
         _prefix(self, key, data[key]);
     });
     // if it is a array
-    Array.isArray(data) ?
+    (Array.isArray(data) || data instanceof DataArray) &&
         // fix the length
-        (this.length = keys.length) :
-        // if it is a DataArray Object
-        data instanceof DataArray &&
-            // the length should be keys.length - 1
-            (this.length = keys.length - 1);
+        (this.length = _getLength(keys));
 }
 _.extend(Data.prototype, {
     /**
