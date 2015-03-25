@@ -185,4 +185,22 @@ describe('data', function () {
 
         vm.$set('test', 'test');
     });
+
+    it('should able traversing a array which has some property', function () {
+        var arr = [1, 2, 3, 4],
+            l = arr.length;
+
+        arr.flag = true;
+        var vm = new Q({
+            el: null,
+            data: {
+                arr: arr
+            }
+        });
+        vm.arr.length.should.equal(l);
+        vm.arr.forEach(function (item, i) {
+            item.should.equal(i + 1);
+        });
+        vm.arr.flag.should.be.ok;
+    });
 });
