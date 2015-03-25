@@ -33,11 +33,9 @@ function _walk($el, cb, setting) {
             res.length > 0 &&
                 cb(el, res, setting);
         }
-        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, { useCache: setting.useCache, norepeat: setting.unrepeat });
+        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
         // reset stop
         setting.stop = false;
-        // reset unrepeat
-        setting.unrepeat = false;
     }
 }
 
@@ -80,12 +78,8 @@ module.exports = function (el, options) {
             name === 'repeat' &&
                 // has parentNode, so this is not a template
                 node.parentNode &&
-                // don't norepeat
-                // norepeat is the real flag for ignore repeat
-                !setting.norepeat &&
-                // set uprepeat, if the has repeat
-                // unrepeat will make node's childNodes ignore repeat
-                (setting.unrepeat = true) &&
+                // just stop
+                (setting.stop = true) &&
                     descriptors.forEach(function (descriptor) {
                         var key = descriptor.target,
                             target = namespace ? ([namespace, key].join('.')) : key,
