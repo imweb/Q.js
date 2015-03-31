@@ -105,7 +105,7 @@ module.exports = {
         }
     },
     repeat: {
-        init: function () {
+        bind: function () {
             var tpl = this.el,
                 setting = this.setting,
                 parentNode = tpl.parentNode,

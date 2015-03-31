@@ -21,7 +21,6 @@ module.exports = function (el, options) {
                         key = descriptor.target,
                         target = namespace ? ([namespace, key].join('.')) : key,
                         update = _.isObject(directive) ? directive.update : directive,
-                        init = _.isObject(directive) ? directive.init : undefined,
                         that = _.extend({
                             el: node,
                             vm: self,
@@ -30,8 +29,6 @@ module.exports = function (el, options) {
                         }, descriptor, {
                             filters: readFilters
                         });
-
-                    if (init) return init.call(that);
 
                     update && self.$watch(target, function (value) {
                         value = self.applyFilters(value, readFilters);

@@ -1213,7 +1213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    repeat: {
-	        init: function () {
+	        bind: function () {
 	            var tpl = this.el,
 	                setting = this.setting,
 	                parentNode = tpl.parentNode,
@@ -1296,7 +1296,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        key = descriptor.target,
 	                        target = namespace ? ([namespace, key].join('.')) : key,
 	                        update = _.isObject(directive) ? directive.update : directive,
-	                        init = _.isObject(directive) ? directive.init : undefined,
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
@@ -1305,8 +1304,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        }, descriptor, {
 	                            filters: readFilters
 	                        });
-
-	                    if (init) return init.call(that);
 
 	                    update && self.$watch(target, function (value) {
 	                        value = self.applyFilters(value, readFilters);
