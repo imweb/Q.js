@@ -102,7 +102,7 @@ describe('repeat', function () {
         }).should.throw('Filter noexist hasn\'t implemented.');
     });
 
-    it('should able to use multi-repeat', function (done) {
+    it('should able to use double repeat', function (done) {
         var vm = new Q({
             el: '#multi-repeat',
             data: {

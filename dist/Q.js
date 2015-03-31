@@ -83,7 +83,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	var noop = function () {},
 	    defer = window.requestAnimationFrame ||
 	        window.webkitRequestAnimationFrame ||
-	        setTimeout;
+	        setTimeout,
+	    cache = new (__webpack_require__(5))(1000),
+	    _qtid = 0;
+
+	function walk($el, cb, setting) {
+	    var i, j, l, el, atts, res, qtid;
+	    for (i = 0; el = $el[i++];) {
+	        if (el.nodeType === 1) {
+	            if (
+	                setting.useCache &&
+	                    (qtid = el.getAttribute('qtid')) &&
+	                    (res = cache.get(qtid))
+	            ) {
+	                el.removeAttribute('qtid');
+	            } else {
+	                atts = el.attributes;
+	                l = atts.length;
+	                res = [];
+	                for (j = 0; j < l; j++) {
+	                    atts[j].name.indexOf('q-') === 0 &&
+	                        res.push({
+	                            name: atts[j].name,
+	                            value: atts[j].value
+	                        })
+	                }
+	                if (setting.useCache && !qtid) {
+	                    qtid = qtid || ++_qtid;
+	                    el.setAttribute('qtid', qtid);
+	                    cache.put(qtid, res);
+	                }
+	            }
+	            res.length > 0 &&
+	                cb(el, res, setting);
+	        }
+	        if (el.childNodes.length && !setting.stop) walk(el.childNodes, cb, setting);
+	        // reset stop
+	        setting.stop = false;
+	    }
+	}
 
 	module.exports = {
 	    slice: [].slice,
@@ -135,7 +173,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ctx ?
 	            defer(function () { cb.call(ctx) }, 0) :
 	            defer(cb, 0);
-	    }
+	    },
+	    walk: walk
 	};
 
 
@@ -144,10 +183,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function (_) {
-	    var Data = __webpack_require__(5),
+	    var Data = __webpack_require__(6),
 	        MARK = /\{\{(.+?)\}\}/,
-	        mergeOptions = __webpack_require__(6).mergeOptions,
-	        clas = __webpack_require__(7),
+	        mergeOptions = __webpack_require__(7).mergeOptions,
+	        clas = __webpack_require__(8),
 	        _doc = document;
 
 	    function _inDoc(ele) {
@@ -158,7 +197,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._init(options);
 	    }
 	    Q.options = {
-	        directives: __webpack_require__(8),
+	        directives: __webpack_require__(9),
 	        filters: {}
 	    };
 	    Q.get = function (selector) {
@@ -485,7 +524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * bind rendered template
 	         */
-	        _templateBind: __webpack_require__(9),
+	        _templateBind: __webpack_require__(10),
 
 	        /**
 	         * bind rendered template
@@ -577,6 +616,118 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
+	 *
+	 * @param {Number} limit
+	 * @constructor
+	 */
+
+	function Cache (limit) {
+	    this.size = 0;
+	    this.limit = limit;
+	    this.head = this.tail = undefined;
+	    this._keymap = {};
+	}
+
+	var p = Cache.prototype;
+
+	/**
+	 * Put <value> into the cache associated with <key>.
+	 * Returns the entry which was removed to make room for
+	 * the new entry. Otherwise undefined is returned.
+	 * (i.e. if there was enough room already).
+	 *
+	 * @param {String} key
+	 * @param {*} value
+	 * @return {Entry|undefined}
+	 */
+
+	p.put = function (key, value) {
+	    var entry = {
+	        key:key,
+	        value:value
+	    }
+	    this._keymap[key] = entry;
+	    if (this.tail) {
+	        this.tail.newer = entry;
+	        entry.older = this.tail;
+	    } else {
+	        this.head = entry;
+	    }
+	    this.tail = entry;
+	    if (this.size === this.limit) {
+	        return this.shift();
+	    } else {
+	        this.size++;
+	    }
+	};
+
+	/**
+	 * Purge the least recently used (oldest) entry from the
+	 * cache. Returns the removed entry or undefined if the
+	 * cache was empty.
+	 */
+
+	p.shift = function () {
+	    var entry = this.head;
+	    if (entry) {
+	        this.head = this.head.newer;
+	        this.head.older = undefined;
+	        entry.newer = entry.older = undefined;
+	        this._keymap[entry.key] = undefined;
+	    }
+	    return entry;
+	};
+
+	/**
+	 * Get and register recent use of <key>. Returns the value
+	 * associated with <key> or undefined if not in cache.
+	 *
+	 * @param {String} key
+	 * @param {Boolean} returnEntry
+	 * @return {Entry|*}
+	 */
+
+	p.get = function (key, returnEntry) {
+	    var entry = this._keymap[key];
+	    if (entry === undefined) return;
+	    if (entry === this.tail) {
+	        return returnEntry ?
+	            entry :
+	            entry.value;
+	    }
+	  // HEAD--------------TAIL
+	  //   <.older   .newer>
+	  //  <--- add direction --
+	  //   A  B  C  <D>  E
+	    if (entry.newer) {
+	        if (entry === this.head) {
+	            this.head = entry.newer;
+	        }
+	        entry.newer.older = entry.older; // C <-- E.
+	    }
+	    if (entry.older) {
+	        entry.older.newer = entry.newer; // C. --> E
+	    }
+	    entry.newer = undefined; // D --x
+	    entry.older = this.tail; // D. --> E
+	    if (this.tail) {
+	        this.tail.newer = entry; // E. <-- D
+	    }
+	    this.tail = entry;
+	    return returnEntry ?
+	        entry :
+	        entry.value;
+	}
+
+	module.exports = Cache;
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -782,7 +933,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -852,12 +1003,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Modules map
 	var modules = {},
-	    mergeOptions = __webpack_require__(6).mergeOptions,
+	    mergeOptions = __webpack_require__(7).mergeOptions,
 	    listeners = {};
 
 	function _define(name, options) {
@@ -921,7 +1072,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1029,54 +1180,70 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 	        }
+	    },
+	    repeat: {
+	        init: function () {
+	            var tpl = this.el,
+	                setting = this.setting,
+	                parentNode = tpl.parentNode,
+	                key, namespace, target, readFilters, repeats, ref, vm;
+	            // return
+	            if (!parentNode || setting.stop) return;
+
+	            setting.stop = true;
+
+	            key = this.target;
+	            namespace = this.namespace;
+	            target = namespace ? ([namespace, key].join('.')) : key;
+	            readFilters = this.readFilters;
+	            repeats = [];
+	            ref = document.createComment('q-repeat');
+	            vm = this.vm;
+
+	            parentNode.replaceChild(ref, tpl);
+	            // cache tpl
+	            _.walk([tpl], _.noop, { useCache: true });
+
+	            vm.$watch(target, function (value) {
+	                value = vm.applyFilters(value, readFilters);
+	                _.nextTick(function () {
+	                    if (repeats.length) {
+	                        repeats.forEach(function (node) {
+	                            // repeat element may has been remove
+	                            node.parentNode === parentNode &&
+	                                parentNode.removeChild(node);
+	                        });
+	                        _.cleanData(repeats);
+	                        repeats.length = 0;
+	                    }
+	                    var fragment = document.createDocumentFragment(),
+	                        itemNode;
+	                    value.forEach(function (obj, i) {
+	                        itemNode = _.clone(tpl);
+	                        vm._templateBind(itemNode, {
+	                            data: obj,
+	                            namespace: obj.$namespace(),
+	                            immediate: true,
+	                            useCache: true
+	                        });
+	                        repeats.push(itemNode);
+	                        fragment.appendChild(itemNode);
+	                    });
+	                    parentNode.insertBefore(fragment, ref);
+	                    vm.$emit('repeat-render');
+	                });
+	            }, false, true);
+	        }
 	    }
 	};
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(10),
-	    _ = __webpack_require__(1),
-	    cache = new (__webpack_require__(11))(1000),
-	    _qtid = 0;
-
-	function _walk($el, cb, setting) {
-	    var i, j, l, el, atts, res, qtid;
-	    for (i = 0; el = $el[i++];) {
-	        if (el.nodeType === 1) {
-	            if (
-	                setting.useCache &&
-	                    (qtid = el.getAttribute('qtid')) &&
-	                    (res = cache.get(qtid))
-	            ) {
-	                el.removeAttribute('qtid');
-	            } else {
-	                atts = el.attributes;
-	                l = atts.length;
-	                res = [];
-	                for (j = 0; j < l; j++) {
-	                    atts[j].name.indexOf('q-') === 0 &&
-	                        res.push({
-	                            name: atts[j].name,
-	                            value: atts[j].value
-	                        })
-	                }
-	                if (setting.useCache && !qtid) {
-	                    qtid = qtid || ++_qtid;
-	                    el.setAttribute('qtid', qtid);
-	                    cache.put(qtid, res);
-	                }
-	            }
-	            res.length > 0 &&
-	                cb(el, res, setting);
-	        }
-	        if (el.childNodes.length && !setting.stop) _walk(el.childNodes, cb, setting);
-	        // reset stop
-	        setting.stop = false;
-	    }
-	}
+	var parse = __webpack_require__(11),
+	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
 	    options = options || {};
@@ -1087,7 +1254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        data = options.data || self,
 	        namespace = options.namespace;
 
-	    _walk([el], function (node, res, setting) {
+	    _.walk([el], function (node, res, setting) {
 	        res.forEach(function (obj) {
 	            var name = obj.name.substring(2),
 	                directive = directives[name],
@@ -1098,14 +1265,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        key = descriptor.target,
 	                        target = namespace ? ([namespace, key].join('.')) : key,
 	                        update = _.isObject(directive) ? directive.update : directive,
+	                        init = _.isObject(directive) ? directive.init : undefined,
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
 	                            namespace: namespace,
-	                            setting: setting
+	                            setting: setting,
 	                        }, descriptor, {
 	                            filters: readFilters
 	                        });
+
+	                    if (init) return init.call(that);
+
 	                    update && self.$watch(target, function (value) {
 	                        value = self.applyFilters(value, readFilters);
 	                        update.call(that, value);
@@ -1113,56 +1284,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 
-	            // directive is repeat
-	            name === 'repeat' &&
-	                // has parentNode, so this is not a template
-	                node.parentNode &&
-	                // just stop
-	                (setting.stop = true) &&
-	                    descriptors.forEach(function (descriptor) {
-	                        var key = descriptor.target,
-	                            target = namespace ? ([namespace, key].join('.')) : key,
-	                            readFilters = self._makeReadFilters(descriptor.filters),
-	                            repeats = [],
-	                            tpl = node,
-	                            ref = document.createComment('q-repeat'),
-	                            parentNode = node.parentNode;
-	                        parentNode.replaceChild(ref, tpl);
-	                        _walk([tpl], _.noop, {
-	                            useCache: true
-	                        });
-	                        readFilters.push(function (arr) {
-	                            if (repeats.length) {
-	                                repeats.forEach(function (node) {
-	                                    // repeat element may has been remove
-	                                    node.parentNode === parentNode &&
-	                                        parentNode.removeChild(node);
-	                                });
-	                                _.cleanData(repeats);
-	                                repeats.length = 0;
-	                            }
-	                            var fragment = document.createDocumentFragment(),
-	                                itemNode;
-	                            arr.forEach(function (obj, i) {
-	                                itemNode = _.clone(tpl);
-	                                self._templateBind(itemNode, {
-	                                    data: obj,
-	                                    namespace: obj.$namespace(),
-	                                    immediate: true,
-	                                    useCache: true
-	                                });
-	                                repeats.push(itemNode);
-	                                fragment.appendChild(itemNode);
-	                            });
-	                            parentNode.insertBefore(fragment, ref);
-	                        });
-	                        self.$watch(target, function (value) {
-	                            _.nextTick(function () {
-	                                self.applyFilters(value, readFilters);
-	                                self.$emit('repeat-render');
-	                            });
-	                        }, false, true);
-	                    });
+	            // // directive is repeat
+	            // name === 'repeat' &&
+	            //     // has parentNode, so this is not a template
+	            //     node.parentNode &&
+	            //     // just stop
+	            //     (setting.stop = true) &&
+	            //         descriptors.forEach(function (descriptor) {
+	            //             var key = descriptor.target,
+	            //                 target = namespace ? ([namespace, key].join('.')) : key,
+	            //                 readFilters = self._makeReadFilters(descriptor.filters),
+	            //                 repeats = [],
+	            //                 tpl = node,
+	            //                 ref = document.createComment('q-repeat'),
+	            //                 parentNode = node.parentNode;
+	            //             parentNode.replaceChild(ref, tpl);
+	            //             _walk([tpl], _.noop, {
+	            //                 useCache: true
+	            //             });
+	            //             readFilters.push(function (arr) {
+	            //                 if (repeats.length) {
+	            //                     repeats.forEach(function (node) {
+	            //                         // repeat element may has been remove
+	            //                         node.parentNode === parentNode &&
+	            //                             parentNode.removeChild(node);
+	            //                     });
+	            //                     _.cleanData(repeats);
+	            //                     repeats.length = 0;
+	            //                 }
+	            //                 var fragment = document.createDocumentFragment(),
+	            //                     itemNode;
+	            //                 arr.forEach(function (obj, i) {
+	            //                     itemNode = _.clone(tpl);
+	            //                     self._templateBind(itemNode, {
+	            //                         data: obj,
+	            //                         namespace: obj.$namespace(),
+	            //                         immediate: true,
+	            //                         useCache: true
+	            //                     });
+	            //                     repeats.push(itemNode);
+	            //                     fragment.appendChild(itemNode);
+	            //                 });
+	            //                 parentNode.insertBefore(fragment, ref);
+	            //             });
+	            //             self.$watch(target, function (value) {
+	            //                 _.nextTick(function () {
+	            //                     self.applyFilters(value, readFilters);
+	            //                     self.$emit('repeat-render');
+	            //                 });
+	            //             }, false, true);
+	            //         });
 	        });
 	    }, {
 	        useCache: options.useCache
@@ -1171,10 +1342,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var cache = new (__webpack_require__(11))(1000);
+	var cache = new (__webpack_require__(5))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown
@@ -1211,118 +1382,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = parse;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
-	 *
-	 * @param {Number} limit
-	 * @constructor
-	 */
-
-	function Cache (limit) {
-	    this.size = 0;
-	    this.limit = limit;
-	    this.head = this.tail = undefined;
-	    this._keymap = {};
-	}
-
-	var p = Cache.prototype;
-
-	/**
-	 * Put <value> into the cache associated with <key>.
-	 * Returns the entry which was removed to make room for
-	 * the new entry. Otherwise undefined is returned.
-	 * (i.e. if there was enough room already).
-	 *
-	 * @param {String} key
-	 * @param {*} value
-	 * @return {Entry|undefined}
-	 */
-
-	p.put = function (key, value) {
-	    var entry = {
-	        key:key,
-	        value:value
-	    }
-	    this._keymap[key] = entry;
-	    if (this.tail) {
-	        this.tail.newer = entry;
-	        entry.older = this.tail;
-	    } else {
-	        this.head = entry;
-	    }
-	    this.tail = entry;
-	    if (this.size === this.limit) {
-	        return this.shift();
-	    } else {
-	        this.size++;
-	    }
-	};
-
-	/**
-	 * Purge the least recently used (oldest) entry from the
-	 * cache. Returns the removed entry or undefined if the
-	 * cache was empty.
-	 */
-
-	p.shift = function () {
-	    var entry = this.head;
-	    if (entry) {
-	        this.head = this.head.newer;
-	        this.head.older = undefined;
-	        entry.newer = entry.older = undefined;
-	        this._keymap[entry.key] = undefined;
-	    }
-	    return entry;
-	};
-
-	/**
-	 * Get and register recent use of <key>. Returns the value
-	 * associated with <key> or undefined if not in cache.
-	 *
-	 * @param {String} key
-	 * @param {Boolean} returnEntry
-	 * @return {Entry|*}
-	 */
-
-	p.get = function (key, returnEntry) {
-	    var entry = this._keymap[key];
-	    if (entry === undefined) return;
-	    if (entry === this.tail) {
-	        return returnEntry ?
-	            entry :
-	            entry.value;
-	    }
-	  // HEAD--------------TAIL
-	  //   <.older   .newer>
-	  //  <--- add direction --
-	  //   A  B  C  <D>  E
-	    if (entry.newer) {
-	        if (entry === this.head) {
-	            this.head = entry.newer;
-	        }
-	        entry.newer.older = entry.older; // C <-- E.
-	    }
-	    if (entry.older) {
-	        entry.older.newer = entry.newer; // C. --> E
-	    }
-	    entry.newer = undefined; // D --x
-	    entry.older = this.tail; // D. --> E
-	    if (this.tail) {
-	        this.tail.newer = entry; // E. <-- D
-	    }
-	    this.tail = entry;
-	    return returnEntry ?
-	        entry :
-	        entry.value;
-	}
-
-	module.exports = Cache;
 
 
 /***/ }
