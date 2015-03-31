@@ -104,58 +104,5 @@ module.exports = {
             });
         }
     },
-    repeat: {
-        bind: function () {
-            var tpl = this.el,
-                setting = this.setting,
-                parentNode = tpl.parentNode,
-                key, namespace, target, readFilters, repeats, ref, vm;
-            // return
-            if (!parentNode || setting.stop) return;
-
-            setting.stop = true;
-
-            key = this.target;
-            namespace = this.namespace;
-            target = namespace ? ([namespace, key].join('.')) : key;
-            readFilters = this.readFilters;
-            repeats = [];
-            ref = document.createComment('q-repeat');
-            vm = this.vm;
-
-            parentNode.replaceChild(ref, tpl);
-            // cache tpl
-            _.walk([tpl], _.noop, { useCache: true });
-
-            vm.$watch(target, function (value) {
-                value = vm.applyFilters(value, readFilters);
-                _.nextTick(function () {
-                    if (repeats.length) {
-                        repeats.forEach(function (node) {
-                            // repeat element may has been remove
-                            node.parentNode === parentNode &&
-                                parentNode.removeChild(node);
-                        });
-                        _.cleanData(repeats);
-                        repeats.length = 0;
-                    }
-                    var fragment = document.createDocumentFragment(),
-                        itemNode;
-                    value.forEach(function (obj, i) {
-                        itemNode = _.clone(tpl);
-                        vm._templateBind(itemNode, {
-                            data: obj,
-                            namespace: obj.$namespace(),
-                            immediate: true,
-                            useCache: true
-                        });
-                        repeats.push(itemNode);
-                        fragment.appendChild(itemNode);
-                    });
-                    parentNode.insertBefore(fragment, ref);
-                    vm.$emit('repeat-render');
-                });
-            }, false, true);
-        }
-    }
+    repeat: require('./repeat')
 };

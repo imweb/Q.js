@@ -22,6 +22,16 @@ describe('repeat', function () {
         }, 100);
     });
 
+    it('should able push a data', function (done) {
+        tpl1.items.push({ msg: 'nihao' });
+
+        setTimeout(function () {
+            var lis = $('li', '#tpl1');
+            lis.length.should.equal(3);
+            done();
+        }, 100);
+    });
+
     it('should able multiple repeat', function (done) {
         new Q({
             el: '#tpl2',

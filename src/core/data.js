@@ -102,11 +102,20 @@ _.extend(DataArray.prototype, Data.prototype, {
     /**
      * push data
      */
-    push: function (value) {
-        _prefix(this, this.length, value);
-        this._keys.push(this.length);
-        this.length++;
-        this._top.$emit('data:' + this.$namespace(), this);
+    push: function (values) {
+        values = _.slice.call(arguments, 0);
+        var args = [];
+        for (var i = 0, l = values.length; i < l; i++) {
+            _prefix(this, this.length, values[i]);
+            this._keys.push(this.length);
+            args.push(this[this.length]);
+            this.length++;
+        }
+        this._top.$emit('data:' + this.$namespace(), this, {
+            method: 'push',
+            args: args
+        });
+
         return this;
     },
     /**
