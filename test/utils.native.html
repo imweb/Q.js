@@ -22,6 +22,11 @@ var require = function (name) {
 };
 var module = { exports: {} };
 </script>
+<script src="../src/core/cache.js"></script>
+<script>
+window['cache'] = module.exports;
+module.exports = {};
+</script>
 <script src="../src/core/utils.js"></script>
 <script>
 window['utils'] = module.exports;

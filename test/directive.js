@@ -22,6 +22,16 @@ describe('repeat', function () {
         }, 100);
     });
 
+    it('should able push a data', function (done) {
+        tpl1.items.push({ msg: 'nihao' });
+
+        setTimeout(function () {
+            var lis = $('li', '#tpl1');
+            lis.length.should.equal(3);
+            done();
+        }, 100);
+    });
+
     it('should able multiple repeat', function (done) {
         new Q({
             el: '#tpl2',
@@ -102,7 +112,7 @@ describe('repeat', function () {
         }).should.throw('Filter noexist hasn\'t implemented.');
     });
 
-    it('should able to use multi-repeat', function (done) {
+    it('should able to use double repeat', function (done) {
         var vm = new Q({
             el: '#multi-repeat',
             data: {

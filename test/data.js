@@ -57,9 +57,10 @@ describe('data', function () {
             }
         });
 
-        vm.list.push({ text: 'nihao' });
+        vm.list.push({ text: 'nihao' }, { text: 'imweb' });
         vm.list[2].text.should.equal('nihao');
-        vm.list.length.should.equal(3);
+        vm.list[3].text.should.equal('imweb');
+        vm.list.length.should.equal(4);
     });
 
     it('should able to pop a vm data', function () {
@@ -202,5 +203,23 @@ describe('data', function () {
             item.should.equal(i + 1);
         });
         vm.arr.flag.should.be.ok;
+    });
+
+    it('should able to watch push method', function (done) {
+        var vm = new Q({
+            el: 'null',
+            data: {
+                arr: [1, 2]
+            }
+        });
+
+        vm.$watch('arr', function (value, action) {
+            value[2].should.equal(3);
+            action.method.should.equal('push');
+            action.args[0].should.equal(3);
+            done();
+        });
+
+        vm.arr.push(3);
     });
 });
