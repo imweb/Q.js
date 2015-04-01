@@ -57,7 +57,7 @@ exports.bind = function () {
             dp = (methods[method] || {}).dp;
 
         // if dp exists and readFilters.length === 0, proceess data
-        dp && !readFilters && (value = dp(value, action));
+        dp && !readFilters.length && (value = dp(value, action));
 
         _.nextTick(function () {
             // clean up repeats dom
