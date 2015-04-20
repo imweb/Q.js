@@ -180,7 +180,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var DELEGATOR_CALLBACKS_KEY = '__cbs__',
-	    NO_DELEGATOR = {};
+	    NO_DELEGATOR = {
+	        // prevent mouseover trigger more than one time
+	        mouseover: true
+	    };
 	var _extend = function (target, srcs) {
 	        srcs = [].splice.call(arguments, 1);
 	        var i = 0, l = srcs.length, src, key;
