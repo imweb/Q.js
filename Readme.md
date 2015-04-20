@@ -272,3 +272,5 @@ var vm = new Q({
 ----
 
 [![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)](http://www.qxiu.com/)
+
+[![QQ群](http://qplus3.idqqimg.com/qun/portal/img/logo2.png)](http://qun.qq.com/)
