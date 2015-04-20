@@ -1326,7 +1326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            dp = (methods[method] || {}).dp;
 
 	        // if dp exists and readFilters.length === 0, proceess data
-	        dp && !readFilters.length && (value = dp(value, action));
+	        dp && !readFilters.length ?
+	            (value = dp(value, action)) : (clean = methods['default'].clean);
 
 	        _.nextTick(function () {
 	            // clean up repeats dom
