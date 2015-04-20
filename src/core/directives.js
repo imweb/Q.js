@@ -53,7 +53,7 @@ module.exports = {
                 vm = this.vm;
             _.add(el, 'input onpropertychange change', function (e) {
                 vm.data(namespace).$set(key, el.value);
-            });
+            }, vm);
         },
         update: function (value) {
             this.el.value = value;

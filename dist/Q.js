@@ -25,41 +25,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -69,8 +69,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(1),
-	    _ = __webpack_require__(3),
-	    factory = __webpack_require__(2)
+	    _ = __webpack_require__(2),
+	    factory = __webpack_require__(3)
 
 	_.extend(utils, _);
 	module.exports = factory(utils);
@@ -180,6 +180,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(4);
+
+	module.exports = {
+	    find: $.find,
+	    contains: $.contains,
+	    data: $.data,
+	    cleanData: $.cleanData,
+	    add: $.event.add,
+	    remove: $.event.remove,
+	    clone: $.clone,
+	    extend: $.extend
+	};
+
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function (_) {
@@ -587,24 +605,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.extend(Q.prototype, Data.prototype);
 
 	    return Q;
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(4);
-
-	module.exports = {
-	    find: $.find,
-	    contains: $.contains,
-	    data: $.data,
-	    cleanData: $.cleanData,
-	    add: $.event.add,
-	    remove: $.event.remove,
-	    clone: $.clone,
-	    extend: $.extend
 	};
 
 
@@ -1139,7 +1139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                vm = this.vm;
 	            _.add(el, 'input onpropertychange change', function (e) {
 	                vm.data(namespace).$set(key, el.value);
-	            });
+	            }, vm);
 	        },
 	        update: function (value) {
 	            this.el.value = value;
@@ -1380,3 +1380,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ }
 /******/ ])
 });
+;

@@ -22,41 +22,41 @@
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
@@ -66,8 +66,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(1),
-	    _ = __webpack_require__(3),
-	    factory = __webpack_require__(2)
+	    _ = __webpack_require__(2),
+	    factory = __webpack_require__(3)
 
 	_.extend(utils, _);
 	module.exports = factory(utils);
@@ -177,6 +177,94 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var DELEGATOR_CALLBACKS_KEY = '__cbs__',
+	    NO_DELEGATOR = {};
+	var _extend = function (target, srcs) {
+	        srcs = [].splice.call(arguments, 1);
+	        var i = 0, l = srcs.length, src, key;
+	        for (; i < l; i++) {
+	            src = srcs[i];
+	            for (key in src) {
+	                target[key] = src[key];
+	            }
+	        }
+	        return target;
+	    },
+	    _expando = 'QDataUid',
+	    _uid = 0,
+	    _map = {};
+
+	function contains(a, b) {
+	    return a !== b && a.contains(b);
+	}
+
+	function data(el, key, value) {
+	    var uid = el[_expando] = el[_expando] || ++_uid,
+	        data = _map[uid] = _map[uid] || {};
+	    // set Data
+	    if (value === undefined) return data[key];
+	    return (data[key] = value);
+	}
+
+	module.exports = {
+	    find: function (selector) {
+	        return this.slice.call(document.querySelectorAll(selector), 0);
+	    },
+	    contains: contains,
+	    data: data,
+	    cleanData: function (els) {
+	        var uid
+	        els.forEach(function (el) {
+	            var uid = el[_expando];
+	            // has data
+	            uid && (uid in _map) &&
+	                (delete _map[uid]);
+	        });
+	    },
+	    add: function (el, evt, fn, vm) {
+	        if (!vm || NO_DELEGATOR[evt]) { 
+	            el.addEventListener(evt, fn);
+	        } else {
+	            var $el = vm.$el,
+	                cbs = data($el, DELEGATOR_CALLBACKS_KEY);
+	            if (!cbs) {
+	                cbs = [];
+	                data($el, DELEGATOR_CALLBACKS_KEY, cbs);
+	                $el.addEventListener(evt, function (e) {
+	                    var target = e.target
+	                    cbs.forEach(function (cb) {
+	                        var fn = cb.fn,
+	                            el = cb.el;
+	                        if (contains(el, target)) {
+	                            fn.call(el, e);
+	                        }
+	                    });
+	                }, false);
+	            }
+	            // push
+	            cbs.push({
+	                el: el,
+	                fn: fn
+	            });
+	        }
+	    },
+	    remove: function (el, evt, fn) {
+	        el.removeEventListener(evt, fn, false);
+	    },
+	    clone: function (ele) {
+	        return ele.cloneNode(true);
+	    },
+	    extend: function (target) {
+	        if (arguments.length === 1) return _extend(this, target);
+	        return _extend.apply(this, arguments);
+	    }
+	};
+
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function (_) {
@@ -584,64 +672,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.extend(Q.prototype, Data.prototype);
 
 	    return Q;
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _extend = function (target, srcs) {
-	        srcs = [].splice.call(arguments, 1);
-	        var i = 0, l = srcs.length, src, key;
-	        for (; i < l; i++) {
-	            src = srcs[i];
-	            for (key in src) {
-	                target[key] = src[key];
-	            }
-	        }
-	        return target;
-	    },
-	    _expando = 'QDataUid',
-	    _uid = 0,
-	    _map = {};
-
-	module.exports = {
-	    find: function (selector) {
-	        return this.slice.call(document.querySelectorAll(selector), 0);
-	    },
-	    contains: function (a, b){
-	        return a !== b && a.contains(b);
-	    },
-	    data: function (el, key, value) {
-	        var uid = el[_expando] = el[_expando] || ++_uid,
-	            data = _map[uid] = _map[uid] || {};
-	        // set Data
-	        if (value === undefined) return data[key];
-	        return (data[key] = value);
-	    },
-	    cleanData: function (els) {
-	        var uid
-	        els.forEach(function (el) {
-	            var uid = el[_expando];
-	            // has data
-	            uid && (uid in _map) &&
-	                (delete _map[uid]);
-	        });
-	    },
-	    add: function (el, evt, fn) {
-	        el.addEventListener(evt, fn, false);
-	    },
-	    remove: function (el, evt, fn) {
-	        el.removeEventListener(evt, fn, false);
-	    },
-	    clone: function (ele) {
-	        return ele.cloneNode(true);
-	    },
-	    extend: function (target) {
-	        if (arguments.length === 1) return _extend(this, target);
-	        return _extend.apply(this, arguments);
-	    }
 	};
 
 
@@ -1170,7 +1200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                vm = this.vm;
 	            _.add(el, 'input onpropertychange change', function (e) {
 	                vm.data(namespace).$set(key, el.value);
-	            });
+	            }, vm);
 	        },
 	        update: function (value) {
 	            this.el.value = value;
@@ -1411,3 +1441,4 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ }
 /******/ ])
 });
+;

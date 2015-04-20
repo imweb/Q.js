@@ -17,9 +17,7 @@
     "map-stream": "0.0.5",
     "maxmin": "^1.0.0",
     "mocha": "^2.1.0",
-    "npm-zepto": "^1.1.7",
     "should": "^4.4.2",
-    "webpack": "*",
-    "zeptojs": "^1.1.4"
+    "webpack": "*"
   }
 }
