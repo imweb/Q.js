@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.6
+ * Q.js v0.2.7
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1249,7 +1249,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1);
 	    methods = {
-	        default: {
+	        'default': {
 	            // how to clean the dom
 	            clean: function (parentNode, repeats) {
 	                if (repeats.length) {
@@ -1284,6 +1284,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // return
 	    if (!parentNode || setting.stop) return;
 
+	    // remove repeat mark
+	    tpl.removeAttribute('q-repeat');
 	    setting.stop = true;
 
 	    key = this.target;

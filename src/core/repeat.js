@@ -1,6 +1,6 @@
 var _ = require('./utils');
     methods = {
-        default: {
+        'default': {
             // how to clean the dom
             clean: function (parentNode, repeats) {
                 if (repeats.length) {
@@ -35,6 +35,8 @@ exports.bind = function () {
     // return
     if (!parentNode || setting.stop) return;
 
+    // remove repeat mark
+    tpl.removeAttribute('q-repeat');
     setting.stop = true;
 
     key = this.target;
