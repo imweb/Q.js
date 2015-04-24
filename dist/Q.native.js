@@ -135,7 +135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            var cur = ' ' + (el.getAttribute('class') || '') + ' ';
 	            if (cur.indexOf(' ' + cls + ' ') < 0) {
-	                el.setAttribute('class', trim((cur + cls)));
+	                el.setAttribute('class', (cur + cls).trim());
 	            }
 	        }
 	    },
@@ -154,7 +154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            while (cur.indexOf(tar) >= 0) {
 	                cur = cur.replace(tar, ' ');
 	            }
-	            el.setAttribute('class', trim(cur));
+	            el.setAttribute('class', cur.trim());
 	        }
 	    },
 	    noexist: function (name) { throw new Error('Filter ' + name + ' hasn\'t implemented.'); },
