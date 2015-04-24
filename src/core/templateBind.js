@@ -25,7 +25,7 @@ module.exports = function (el, options) {
                             el: node,
                             vm: self,
                             namespace: namespace,
-                            setting: setting,
+                            setting: setting
                         }, descriptor, {
                             filters: readFilters
                         });

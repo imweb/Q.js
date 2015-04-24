@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.7
+ * Q.js v0.2.8
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1289,7 +1289,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            el: node,
 	                            vm: self,
 	                            namespace: namespace,
-	                            setting: setting,
+	                            setting: setting
 	                        }, descriptor, {
 	                            filters: readFilters
 	                        });
