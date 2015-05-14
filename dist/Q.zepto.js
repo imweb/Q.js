@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.8
+ * Q.js v0.2.9
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1125,6 +1125,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            el.checked = value;
 	        } else {
 	            el.value = value;
+	        }
+	    },
+	    attr: function (value) {
+	        if (value === undefined) return;
+	        var arg = this.arg,
+	            el = this.el;
+	        // property
+	        if (arg in el) {
+	            el[arg] = value;
+	        } else {
+	            el.setAttribute(arg, value);
 	        }
 	    },
 	    text: function (value) {
