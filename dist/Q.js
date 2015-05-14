@@ -1107,6 +1107,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            el.value = value;
 	        }
 	    },
+	    attr: function (value) {
+	        if (value === undefined) return;
+	        var arg = this.arg,
+	            el = this.el;
+	        // property
+	        if (arg in el) {
+	            el[arg] = value;
+	        } else {
+	            el.setAttribute(arg, value);
+	        }
+	    },
 	    text: function (value) {
 	        value !== undefined &&
 	            (this.el.innerText = value);

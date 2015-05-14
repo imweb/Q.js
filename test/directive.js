@@ -1,3 +1,27 @@
+describe('attrbute', function () {
+    it('should able to set src', function () {
+        var attrTpl1 = new Q({
+            el: '#attr1',
+            data: {
+                url: 'http://9.url.cn/edu/img/index/bg-logo-new.385c8.png'
+            }
+        });
+
+        $('#attr1 img')[0].src.should.equal('http://9.url.cn/edu/img/index/bg-logo-new.385c8.png');
+    });
+
+    it('should able to set attribute', function () {
+        var attrTpl2 = new Q({
+            el: '#attr2',
+            data: {
+                id: 2
+            }
+        });
+
+        $('#attr2 span')[0].getAttribute('data-id').should.equal('2');
+    });
+});
+
 
 describe('repeat', function () {
     var tpl1
