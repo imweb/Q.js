@@ -1,34 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
+    <meta charset="UTF-8">
+    <title>Q.js by imweb</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <title>Q.js by miniflycn</title>
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
+    <section class="page-header">
+      <h1 class="project-name">Q.js</h1>
+      <h2 class="project-tagline">fake-MVVM library</h2>
+      <a href="https://github.com/imweb/Q.js" class="btn">View on GitHub</a>
+      <a href="https://github.com/imweb/Q.js/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/imweb/Q.js/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <header>
-      <div class="container">
-        <h1>Q.js</h1>
-        <h2>fake-MVVM library</h2>
-
-        <section id="downloads">
-          <a href="https://github.com/miniflycn/Q.js/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/miniflycn/Q.js/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/miniflycn/Q.js" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
-
-    <div class="container">
-      <section id="main_content">
-        <h1>
+    <section class="main-content">
+      <h1>
 <a id="qjs" class="anchor" href="#qjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Q.js</h1>
 
 <p><a href="https://travis-ci.org/miniflycn/Q.js"><img src="https://travis-ci.org/miniflycn/Q.js.svg?branch=master" alt="Build Status"></a></p>
@@ -47,10 +38,10 @@
 
 <p>脚本：</p>
 
-<div class="highlight highlight-js"><pre><span class="pl-s">var</span> vm <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Q</span>({
-    el<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>#demo<span class="pl-pds">'</span></span>,
+<div class="highlight highlight-js"><pre><span class="pl-k">var</span> vm <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Q</span>({
+    el<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>#demo<span class="pl-pds">'</span></span>,
     data<span class="pl-k">:</span> {
-        msg<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>hello<span class="pl-pds">'</span></span>
+        msg<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>hello<span class="pl-pds">'</span></span>
     }
 });</pre></div>
 
@@ -121,10 +112,10 @@ vm.$options.data === data // -&gt; true
 <li>设置msg的值</li>
 </ul>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> obj <span class="pl-k">=</span> {
-    msg<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">'</span>hello world!<span class="pl-pds">'</span></span>
+<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> obj <span class="pl-k">=</span> {
+    msg<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>hello world!<span class="pl-pds">'</span></span>
 };
-vm.$set(<span class="pl-s1"><span class="pl-pds">'</span>msg<span class="pl-pds">'</span></span>, obj.msg); <span class="pl-c">// -&gt; hello world!</span></pre></div>
+vm.$set(<span class="pl-s"><span class="pl-pds">'</span>msg<span class="pl-pds">'</span></span>, obj.msg); <span class="pl-c">// -&gt; hello world!</span></pre></div>
 
 <ul>
 <li>对于数组可使用大部分数组方法，目前已经支持了：<code>push</code>、<code>pop</code>、<code>unshift</code>、<code>shift</code>、<code>indexOf</code>、<code>splice</code>、<code>forEach</code>、<code>filter</code>
@@ -135,13 +126,11 @@ vm.$set(<span class="pl-s1"><span class="pl-pds">'</span>msg<span class="pl-pds"
 <a id="el" class="anchor" href="#el" aria-hidden="true"><span class="octicon octicon-link"></span></a>el</h3>
 
 <ul>
-<li>类型：<code>String | HTMLElement | Function</code>
+<li>类型：<code>String | HTMLElement</code>
 </li>
 </ul>
 
-<p><code>//TODO</code></p>
-
-<p>Provide the Q instance with an existing DOM element. It can be a CSS selector string, an actual HTMLElement, or a function that returns an HTMLElement. The resolved element will be accessible as <code>q.$el</code>.</p>
+<p>通过一个给定的DOM元素生成一个Q实例。可以是一个CSS选择器字符串，一个实际存在的HTML元素，最终会在<code>q.$el</code>中。</p>
 
 <h3>
 <a id="directive" class="anchor" href="#directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>directive</h3>
@@ -164,7 +153,7 @@ vm.$set(<span class="pl-s1"><span class="pl-pds">'</span>msg<span class="pl-pds"
 
 <p>Q.js中，默认的prefix是<code>q</code>，directiveId是<code>text</code>，expression是<code>message</code>。这个directive的作用是，当Q实例中<code>message</code>这一属性的值发生变化时，告知Q.js去更新这个节点的文本内容。这里表示<code>message</code>(key)对应的数据(value)，用<code>text</code>指令进行操作，<code>text</code>指令是在该节点塞入文字。例如：</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> myText <span class="pl-k">=</span> Q.get(<span class="pl-s1"><span class="pl-pds">'</span>#myText<span class="pl-pds">'</span></span>); <span class="pl-c">//Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息</span></pre></div>
+<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> myText <span class="pl-k">=</span> Q.get(<span class="pl-s"><span class="pl-pds">'</span>#myText<span class="pl-pds">'</span></span>); <span class="pl-c">//Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息</span></pre></div>
 
 <h3>
 <a id="自定义directive" class="anchor" href="#%E8%87%AA%E5%AE%9A%E4%B9%89directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义<code>directive</code>
@@ -335,10 +324,19 @@ function key(handler, key) {
 <h2>
 <a id="用户" class="anchor" href="#%E7%94%A8%E6%88%B7" aria-hidden="true"><span class="octicon octicon-link"></span></a>用户</h2>
 
-<p><img src="http://www.qxiu.com/2014/images/logo_qi.jpg" alt="齐齐互动视频"></p>
-      </section>
-    </div>
+<p><a href="http://www.qxiu.com/"><img src="http://www.qxiu.com/2014/images/logo_qi.jpg" alt="齐齐互动视频"></a></p>
 
-    
+<p><a href="http://qun.qq.com/"><img src="http://qplus3.idqqimg.com/qun/portal/img/logo2.png" alt="QQ群"></a></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/imweb/Q.js">Q.js</a> is maintained by <a href="https://github.com/imweb">imweb</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
+
