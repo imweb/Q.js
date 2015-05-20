@@ -743,12 +743,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        top: up._top,
 	        namespace: [up._namespace, key].join('.')
 	    };
-	    up[key] =
-	        (typeof value === 'object' && value !== null) ?
-	            _isArray(value) ?
-	                new DataArray(options) :
-	                    new Data(options) :
-	            value;
+	    if (typeof value === 'object' && value !== null) {
+	        up[key] =   _isArray(value) ?
+	            new DataArray(options) :
+	                new Data(options);
+	    } else {
+	        up[key] = value;
+	        if (!(~up._keys.indexOf(key))) up._keys.push(key);
+	    }
 	}
 
 	function _isArray(obj) {
@@ -1173,10 +1175,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
-	                childVm = new (vm.constructor.require(name))({
-	                    el: el,
-	                    data: data.$get()
+	                Child = vm.constructor.require(name),
+	                mergeTarget = Child.options.data,
+	                childVm;
+
+	            // merge data
+	            mergeTarget &&
+	                Object.keys(mergeTarget).forEach(function (key) {
+	                    !data[key] &&
+	                        data.$set(key, mergeTarget[key]);
 	                });
+
+	            childVm = new Child({
+	                el: el,
+	                data: data.$get()
+	            });
 
 	            vm._children.push(childVm);
 	            ref && !function () {

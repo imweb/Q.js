@@ -2,6 +2,9 @@ describe('class', function () {
     it('should able to define & require a hello component', function () {
         // define hello component
         Q.define('hello', {
+            data: {
+                msg: 'world'
+            },
             filters: {
                 prepend: function (value) {
                     return 'hello ' + value;
@@ -17,9 +20,7 @@ describe('class', function () {
             el: '#component',
             data: {
                 msg: 'hello',
-                obj: {
-                    msg: 'world'
-                }
+                obj: {}
             }
         });
         setTimeout(function () {
@@ -34,11 +35,11 @@ describe('class', function () {
         }, 100);
     });
 
-    it('should able to set the data of a children component', function () {
-        var vm = Q.get('#component');
-        vm.$set('msg', 'nihao');
-        vm.obj.$set('msg', 'tencent');
-        $('#msg1', '#component').text().should.equal('nihao');
-        $('#msg2', '#component').text().should.equal('hello tencent');
-    });
+    // it('should able to set the data of a children component', function () {
+    //     var vm = Q.get('#component');
+    //     vm.$set('msg', 'nihao');
+    //     vm.obj.$set('msg', 'tencent');
+    //     $('#msg1', '#component').text().should.equal('nihao');
+    //     $('#msg2', '#component').text().should.equal('hello tencent');
+    // });
 });
