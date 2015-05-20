@@ -11,12 +11,14 @@ function _prefix(up, key, value) {
         top: up._top,
         namespace: [up._namespace, key].join('.')
     };
-    up[key] =
-        (typeof value === 'object' && value !== null) ?
-            _isArray(value) ?
-                new DataArray(options) :
-                    new Data(options) :
-            value;
+    if (typeof value === 'object' && value !== null) {
+        up[key] =   _isArray(value) ?
+            new DataArray(options) :
+                new Data(options);
+    } else {
+        up[key] = value;
+        if (!(~up._keys.indexOf(key))) up._keys.push(key);
+    }
 }
 
 function _isArray(obj) {
