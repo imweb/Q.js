@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.9
+ * Q.js v0.2.10
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
