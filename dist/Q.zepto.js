@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.2.10
+ * Q.js v0.3.0
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1232,6 +1232,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    start && (start += 1);
 	                    childProp = prop.substring(start, prop.length);
 	                    childVm.$set(childProp, args[1]);
+	                }
+	            });
+	        }
+	    },
+	    'if': {
+	        bind: function () {
+	            var tpl = this.el,
+	                parentNode = tpl.parentNode,
+	                ref = document.createComment('q-if'),
+	                hasInit = false,
+	                exist = false,
+	                key = this.target,
+	                namespace = this.namespace,
+	                target = namespace ? ([namespace, key].join('.')) : key,
+	                readFilters = this.filters,
+	                data = this.data(),
+	                vm = this.vm;
+
+	            tpl.removeAttribute('q-if');
+	            this.setting.stop = true;
+	            parentNode.replaceChild(ref, tpl);
+
+	            vm.$watch(target, function (value, oldVal) {
+	                value = vm.applyFilters(value, readFilters, oldVal);
+	                // need to init
+	                if (value === exist) return;
+	                // bind
+	                if (value === true) {
+	                    parentNode.replaceChild(tpl, ref);
+	                    !hasInit && vm._templateBind(tpl, {
+	                        data: data,
+	                        namespace: namespace,
+	                        immediate: true
+	                    });
+	                    exist = value;
+	                // unbind
+	                } else if (value === false) {
+	                    parentNode.replaceChild(ref, tpl);
+	                    exist = value;
 	                }
 	            });
 	        }
