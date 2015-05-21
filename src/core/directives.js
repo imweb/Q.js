@@ -114,14 +114,15 @@ module.exports = {
             }();
 
             // unidirectional binding
-            vm.$on('datachange', function (prop) {
+            vm.$on('datachange', function (args) {
+                var prop = args[0];
                 if (!target || ~prop.indexOf(target)) {
                     var start = target.length,
                         childProp;
 
                     start && (start += 1);
                     childProp = prop.substring(start, prop.length);
-                    childVm.$set(childProp, vm.data(prop));
+                    childVm.$set(childProp, args[1]);
                 }
             });
         }

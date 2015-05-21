@@ -412,7 +412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                e = e.substring(5);
 	                args.unshift(e);
 	                this._callDataChange.apply(this, args);
-	                this._emit('datachange', e);
+	                this._emit('datachange', args);
 	            }
 	            return this;
 	        },
@@ -595,10 +595,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    reader;
 	                name = args.shift();
 	                reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
-	                return function (value) {
+	                return function (value, oldVal) {
 	                    return args ?
-	                        reader.apply(self, [value].concat(args)) :
-	                            reader.call(self, value);
+	                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
+	                            reader.call(self, value, oldVal);
 	                };
 	            });
 	        },
@@ -826,8 +826,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * set the value of the key
 	     */
 	    $set: function (key, value) {
+	        var oldValue = this[key];
 	        _prefix(this, key, value);
-	        this._top.$emit('data:' + this.$namespace(key), this[key]);
+	        this._top.$emit('data:' + this.$namespace(key), this[key], oldValue);
 	        return this;
 	    },
 	    /**
@@ -1222,19 +1223,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }();
 
 	            // unidirectional binding
-	            vm.$on('datachange', function (prop) {
+	            vm.$on('datachange', function (args) {
+	                var prop = args[0];
 	                if (!target || ~prop.indexOf(target)) {
 	                    var start = target.length,
 	                        childProp;
 
 	                    start && (start += 1);
 	                    childProp = prop.substring(start, prop.length);
-	                    childVm.$set(childProp, vm.data(prop));
+	                    childVm.$set(childProp, args[1]);
 	                }
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(12)
+	    repeat: __webpack_require__(11)
 	};
 
 
@@ -1242,7 +1244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(11),
+	var parse = __webpack_require__(12),
 	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
@@ -1274,9 +1276,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            filters: readFilters
 	                        });
 
-	                    update && self.$watch(target, function (value) {
-	                        value = self.applyFilters(value, readFilters);
-	                        update.call(that, value);
+	                    update && self.$watch(target, function (value, oldValue) {
+	                        value = self.applyFilters(value, readFilters, oldValue);
+	                        update.call(that, value, oldValue);
 	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
@@ -1289,49 +1291,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var cache = new (__webpack_require__(5))(1000);
-	/**
-	 * click: onclick | filter1 | filter2
-	 * click: onclick , keydown: onkeydown
-	 * value1 | filter1 | filter2
-	 * value - 1 | filter1 | filter2   don't support
-	 */
-	function parse(str) {
-	    var hit = cache.get(str);
-	    if (hit) return hit;
-	    var exps = str.trim().split(/ *\, */),
-	        eventReg = /^([\w\-]+)\:/,
-	        keyReg = /^[\w\-]+$/,
-	        arr = [];
-	    exps.forEach(function (exp) {
-	        var res = {},
-	            match = exp.match(eventReg),
-	            filters, exp;
-	        if (match) {
-	            res.arg = match[1];
-	            exp = exp.substring(match[0].length).trim();
-	        }
-	        filters = exp.split(/ *\| */);
-	        exp = filters.shift();
-	        if (keyReg.test(exp)) {
-	            res.target = exp;
-	        } else {
-	            res.exp = exp;
-	        }
-	        res.filters = filters;
-	        arr.push(res);
-	    });
-	    cache.put(str, arr);
-	    return arr;
-	}
-
-	module.exports = parse;
-
-
-/***/ },
-/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1422,6 +1381,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }, false, true);
 	}
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var cache = new (__webpack_require__(5))(1000);
+	/**
+	 * click: onclick | filter1 | filter2
+	 * click: onclick , keydown: onkeydown
+	 * value1 | filter1 | filter2
+	 * value - 1 | filter1 | filter2   don't support
+	 */
+	function parse(str) {
+	    var hit = cache.get(str);
+	    if (hit) return hit;
+	    var exps = str.trim().split(/ *\, */),
+	        eventReg = /^([\w\-]+)\:/,
+	        keyReg = /^[\w\-]+$/,
+	        arr = [];
+	    exps.forEach(function (exp) {
+	        var res = {},
+	            match = exp.match(eventReg),
+	            filters, exp;
+	        if (match) {
+	            res.arg = match[1];
+	            exp = exp.substring(match[0].length).trim();
+	        }
+	        filters = exp.split(/ *\| */);
+	        exp = filters.shift();
+	        if (keyReg.test(exp)) {
+	            res.target = exp;
+	        } else {
+	            res.exp = exp;
+	        }
+	        res.filters = filters;
+	        arr.push(res);
+	    });
+	    cache.put(str, arr);
+	    return arr;
+	}
+
+	module.exports = parse;
 
 
 /***/ }

@@ -1,3 +1,26 @@
+describe('custom', function () {
+    it('should able to create a custom filter', function () {
+        var vm = new Q({
+            el: '#custom1',
+            data: {
+                msg: 'hello'
+            },
+            directives: {
+                msg: function (val, oldVal) {
+                    if (oldVal) oldVal.should.equal('hello');
+                    this.el.setAttribute('data-msg', val);
+                }
+            }
+        });
+
+        $('#custom1 p')[0].getAttribute('data-msg').should.equal('hello');
+
+        vm.$set('msg', 'nihao');
+
+        $('#custom1 p')[0].getAttribute('data-msg').should.equal('nihao');
+    });
+});
+
 describe('attrbute', function () {
     it('should able to set src', function () {
         var attrTpl1 = new Q({
