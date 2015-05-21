@@ -37,11 +37,11 @@ describe('class', function () {
         }, 100);
     });
 
-    // it('should able to set the data of a children component', function () {
-    //     var vm = Q.get('#component');
-    //     vm.$set('msg', 'nihao');
-    //     vm.obj.$set('msg', 'tencent');
-    //     $('#msg1', '#component').text().should.equal('nihao');
-    //     $('#msg2', '#component').text().should.equal('hello tencent');
-    // });
+    it('should able to set the data of a children component', function () {
+        var vm = Q.get('#component');
+        vm.$set('msg', 'nihao');
+        vm.obj.$set('msg', 'tencent');
+        $('#msg1', '#component').text().should.equal('nihao');
+        $('#msg2', '#component').text().should.equal('hello tencent');
+    });
 });
