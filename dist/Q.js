@@ -1250,6 +1250,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
+	                            data: function (key) {
+	                                var arr = [];
+	                                namespace && arr.push(namespace);
+	                                key && arr.push(key);
+	                                return self.data(arr.join('.'));
+	                            },
 	                            namespace: namespace,
 	                            setting: setting
 	                        }, descriptor, {

@@ -8,6 +8,7 @@ describe('custom', function () {
             directives: {
                 msg: function (val, oldVal) {
                     if (oldVal) oldVal.should.equal('hello');
+                    this.data('msg').should.equal(val);
                     this.el.setAttribute('data-msg', val);
                 }
             }
