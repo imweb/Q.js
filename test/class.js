@@ -31,6 +31,8 @@ describe('class', function () {
             });
             $('#msg1', '#component').text().should.equal('hello');
             $('#msg2', '#component').text().should.equal('hello world');
+
+            vm.obj.$set('msg', 'hhhh');
             done();
         }, 100);
     });

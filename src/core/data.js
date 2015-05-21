@@ -74,8 +74,9 @@ _.extend(Data.prototype, {
      * set the value of the key
      */
     $set: function (key, value) {
+        var oldValue = this[key];
         _prefix(this, key, value);
-        this._top.$emit('data:' + this.$namespace(key), this[key]);
+        this._top.$emit('data:' + this.$namespace(key), this[key], oldValue);
         return this;
     },
     /**

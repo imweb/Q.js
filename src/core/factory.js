@@ -190,7 +190,7 @@ module.exports = function (_) {
                 e = e.substring(5);
                 args.unshift(e);
                 this._callDataChange.apply(this, args);
-                this._emit('datachange', e);
+                this._emit('datachange', args);
             }
             return this;
         },
@@ -373,10 +373,10 @@ module.exports = function (_) {
                     reader;
                 name = args.shift();
                 reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
-                return function (value) {
+                return function (value, oldVal) {
                     return args ?
-                        reader.apply(self, [value].concat(args)) :
-                            reader.call(self, value);
+                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
+                            reader.call(self, value, oldVal);
                 };
             });
         },
