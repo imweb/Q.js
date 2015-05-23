@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.1
+ * Q.js v0.3.2
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -866,7 +866,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args.push(this[this.length]);
 	            this.length++;
 	        }
-	        this._top.$emit('data:' + this.$namespace(), this, {
+	        // value, oldValue, patch
+	        this._top.$emit('data:' + this.$namespace(), this, null, {
 	            method: 'push',
 	            args: args
 	        });
@@ -920,8 +921,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * indexOf
 	     */
 	    indexOf: function (item) {
-	        for (var i = 0, l = this.length; i < l; i++) {
+	        if (item._up === this) {
+	            var namespace = item._namespace.split('.'),
+	                i = +namespace[namespace.length - 1];
 	            if (this[i] === item) return i;
+	        } else if (typeof item !== 'object') {
+	            for (var i = 0, l = this.length; i < l; i++) {
+	                if (this[i] === item) return i;
+	            }
 	        }
 	        return -1;
 	    },
@@ -929,6 +936,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * splice
 	     */
 	    splice: function (i, l /**, items support later **/) {
+	        var patch = {
+	            method: 'splice',
+	            args: [i, l]
+	        };
 	        for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
 	            this[i] = this[k + j];
 	            this[i]._namespace = this[i]._namespace.replace(/\.(\d+?)$/, '.' + i);
@@ -939,7 +950,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.length -= l;
 	        this._keys.splice(this.length, l);
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this._top.$emit('data:' + this.$namespace(), this, null, patch);
 	    },
 	    /**
 	     * forEach
@@ -1361,8 +1372,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            insert: function (parentNode, fragment, ref) {
 	                parentNode.insertBefore(fragment, ref);
 	            },
-	            dp: function (data, action) {
-	                return action.args;
+	            dp: function (data, patch) {
+	                return patch.args;
+	            }
+	        },
+	        splice: {
+	            clean: function (parentNode, repeats, value) {
+	                var i = value[0],
+	                    l = value[1],
+	                    eles = repeats.splice(i, l);
+	                eles.forEach(function (ele) {
+	                    parentNode.removeChild(ele);
+	                });
+	                return true;
+	            },
+	            dp: function (data, patch) {
+	                return patch.args;
 	            }
 	        }
 	    };
@@ -1391,20 +1416,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // cache tpl
 	    _.walk([tpl], _.noop, { useCache: true });
 
-	    vm.$watch(target, function (value, action) {
+	    vm.$watch(target, function (value, oldVal, patch) {
 	        value = vm.applyFilters(value, readFilters);
-	        var method = action ? action.method || 'default' : 'default',
+	        var method = patch ? patch.method : 'default',
 	            clean = (methods[method] || {}).clean,
 	            insert = (methods[method] || {}).insert,
 	            dp = (methods[method] || {}).dp;
 
 	        // if dp exists and readFilters.length === 0, proceess data
 	        dp && !readFilters.length ?
-	            (value = dp(value, action)) : (clean = methods['default'].clean);
+	            (value = dp(value, patch)) : (clean = methods['default'].clean);
 
 	        _.nextTick(function () {
 	            // clean up repeats dom
-	            clean && clean(parentNode, repeats);
+	            if (clean && clean(parentNode, repeats, value) === true) {
+	                return;
+	            }
 
 	            var fragment = document.createDocumentFragment(),
 	                itemNode;

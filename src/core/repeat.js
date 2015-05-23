@@ -21,8 +21,22 @@ var _ = require('./utils');
             insert: function (parentNode, fragment, ref) {
                 parentNode.insertBefore(fragment, ref);
             },
-            dp: function (data, action) {
-                return action.args;
+            dp: function (data, patch) {
+                return patch.args;
+            }
+        },
+        splice: {
+            clean: function (parentNode, repeats, value) {
+                var i = value[0],
+                    l = value[1],
+                    eles = repeats.splice(i, l);
+                eles.forEach(function (ele) {
+                    parentNode.removeChild(ele);
+                });
+                return true;
+            },
+            dp: function (data, patch) {
+                return patch.args;
             }
         }
     };
@@ -51,20 +65,22 @@ exports.bind = function () {
     // cache tpl
     _.walk([tpl], _.noop, { useCache: true });
 
-    vm.$watch(target, function (value, action) {
+    vm.$watch(target, function (value, oldVal, patch) {
         value = vm.applyFilters(value, readFilters);
-        var method = action ? action.method || 'default' : 'default',
+        var method = patch ? patch.method : 'default',
             clean = (methods[method] || {}).clean,
             insert = (methods[method] || {}).insert,
             dp = (methods[method] || {}).dp;
 
         // if dp exists and readFilters.length === 0, proceess data
         dp && !readFilters.length ?
-            (value = dp(value, action)) : (clean = methods['default'].clean);
+            (value = dp(value, patch)) : (clean = methods['default'].clean);
 
         _.nextTick(function () {
             // clean up repeats dom
-            clean && clean(parentNode, repeats);
+            if (clean && clean(parentNode, repeats, value) === true) {
+                return;
+            }
 
             var fragment = document.createDocumentFragment(),
                 itemNode;

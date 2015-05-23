@@ -114,7 +114,8 @@ _.extend(DataArray.prototype, Data.prototype, {
             args.push(this[this.length]);
             this.length++;
         }
-        this._top.$emit('data:' + this.$namespace(), this, {
+        // value, oldValue, patch
+        this._top.$emit('data:' + this.$namespace(), this, null, {
             method: 'push',
             args: args
         });
@@ -168,8 +169,14 @@ _.extend(DataArray.prototype, Data.prototype, {
      * indexOf
      */
     indexOf: function (item) {
-        for (var i = 0, l = this.length; i < l; i++) {
+        if (item._up === this) {
+            var namespace = item._namespace.split('.'),
+                i = +namespace[namespace.length - 1];
             if (this[i] === item) return i;
+        } else if (typeof item !== 'object') {
+            for (var i = 0, l = this.length; i < l; i++) {
+                if (this[i] === item) return i;
+            }
         }
         return -1;
     },
@@ -177,6 +184,10 @@ _.extend(DataArray.prototype, Data.prototype, {
      * splice
      */
     splice: function (i, l /**, items support later **/) {
+        var patch = {
+            method: 'splice',
+            args: [i, l]
+        };
         for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
             this[i] = this[k + j];
             this[i]._namespace = this[i]._namespace.replace(/\.(\d+?)$/, '.' + i);
@@ -187,7 +198,7 @@ _.extend(DataArray.prototype, Data.prototype, {
         }
         this.length -= l;
         this._keys.splice(this.length, l);
-        this._top.$emit('data:' + this.$namespace(), this);
+        this._top.$emit('data:' + this.$namespace(), this, null, patch);
     },
     /**
      * forEach

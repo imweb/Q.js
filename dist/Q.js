@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.1
+ * Q.js v0.3.2
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -846,7 +846,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args.push(this[this.length]);
 	            this.length++;
 	        }
-	        this._top.$emit('data:' + this.$namespace(), this, {
+	        // value, oldValue, patch
+	        this._top.$emit('data:' + this.$namespace(), this, null, {
 	            method: 'push',
 	            args: args
 	        });
@@ -900,8 +901,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * indexOf
 	     */
 	    indexOf: function (item) {
-	        for (var i = 0, l = this.length; i < l; i++) {
+	        if (item._up === this) {
+	            var namespace = item._namespace.split('.'),
+	                i = +namespace[namespace.length - 1];
 	            if (this[i] === item) return i;
+	        } else if (typeof item !== 'object') {
+	            for (var i = 0, l = this.length; i < l; i++) {
+	                if (this[i] === item) return i;
+	            }
 	        }
 	        return -1;
 	    },
@@ -909,6 +916,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * splice
 	     */
 	    splice: function (i, l /**, items support later **/) {
+	        var patch = {
+	            method: 'splice',
+	            args: [i, l]
+	        };
 	        for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
 	            this[i] = this[k + j];
 	            this[i]._namespace = this[i]._namespace.replace(/\.(\d+?)$/, '.' + i);
@@ -919,7 +930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.length -= l;
 	        this._keys.splice(this.length, l);
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this._top.$emit('data:' + this.$namespace(), this, null, patch);
 	    },
 	    /**
 	     * forEach
@@ -1255,7 +1266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(12)
+	    repeat: __webpack_require__(11)
 	};
 
 
@@ -1263,7 +1274,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(11),
+	var parse = __webpack_require__(12),
 	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
@@ -1318,6 +1329,116 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1);
+	    methods = {
+	        'default': {
+	            // how to clean the dom
+	            clean: function (parentNode, repeats) {
+	                if (repeats.length) {
+	                    repeats.forEach(function (node) {
+	                        // repeat element may has been remove
+	                        node.parentNode === parentNode &&
+	                            parentNode.removeChild(node);
+	                    });
+	                    _.cleanData(repeats);
+	                    repeats.length = 0;
+	                }
+	            },
+	            insert: function (parentNode, fragment, ref) {
+	                parentNode.insertBefore(fragment, ref);
+	            }
+	        },
+	        push: {
+	            insert: function (parentNode, fragment, ref) {
+	                parentNode.insertBefore(fragment, ref);
+	            },
+	            dp: function (data, patch) {
+	                return patch.args;
+	            }
+	        },
+	        splice: {
+	            clean: function (parentNode, repeats, value) {
+	                var i = value[0],
+	                    l = value[1],
+	                    eles = repeats.splice(i, l);
+	                eles.forEach(function (ele) {
+	                    parentNode.removeChild(ele);
+	                });
+	                return true;
+	            },
+	            dp: function (data, patch) {
+	                return patch.args;
+	            }
+	        }
+	    };
+
+	exports.bind = function () {
+	    var tpl = this.el,
+	        setting = this.setting,
+	        parentNode = tpl.parentNode,
+	        key, namespace, target, readFilters, repeats, ref, vm;
+	    // return
+	    if (!parentNode || setting.stop) return;
+
+	    // remove repeat mark
+	    tpl.removeAttribute('q-repeat');
+	    setting.stop = true;
+
+	    key = this.target;
+	    namespace = this.namespace;
+	    target = namespace ? ([namespace, key].join('.')) : key;
+	    readFilters = this.filters;
+	    repeats = [];
+	    ref = document.createComment('q-repeat');
+	    vm = this.vm;
+
+	    parentNode.replaceChild(ref, tpl);
+	    // cache tpl
+	    _.walk([tpl], _.noop, { useCache: true });
+
+	    vm.$watch(target, function (value, oldVal, patch) {
+	        value = vm.applyFilters(value, readFilters);
+	        var method = patch ? patch.method : 'default',
+	            clean = (methods[method] || {}).clean,
+	            insert = (methods[method] || {}).insert,
+	            dp = (methods[method] || {}).dp;
+
+	        // if dp exists and readFilters.length === 0, proceess data
+	        dp && !readFilters.length ?
+	            (value = dp(value, patch)) : (clean = methods['default'].clean);
+
+	        _.nextTick(function () {
+	            // clean up repeats dom
+	            if (clean && clean(parentNode, repeats, value) === true) {
+	                return;
+	            }
+
+	            var fragment = document.createDocumentFragment(),
+	                itemNode;
+	            value.forEach(function (obj, i) {
+	                itemNode = _.clone(tpl);
+	                vm._templateBind(itemNode, {
+	                    data: obj,
+	                    namespace: obj.$namespace(),
+	                    immediate: true,
+	                    useCache: true
+	                });
+	                // TODO this must refactor
+	                repeats.push(itemNode);
+	                fragment.appendChild(itemNode);
+	            });
+
+	            insert && insert(parentNode, fragment, ref);
+	            vm.$emit('repeat-render');
+	        });
+	    }, false, true);
+	}
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var cache = new (__webpack_require__(5))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
@@ -1355,100 +1476,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = parse;
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1);
-	    methods = {
-	        'default': {
-	            // how to clean the dom
-	            clean: function (parentNode, repeats) {
-	                if (repeats.length) {
-	                    repeats.forEach(function (node) {
-	                        // repeat element may has been remove
-	                        node.parentNode === parentNode &&
-	                            parentNode.removeChild(node);
-	                    });
-	                    _.cleanData(repeats);
-	                    repeats.length = 0;
-	                }
-	            },
-	            insert: function (parentNode, fragment, ref) {
-	                parentNode.insertBefore(fragment, ref);
-	            }
-	        },
-	        push: {
-	            insert: function (parentNode, fragment, ref) {
-	                parentNode.insertBefore(fragment, ref);
-	            },
-	            dp: function (data, action) {
-	                return action.args;
-	            }
-	        }
-	    };
-
-	exports.bind = function () {
-	    var tpl = this.el,
-	        setting = this.setting,
-	        parentNode = tpl.parentNode,
-	        key, namespace, target, readFilters, repeats, ref, vm;
-	    // return
-	    if (!parentNode || setting.stop) return;
-
-	    // remove repeat mark
-	    tpl.removeAttribute('q-repeat');
-	    setting.stop = true;
-
-	    key = this.target;
-	    namespace = this.namespace;
-	    target = namespace ? ([namespace, key].join('.')) : key;
-	    readFilters = this.filters;
-	    repeats = [];
-	    ref = document.createComment('q-repeat');
-	    vm = this.vm;
-
-	    parentNode.replaceChild(ref, tpl);
-	    // cache tpl
-	    _.walk([tpl], _.noop, { useCache: true });
-
-	    vm.$watch(target, function (value, action) {
-	        value = vm.applyFilters(value, readFilters);
-	        var method = action ? action.method || 'default' : 'default',
-	            clean = (methods[method] || {}).clean,
-	            insert = (methods[method] || {}).insert,
-	            dp = (methods[method] || {}).dp;
-
-	        // if dp exists and readFilters.length === 0, proceess data
-	        dp && !readFilters.length ?
-	            (value = dp(value, action)) : (clean = methods['default'].clean);
-
-	        _.nextTick(function () {
-	            // clean up repeats dom
-	            clean && clean(parentNode, repeats);
-
-	            var fragment = document.createDocumentFragment(),
-	                itemNode;
-	            value.forEach(function (obj, i) {
-	                itemNode = _.clone(tpl);
-	                vm._templateBind(itemNode, {
-	                    data: obj,
-	                    namespace: obj.$namespace(),
-	                    immediate: true,
-	                    useCache: true
-	                });
-	                // TODO this must refactor
-	                repeats.push(itemNode);
-	                fragment.appendChild(itemNode);
-	            });
-
-	            insert && insert(parentNode, fragment, ref);
-	            vm.$emit('repeat-render');
-	        });
-	    }, false, true);
-	}
 
 
 /***/ }

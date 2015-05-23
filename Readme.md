@@ -173,6 +173,18 @@ data: {
 }
 ```
 
+* attr - 设置节点属性（attribute & property）
+
+```
+<img q-src="url">
+```
+
+```
+data: {
+    url: 'http://www.qxiu.com/2014/images/logo_qi.jpg'
+}
+```
+
 * value - 改变值
 
 用法与text类似，支持input等有value属性的标签
@@ -196,6 +208,20 @@ data: {
 ```
 * model - 双向绑定（只支持input、textarea）
 * vm - 创建子VM(ViewModel,一个Q对象的实例)
+
+* if - 是否使用模版
+
+对应值为false，模版将不被渲染，为true则渲染
+
+```
+<p q-if="need">hello world</p>
+```
+
+```
+data: {
+    need: true
+}
+```
 
 ### filter
 
