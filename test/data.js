@@ -218,10 +218,10 @@ describe('data', function () {
             }
         });
 
-        vm.$watch('arr', function (value, action) {
+        vm.$watch('arr', function (value, oldVal, patch) {
             value[2].should.equal(3);
-            action.method.should.equal('push');
-            action.args[0].should.equal(3);
+            patch.method.should.equal('push');
+            patch.args[0].should.equal(3);
             done();
         });
 

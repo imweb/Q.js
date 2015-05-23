@@ -99,6 +99,17 @@ describe('repeat', function () {
         }, 100);
     });
 
+    it('should able splice a data', function (done) {
+        tpl1.items.splice(0, 2);
+
+        setTimeout(function () {
+            var lis = $('li', '#tpl1');
+            lis.length.should.equal(1);
+            lis[0].innerText.should.equal('nihao');
+            done();
+        }, 100);
+    });
+
     it('should able multiple repeat', function (done) {
         new Q({
             el: '#tpl2',
