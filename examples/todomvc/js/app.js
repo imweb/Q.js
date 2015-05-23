@@ -48,7 +48,7 @@
             },
 
             directives: {
-                'todo-focus': function (value, options) {
+                'todo-focus': function (value) {
                     if (!value) {
                         return;
                     }
