@@ -964,7 +964,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * indexOf
 	     */
 	    indexOf: function (item) {
-	        for (var i = 0, l = this.length; i < l; i++) {
+	        if (item._up === this) {
+	            var namespace = item._namespace.split('.'),
+	                i = +namespace[namespace.length - 1];
 	            if (this[i] === item) return i;
 	        }
 	        return -1;
