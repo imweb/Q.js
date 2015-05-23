@@ -18,7 +18,7 @@
     "maxmin": "^1.0.0",
     "mocha": "^2.1.0",
     "should": "^4.4.2",
-    "webpack": "*"
+    "webpack": "^1.9.5"
   },
   "lego": {
     "main": "dist/Q.js",
@@ -36,7 +36,7 @@
       "maxmin": "^1.0.0",
       "mocha": "^2.1.0",
       "should": "^4.4.2",
-      "webpack": "*"
+      "webpack": "^1.9.5"
     }
   }
 }
