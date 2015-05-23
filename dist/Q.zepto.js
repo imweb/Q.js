@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.0
+ * Q.js v0.3.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1393,7 +1393,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    vm.$watch(target, function (value, action) {
 	        value = vm.applyFilters(value, readFilters);
-	        var method = action ? action.method : 'default',
+	        var method = action ? action.method || 'default' : 'default',
 	            clean = (methods[method] || {}).clean,
 	            insert = (methods[method] || {}).insert,
 	            dp = (methods[method] || {}).dp;

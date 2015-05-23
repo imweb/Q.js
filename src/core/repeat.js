@@ -53,7 +53,7 @@ exports.bind = function () {
 
     vm.$watch(target, function (value, action) {
         value = vm.applyFilters(value, readFilters);
-        var method = action ? action.method : 'default',
+        var method = action ? action.method || 'default' : 'default',
             clean = (methods[method] || {}).clean,
             insert = (methods[method] || {}).insert,
             dp = (methods[method] || {}).dp;
