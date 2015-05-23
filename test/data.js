@@ -129,18 +129,23 @@ describe('data', function () {
             el: null,
             data: {
                 msg: 'hello',
-                list: [
+                list1: [
                     {
                         text: 'tencent'
                     },
                     {
                         text: 'donaldyang'
                     }
+                ],
+                list2: [
+                    'tencent',
+                    'donaldyang'
                 ]
             }
         });
 
-        vm.list.indexOf(vm.list[1]).should.equal(1);
+        vm.list1.indexOf(vm.list1[1]).should.equal(1);
+        vm.list2.indexOf(vm.list2[1]).should.equal(1);
     });
 
     it('should able to call splice for a DataArray', function () {

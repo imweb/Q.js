@@ -968,6 +968,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var namespace = item._namespace.split('.'),
 	                i = +namespace[namespace.length - 1];
 	            if (this[i] === item) return i;
+	        } else if (typeof item !== 'object') {
+	            for (var i = 0, l = this.length; i < l; i++) {
+	                if (this[i] === item) return i;
+	            }
 	        }
 	        return -1;
 	    },
