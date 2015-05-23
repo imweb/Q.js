@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.0
+ * Q.js v0.3.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1255,7 +1255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(11)
+	    repeat: __webpack_require__(12)
 	};
 
 
@@ -1263,7 +1263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(12),
+	var parse = __webpack_require__(11),
 	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
@@ -1316,6 +1316,49 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var cache = new (__webpack_require__(5))(1000);
+	/**
+	 * click: onclick | filter1 | filter2
+	 * click: onclick , keydown: onkeydown
+	 * value1 | filter1 | filter2
+	 * value - 1 | filter1 | filter2   don't support
+	 */
+	function parse(str) {
+	    var hit = cache.get(str);
+	    if (hit) return hit;
+	    var exps = str.trim().split(/ *\, */),
+	        eventReg = /^([\w\-]+)\:/,
+	        keyReg = /^[\w\-]+$/,
+	        arr = [];
+	    exps.forEach(function (exp) {
+	        var res = {},
+	            match = exp.match(eventReg),
+	            filters, exp;
+	        if (match) {
+	            res.arg = match[1];
+	            exp = exp.substring(match[0].length).trim();
+	        }
+	        filters = exp.split(/ *\| */);
+	        exp = filters.shift();
+	        if (keyReg.test(exp)) {
+	            res.target = exp;
+	        } else {
+	            res.exp = exp;
+	        }
+	        res.filters = filters;
+	        arr.push(res);
+	    });
+	    cache.put(str, arr);
+	    return arr;
+	}
+
+	module.exports = parse;
+
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1373,7 +1416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    vm.$watch(target, function (value, action) {
 	        value = vm.applyFilters(value, readFilters);
-	        var method = action ? action.method : 'default',
+	        var method = action ? action.method || 'default' : 'default',
 	            clean = (methods[method] || {}).clean,
 	            insert = (methods[method] || {}).insert,
 	            dp = (methods[method] || {}).dp;
@@ -1406,49 +1449,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }, false, true);
 	}
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var cache = new (__webpack_require__(5))(1000);
-	/**
-	 * click: onclick | filter1 | filter2
-	 * click: onclick , keydown: onkeydown
-	 * value1 | filter1 | filter2
-	 * value - 1 | filter1 | filter2   don't support
-	 */
-	function parse(str) {
-	    var hit = cache.get(str);
-	    if (hit) return hit;
-	    var exps = str.trim().split(/ *\, */),
-	        eventReg = /^([\w\-]+)\:/,
-	        keyReg = /^[\w\-]+$/,
-	        arr = [];
-	    exps.forEach(function (exp) {
-	        var res = {},
-	            match = exp.match(eventReg),
-	            filters, exp;
-	        if (match) {
-	            res.arg = match[1];
-	            exp = exp.substring(match[0].length).trim();
-	        }
-	        filters = exp.split(/ *\| */);
-	        exp = filters.shift();
-	        if (keyReg.test(exp)) {
-	            res.target = exp;
-	        } else {
-	            res.exp = exp;
-	        }
-	        res.filters = filters;
-	        arr.push(res);
-	    });
-	    cache.put(str, arr);
-	    return arr;
-	}
-
-	module.exports = parse;
 
 
 /***/ }

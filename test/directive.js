@@ -196,10 +196,24 @@ describe('repeat', function () {
 
         setTimeout(function () {
             var ps = $('#multi-repeat div p');
+            ps.length.should.equal(4);
             for (var i = 0, l = ps.length; i < l; i++) {
                 ps[i].innerText.should.equal('hello');
             }
-            done();
+            vm.$set('msgs', [{
+                text: 'nihao'
+            }, {
+                text: 'nihao'
+            }]);
+
+            setTimeout(function () {
+                ps = $('#multi-repeat div p');
+                ps.length.should.equal(4);
+                for (var i = 0, l = ps.length; i < l; i++) {
+                    ps[i].innerText.should.equal('nihao');
+                }
+                done();
+            }, 200);
         }, 200);
     });
 });

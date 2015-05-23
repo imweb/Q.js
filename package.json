@@ -1,6 +1,6 @@
 {
   "name": "Q.js",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "fake-MVVM library",
   "main": "dist/Q.js",
   "scripts": {
@@ -13,11 +13,30 @@
     "gulp-mocha-phantomjs": "^0.5.3",
     "gulp-uglify": "^1.1.0",
     "gulp-webpack": "^1.1.2",
-    "jquery": "^2.1.3",
+    "jquery": "^1.9.1",
     "map-stream": "0.0.5",
     "maxmin": "^1.0.0",
     "mocha": "^2.1.0",
     "should": "^4.4.2",
     "webpack": "*"
+  },
+  "lego": {
+    "main": "dist/Q.js",
+    "category" : "1",
+    "categoryName" : "基础库",
+    "dependencies": {
+      "jquery": "^1.9.1"
+    },
+    "devDependencies": {
+      "gulp": "^3.8.10",
+      "gulp-mocha-phantomjs": "^0.5.3",
+      "gulp-uglify": "^1.1.0",
+      "gulp-webpack": "^1.1.2",
+      "map-stream": "0.0.5",
+      "maxmin": "^1.0.0",
+      "mocha": "^2.1.0",
+      "should": "^4.4.2",
+      "webpack": "*"
+    }
   }
 }
