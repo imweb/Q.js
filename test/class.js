@@ -12,7 +12,7 @@ describe('class', function () {
             }
         });
         // require hello component
-        Q.require('hello').options.filters.should.have.property('prepend')
+        Q.require('hello').options.filters.should.have.property('prepend');
     });
 
     it('should able to create a child component', function (done) {

@@ -65,6 +65,51 @@ describe('attrbute', function () {
     });
 });
 
+describe('on', function () {
+    it('should able bind event', function (done) {
+        new Q({
+            el: '#on1',
+            methods: {
+                onclick: function () {
+                    done();
+                }
+            }
+        });
+        // just button has click method in phantomjs
+        // https://github.com/ariya/phantomjs/issues/10795
+        $('button', '#on1')[0].click();
+    });
+
+    it('should able bind event', function (done) {
+        new Q({
+            el: '#on2',
+            data: {
+                msgs: [
+                    {
+                        text: 'hello'
+                    }
+                ]
+            },
+            methods: {
+                onclick: function (data) {
+                    data.should.equal(this);
+                },
+                clickItem: function (data) {
+                    data.should.equal(this.msgs[0]);
+                    done();
+                }
+            }
+        });
+
+
+        setTimeout(function () {
+            var buttons = $('button', '#on2');
+            buttons[0].click();
+            buttons[1].click();
+        }, 100);
+
+    });
+});
 
 describe('repeat', function () {
     var tpl1
@@ -130,7 +175,7 @@ describe('repeat', function () {
             ps[0].innerText.should.equal('hello');
             ps[1].innerText.should.equal('qq');
             done();
-        }, 100);
+        }, 200);
     });
 
     it('should not throw a error when repeat element has been modified', function (done) {
@@ -148,20 +193,6 @@ describe('repeat', function () {
             { msg: 'world' }
         ]);
         done();
-    });
-
-    it('should able bind event', function (done) {
-        new Q({
-            el: '#tpl3',
-            methods: {
-                onclick: function () {
-                    done();
-                }
-            }
-        });
-        // just button has click method in phantomjs
-        // https://github.com/ariya/phantomjs/issues/10795
-        $('button', '#tpl3')[0].click();
     });
 
     it('should able to toggle class', function () {

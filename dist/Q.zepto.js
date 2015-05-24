@@ -1158,20 +1158,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    on: {
 	        bind: function () {
-	            var key = this.target || this.exp.match(/^[\w\-]+/)[0],
+	            var self = this,
+	                key = this.target || this.exp.match(/^[\w\-]+/)[0],
 	                expression = this.exp,
 	                filters = this.filters,
 	                vm = this.vm,
-	                handler = vm.applyFilters(this.vm[key], filters),
-	                data = this.namespace ?
-	                    vm.data(this.namespace) :
-	                    vm;
+	                handler = vm.applyFilters(this.vm[key], filters);
 	            _.add(this.el, this.arg, function (e) {
 	                if (!handler || typeof handler !== 'function') {
 	                    return _.warn('You need implement the ' + key + ' method.');
 	                }
 	                expression ?
-	                    handler.call(vm, data) :
+	                    handler.call(vm, self.data()) :
 	                    handler.apply(vm, arguments);
 	            });
 	        }
