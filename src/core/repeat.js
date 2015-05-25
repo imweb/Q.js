@@ -26,13 +26,14 @@ var _ = require('./utils');
             }
         },
         splice: {
-            clean: function (parentNode, repeats, value) {
+            clean: function (parentNode, repeats, value, watchers, target) {
                 var i = value[0],
                     l = value[1],
                     eles = repeats.splice(i, l);
                 eles.forEach(function (ele) {
                     parentNode.removeChild(ele);
                 });
+                splice(watchers, target, i, l);
                 return true;
             },
             dp: function (data, patch) {
@@ -40,6 +41,31 @@ var _ = require('./utils');
             }
         }
     };
+
+
+function splice(watchers, target, i, l) {
+    var length = target.length,
+        subKey,
+        cur,
+        index,
+        newKey;
+    Object.keys(watchers).forEach(function (key) {
+        if (~key.indexOf(target)) {
+            subKey = key.substring(length + 1);
+            cur = subKey.split('.');
+            if (cur.length) {
+                index = +cur.shift();
+                if ((index -= l) >= i) {
+                    cur.unshift(index);
+                    cur.unshift(target);
+                    newKey = cur.join('.');
+                    watchers[newKey] = watchers[key];
+                    delete watchers[key];
+                }
+            }
+        }
+    });
+}
 
 exports.bind = function () {
     var tpl = this.el,
@@ -78,7 +104,7 @@ exports.bind = function () {
 
         _.nextTick(function () {
             // clean up repeats dom
-            if (clean && clean(parentNode, repeats, value) === true) {
+            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
                 return;
             }
 

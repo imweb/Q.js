@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.3
+ * Q.js v0.3.4
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1043,11 +1043,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return modules[name] || this;
 	}
 
+	function _create(o) {
+	    function F() {}
+	    F.prototype = o;
+	    return new F();
+	}
+
 	function _extend(extendOptions) {
 	    extendOptions = extendOptions || {};
 	    var Super = this,
 	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = Object.create(Super.prototype);
+	    Sub.prototype = _create(Super.prototype);
 	    Sub.prototype.constructor = Sub;
 	    Sub.options = mergeOptions(
 	        Super.options,
@@ -1143,13 +1149,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                expression = this.exp,
 	                filters = this.filters,
 	                vm = this.vm,
-	                handler = vm.applyFilters(this.vm[key], filters);
+	                handler = vm.applyFilters(this.vm[key], filters),
+	                data = expression && self.data();
 	            _.add(this.el, this.arg, function (e) {
 	                if (!handler || typeof handler !== 'function') {
 	                    return _.warn('You need implement the ' + key + ' method.');
 	                }
 	                expression ?
-	                    handler.call(vm, self.data()) :
+	                    handler.call(vm, data) :
 	                    handler.apply(vm, arguments);
 	            });
 	        }
@@ -1355,13 +1362,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        },
 	        splice: {
-	            clean: function (parentNode, repeats, value) {
+	            clean: function (parentNode, repeats, value, watchers, target) {
 	                var i = value[0],
 	                    l = value[1],
 	                    eles = repeats.splice(i, l);
 	                eles.forEach(function (ele) {
 	                    parentNode.removeChild(ele);
 	                });
+	                splice(watchers, target, i, l);
 	                return true;
 	            },
 	            dp: function (data, patch) {
@@ -1369,6 +1377,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	    };
+
+
+	function splice(watchers, target, i, l) {
+	    var length = target.length,
+	        subKey,
+	        cur,
+	        index,
+	        newKey;
+	    Object.keys(watchers).forEach(function (key) {
+	        if (~key.indexOf(target)) {
+	            subKey = key.substring(length + 1);
+	            cur = subKey.split('.');
+	            if (cur.length) {
+	                index = +cur.shift();
+	                if ((index -= l) >= i) {
+	                    cur.unshift(index);
+	                    cur.unshift(target);
+	                    newKey = cur.join('.');
+	                    watchers[newKey] = watchers[key];
+	                    delete watchers[key];
+	                }
+	            }
+	        }
+	    });
+	}
 
 	exports.bind = function () {
 	    var tpl = this.el,
@@ -1407,7 +1440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _.nextTick(function () {
 	            // clean up repeats dom
-	            if (clean && clean(parentNode, repeats, value) === true) {
+	            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
 	                return;
 	            }
 

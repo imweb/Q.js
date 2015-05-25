@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+}
+
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+
+
+.clearfix:after {
+  clear: both;
+  overflow: hidden;
+}
+
+
+.album-header {
+  height: 45px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 8px 10px;
+  position: relative;
+}
+
+.album-header h3 {
+  font-size: 16px;
+  color: #000000;
+  margin: 0;
+}
+
+.album-header p {
+  font-size: 12px;
+  color: #000000;
+  margin: 5px 0;
+}
+
+.album-header .arrow {
+  color: #CCC;
+  top: 21px;
+  right: 20px;
+  width: 7px;
+  height: 7px;
+  margin-top: -5px;
+  margin-left: 7px;
+  border-style: solid;
+  border-width: 2px 2px 0 0;
+  -webkit-transform: rotate(45deg);
+  z-index: 2;
+  bottom: -1px;
+  line-height: 42px;
+  font-size: 32px;
+  text-align: center;
+  display: inline-block;
+}
+
+.album-header .author {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  font-size: 12px;
+  color: #a6a6a6;
+  right: 10px;
+  bottom: 5px;
+}
+
+
+.album-pic {
+  margin-left: -2px;
+  margin-bottom: 15px;
+}
+
+
+.pic-item {
+  display: block;
+  box-sizing: border-box;
+  float: left;
+  border-left: 2px solid transparent;
+  border-top: 2px solid transparent;
+  width: 25%;
+  height: 0;
+  padding-bottom: 25%;
+  overflow: hidden;
+  position: relative;
+}
+
+.pic-item img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pic-item .mask {
+  display: none;
+}
+
+.pic-item.selected .mask {
+  display: block;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.5);
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAATlBMVEUAAAAYtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO0YtO3///8lue7J7ft81PXU8fz8/v9t0PQctu1CwvGy5vnn9/2D2MQQAAAADnRSTlMA9BfOkXRT+9q3ZycE7mwJy7YAAAEbSURBVEjHlZbbksIgEESHO2jSuLtK3P//Uau0QkVHLtNPPJxTFEnRA7Fob1NcQ1hjsl7TINoZvMU43cOtAouyLWVxL5wrbvnGnw2aMWfOe4VOlP/kTwHdhNMHj2HeDB/GQvCH8ypMRNWTLwZTMfvXdZiMe/FazQpKPwWL6di5DX6vP+WwhRvyOeftcAozwe87wBDpGf6CPZq8iIcnK+JhKYl4JIr7stz/b0Mekepf2HK+3kY8FNVl+atGmwcINZdqdPhAihk9HitFMKPDI1ICMzo8Ellwo83Dkgc37k0enjS40eahiQwzOrx5XiBmNHm4r1e0bKXZAtISENeMtMjEVSktY2ndSweKfGTJh6J87MoHu/zpIH+ciJ8/Dz0yYx6cBnWXAAAAAElFTkSuQmCC');
+  background-repeat: no-repeat;
+  background-size: 35%;
+  background-position: 90% 10%;
+}
+
+
+.manage-tool-mod {
+  background-color: #f0f0f0;
+  height: 55px;
+  width: 100%;
+  position: fixed;
+  bottom: 0px;
+}
+
+.manage-tool-mod .grid-2 {
+  display: block;
+  width: 46%;
+  float: left;
+  padding: 3px 2%;
+}
+
+.manage-tool-mod .ui-button {
+  border-color: #cacccd;
+}
