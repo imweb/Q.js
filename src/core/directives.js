@@ -43,13 +43,14 @@ module.exports = {
                 expression = this.exp,
                 filters = this.filters,
                 vm = this.vm,
-                handler = vm.applyFilters(this.vm[key], filters);
+                handler = vm.applyFilters(this.vm[key], filters),
+                data = expression && self.data();
             _.add(this.el, this.arg, function (e) {
                 if (!handler || typeof handler !== 'function') {
                     return _.warn('You need implement the ' + key + ' method.');
                 }
                 expression ?
-                    handler.call(vm, self.data()) :
+                    handler.call(vm, data) :
                     handler.apply(vm, arguments);
             });
         }
