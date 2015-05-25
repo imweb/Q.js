@@ -38,13 +38,13 @@
                                 url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://pub.idqqimg.com/pc/misc/connect/files/20140424/e934597ca2314d8da4f3dbe67d41f80d.png'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://p.qpic.cn/qqcourse/QFzQYCgCrxmtIj1Mk65nq9ibYMibU3Y4p2aLe3Nzo72ZPxicib0z6bFp4zFZ0NkFu6Bu/'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://t3.qlogo.cn/mbloghead/157a5b12f45a8d325e36/0'
                             }
                         ]
                     },
@@ -57,25 +57,25 @@
                                 url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://pub.idqqimg.com/pc/misc/connect/files/20140424/e934597ca2314d8da4f3dbe67d41f80d.png'
+                            },
+                            {
+                                url: 'http://p.qpic.cn/qqcourse/QFzQYCgCrxmtIj1Mk65nq9ibYMibU3Y4p2aLe3Nzo72ZPxicib0z6bFp4zFZ0NkFu6Bu/'
+                            },
+                            {
+                                url: 'http://t3.qlogo.cn/mbloghead/157a5b12f45a8d325e36/0'
                             },
                             {
                                 url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://pub.idqqimg.com/pc/misc/connect/files/20140424/e934597ca2314d8da4f3dbe67d41f80d.png'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://p.qpic.cn/qqcourse/QFzQYCgCrxmtIj1Mk65nq9ibYMibU3Y4p2aLe3Nzo72ZPxicib0z6bFp4zFZ0NkFu6Bu/'
                             },
                             {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
-                            },
-                            {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
-                            },
-                            {
-                                url: 'http://p.qlogo.cn/gh/342323923/342323923/0'
+                                url: 'http://t3.qlogo.cn/mbloghead/157a5b12f45a8d325e36/0'
                             }
                         ]
                     }
