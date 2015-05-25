@@ -34,7 +34,7 @@ module.exports = {
     },
     text: function (value) {
         value !== undefined &&
-            (this.el.innerText = value);
+            (this.el.textContent = value);
     },
     on: {
         bind: function () {
