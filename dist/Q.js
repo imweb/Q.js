@@ -1043,11 +1043,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return modules[name] || this;
 	}
 
+	function _create(o) {
+	    function F() {}
+	    F.prototype = o;
+	    return new F();
+	}
+
 	function _extend(extendOptions) {
 	    extendOptions = extendOptions || {};
 	    var Super = this,
 	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = Object.create(Super.prototype);
+	    Sub.prototype = _create(Super.prototype);
 	    Sub.prototype.constructor = Sub;
 	    Sub.options = mergeOptions(
 	        Super.options,
