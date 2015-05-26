@@ -119,7 +119,7 @@ vm.msgs[0].$key(); // -> 0
 vm.msgs[0].$up(); // -> vm.msgs
 ```
 
-* 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`
+* 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`，其中`push`、`splice`在`repeat` directive中做了适当的优化，使得使用这两个方法，只会导致repeat的局部渲染。
 
 ### el
 
