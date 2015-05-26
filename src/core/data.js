@@ -9,7 +9,7 @@ function _prefix(up, key, value) {
         data: value,
         up: up,
         top: up._top,
-        namespace: [up._namespace, key].join('.')
+        namespace: key + ''
     };
     if (typeof value === 'object' && value !== null) {
         up[key] =   _isArray(value) ?
@@ -64,11 +64,14 @@ _.extend(Data.prototype, {
      * get the namespace
      */
     $namespace: function (key) {
-        return (
-            key !== undefined ?
-                [this._namespace, key].join('.') :
-                this._namespace
-        ).substring(1);
+        var keys = [],
+            self = this;
+        for (; self != undefined; self = self._up) {
+            self._namespace &&
+                keys.unshift(self._namespace);
+        }
+        if (key) keys.push(key);
+        return keys.join('.');
     },
     /**
      * set the value of the key
@@ -170,8 +173,7 @@ _.extend(DataArray.prototype, Data.prototype, {
      */
     indexOf: function (item) {
         if (item._up === this) {
-            var namespace = item._namespace.split('.'),
-                i = +namespace[namespace.length - 1];
+            var i = +item._namespace;
             if (this[i] === item) return i;
         } else if (typeof item !== 'object') {
             for (var i = 0, l = this.length; i < l; i++) {
@@ -190,7 +192,7 @@ _.extend(DataArray.prototype, Data.prototype, {
         };
         for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
             this[i] = this[k + j];
-            this[i]._namespace = this[i]._namespace.replace(/\.(\d+?)$/, '.' + i);
+            this[i]._namespace = i + '';
         }
         for (;i < this.length; i++) {
             this[i] = null;
