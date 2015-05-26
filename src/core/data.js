@@ -74,6 +74,19 @@ _.extend(Data.prototype, {
         return keys.join('.');
     },
     /**
+     * get the key of it's parent
+     */
+    $key: function () {
+        var key = this._namespace;
+        return +key + '' === key ? +key : key;
+    },
+    /**
+     * get the parent of the data
+     */
+    $up: function () {
+        return this._up;
+    },
+    /**
      * set the value of the key
      */
     $set: function (key, value) {
@@ -130,7 +143,6 @@ _.extend(DataArray.prototype, Data.prototype, {
      */
     pop: function () {
         var res = this[--this.length];
-        this[this.length] = null;
         delete this[this.length];
         this._keys.pop();
         this._top.$emit('data:' + this.$namespace(), this);
@@ -144,6 +156,9 @@ _.extend(DataArray.prototype, Data.prototype, {
         this.length++;
         for (var l = this.length; l--;) {
             this[l] = this[l - 1];
+            // fixed namespace
+            typeof this[l] === 'object' &&
+                (this[l]._namespace = l + '');
         }
         _prefix(this, 0, value);
         this._top.$emit('data:' + this.$namespace(), this);
@@ -157,6 +172,9 @@ _.extend(DataArray.prototype, Data.prototype, {
         var res = this[0];
         for (var i = 0, l = this.length; i < l; i++) {
             this[i] = this[i + 1];
+            // fixed namespace
+            typeof this[i] === 'object' &&
+                (this[i]._namespace = i + '');
         }
         this._keys.pop();
         this._top.$emit('data:' + this.$namespace(), this);
@@ -192,7 +210,8 @@ _.extend(DataArray.prototype, Data.prototype, {
         };
         for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
             this[i] = this[k + j];
-            this[i]._namespace = i + '';
+            typeof this[i] === 'object' &&
+                (this[i]._namespace = i + '');
         }
         for (;i < this.length; i++) {
             this[i] = null;
