@@ -81,6 +81,7 @@ describe('data', function () {
 
         vm.list.pop().text.should.equal('donaldyang');
         vm.list.length.should.equal(1);
+        vm.list[0].text.should.equal('tencent');
     });
 
     it('should able to unshift a vm data', function () {
@@ -101,6 +102,9 @@ describe('data', function () {
 
         vm.list.unshift({ text: 'good' });
         vm.list[0].text.should.equal('good');
+        vm.list[0].$key().should.equal(0);
+        vm.list[1].$key().should.equal(1);
+        vm.list[2].$key().should.equal(2);
         vm.list.length.should.equal(3);
     });
 
@@ -122,6 +126,8 @@ describe('data', function () {
 
         vm.list.shift().text.should.equal('tencent');
         vm.list.length.should.equal(1);
+        vm.list[0].text.should.equal('donaldyang');
+        vm.list[0].$key().should.equal(0);
     });
 
     it('should able to call indexOf for a DataArray', function () {
@@ -167,6 +173,7 @@ describe('data', function () {
         vm.list.splice(0, 1);
         vm.list.length.should.equal(1);
         vm.list[0].text.should.equal('donaldyang');
+        vm.list[0].$key().should.equal(0);
     });
 
     it('should return itself when key is undefined', function () {

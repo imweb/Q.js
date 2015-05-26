@@ -85,7 +85,38 @@ vm.msg // -> hello
 var obj = {
     msg: 'hello world!'
 };
-vm.$set('msg', obj.msg); // -> hello world!
+vm.$set('msg', obj.msg); // -> 'hello world!'
+```
+
+* 得到data相对于vm的namespace:
+
+```javascript
+var data = {
+    msgs: [
+        {
+            text: 'hello'
+        },
+        {
+            text: 'tencent'
+        }
+    ]
+};
+var vm = new Q({
+    data: data
+})
+vm.msgs[0].$namespace(); // -> 'msgs.0'
+```
+
+* 如果data是obj，得到其在父级的key:
+
+```javascript
+vm.msgs[0].$key(); // -> 0
+```
+
+* 如果data是obj，得到其父级:
+
+```javascript
+vm.msgs[0].$up(); // -> vm.msgs
 ```
 
 * 对于数组可使用大部分数组方法，目前已经支持了：`push`、`pop`、`unshift`、`shift`、`indexOf`、`splice`、`forEach`、`filter`
