@@ -147,7 +147,7 @@ vm.msgs[0].$up(); // -> vm.msgs
 
 Q.js中，默认的prefix是`q`，directiveId是`text`，expression是`message`。这个directive的作用是，当Q实例中`message`这一属性的值发生变化时，告知Q.js去更新这个节点的文本内容。这里表示`message`(key)对应的数据(value)，用`text`指令进行操作，`text`指令是在该节点塞入文字。例如：
 ```javascript
-var myText = Q.get('#myText'); //Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息
+var myText = Q.get('#myText'); // Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息
 ```
 
 ### 自定义`directive`
@@ -331,3 +331,5 @@ var vm = new Q({
 [![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)](http://www.qxiu.com/)
 
 [![QQ群](http://qplus3.idqqimg.com/qun/portal/img/logo2.png)](http://qun.qq.com/)
+
+[![家校群](https://cloud.githubusercontent.com/assets/2239584/7838577/283888ca-04c0-11e5-98a2-adc49360eb2a.png)](http://qun.qq.com/homework/)
