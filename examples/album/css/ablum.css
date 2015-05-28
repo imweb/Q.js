@@ -2,6 +2,10 @@ body {
   margin: 0;
 }
 
+.grid-2 {
+  width: 50%;
+}
+
 .clearfix:before,
 .clearfix:after {
   content: "";
@@ -129,4 +133,75 @@ body {
 
 .manage-tool-mod .ui-button {
   border-color: #cacccd;
+}
+
+/** button **/
+.ui-button {
+    display: inline-block;
+
+    border-radius: 3px;
+    padding: 6px 10px;
+    margin: 4px 0;
+    border: 1px solid #0079FF;
+    color: #0079FF;
+    font-size: 13px;
+    line-height: 13px;
+    text-align: center;
+    background-color: transparent;
+
+    -webkit-appearance: none;
+    text-decoration: none;
+    -webkit-box-sizing: border-box;
+}
+
+.ui-button:active {
+    color: #fff;
+    background: #0079FF;
+}
+
+.ui-button[disabled]{
+    pointer-events: none;
+    color: #a6a6a6;
+    border-color: #a6a6a6;
+    background: #fff;
+    opacity: 0.6;
+}
+
+.ui-button.ui-block {
+    height: 44px;
+    padding: 10px;
+    font-size: 17px;
+    line-height: 17px;
+    display: block;
+    width: 100%;
+}
+
+.slider-mod {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
+  background: #fff;
+  overflow: scroll;
+}
+
+.slider-img {
+  display: block;
+  float: left;
+  border-left: 2px solid transparent;
+  border-top: 2px solid transparent;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.slider-img img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
 }
