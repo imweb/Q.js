@@ -30,6 +30,12 @@
             </div>
         </div>
 
+        <div class="slider-mod" id="slider-mod" style="display: none" q-show="images | hasLength" q-on="tap: close">
+            <div q-repeat="images" class="slider-img">
+                <img q-attr="src: url">
+            </div>
+        </div>
+
         <script src="http://pub.idqqimg.com/guagua/qiqimobile/js/libs/zepto.min-e0859e89.js"></script>
         <script>
         var define = function (name, deps, factory) {
@@ -39,6 +45,7 @@
         }
         </script>
         <script src="../../dist/Q.zepto.js"></script>
+        <script src="js/slider.js"></script>
         <script src="js/album-list.js"></script>
         <script src="js/app.js"></script>
 

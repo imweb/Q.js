@@ -1,14 +1,10 @@
-!function (Q, root) {
+!function (Q, slider, root) {
     var vm, selected = [];
 
-    function showPic(value) {
-        var arr = value._up;
+    slider = slider();
 
-        mqq.media.showPicture({
-            imageIDs: arr.$get().filter(function (item) { return item.url }),
-            index : arr.indexOf(value),
-            isNotShowIndex : false
-        });
+    function showPic(value) {
+        slider.$set('images', value.$up());
     }
 
     function selectPic(value) {
@@ -116,4 +112,4 @@
     }
 
     root['albumList'] = init;
-}(Q, window);
+}(Q, slider, window);
