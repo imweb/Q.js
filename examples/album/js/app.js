@@ -44,6 +44,7 @@
                     var arr = img._up;
                     arr.splice(arr.indexOf(img), 1);
                 });
+                imgs.length = 0;
                 reset();
             },
             cancel: function () {
@@ -51,12 +52,12 @@
                 imgs.forEach(function (img) {
                     img.$set('selected', false);
                 });
+                imgs.length = 0;
                 reset();
             }
         }
 
         function reset() {
-            imgs.length = 0;
             toolVm.$set('buttons', DEFAULT_BUTTONS);
             listVm.$set('dealImg', 'show');
         }
