@@ -4,8 +4,6 @@
     function showPic(value) {
         var arr = value._up;
 
-        console.log(arr, arr.indexOf(value));
-
         mqq.media.showPicture({
             imageIDs: arr.$get().filter(function (item) { return item.url }),
             index : arr.indexOf(value),
