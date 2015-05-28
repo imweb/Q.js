@@ -75,12 +75,25 @@
                     }
                 ]
             },
+            directives: {
+                del: function (value) {
+                    if (!value.length) {
+                        value = value.$up();
+                        var arr = value.$up(),
+                            index = arr.indexOf(value);
+                        ~index && arr.splice(index, 1);
+                    }
+                }
+            },
             filters: {
                 whoUpload: function (value) {
                     return value + '上传';
                 },
                 hasLength: function (value) {
                     return !!value.length;
+                },
+                noLength: function (value) {
+                    return !value.length;
                 }
             },
             methods: {

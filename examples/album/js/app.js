@@ -26,14 +26,17 @@
                 if (value) {
                     if (listVm.albums.length === 2) {
                         var d = new Date;
-                        listVm.albums.unshift({
+                        listVm.albums.push({
                             date: [d.getFullYear(), d.getMonth() + 1, d.getDate()].join('-'),
                             des: '反正就是游玩',
                             author: '你',
                             pics: []
                         })
                     }
-                    listVm.albums[0].pics.push({
+                    if (listVm.albums.length < 3) {
+                        return alert('你已经删除掉创建的相册!');
+                    }
+                    listVm.albums[2].pics.push({
                         url: value
                     });
                 }

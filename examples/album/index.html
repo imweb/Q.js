@@ -9,7 +9,7 @@
     </head>
     <body>
         <div class="album-list-mod" id="album-list-mod" q-show="isShow" style="display: none;">
-            <div class="album-mod" q-repeat="albums" q-show="pics | hasLength">
+            <div class="album-mod" q-repeat="albums" q-del="pics">
                 <div class="album-header">
                     <h3 q-text="date"></h3>
                     <p><span q-text="des"></span><i class="arrow"></i></p>
@@ -22,6 +22,8 @@
                     </div>
                 </div>
             </div>
+
+            <div q-show="albums | noLength" class="album-null">啥都没有，请上传</div>
         </div>
 
         <div class="manage-tool-mod" id="manage-tool-mod" style="display: none;" q-show="isShow">

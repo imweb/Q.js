@@ -115,6 +115,13 @@ body {
   background-position: 90% 10%;
 }
 
+.album-null {
+  display: none;
+  font-size: 30px;
+  line-height: 250px;
+  text-align: center;
+}
+
 
 .manage-tool-mod {
   background-color: #f0f0f0;
