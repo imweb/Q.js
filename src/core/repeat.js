@@ -26,17 +26,23 @@ var _ = require('./utils');
             }
         },
         splice: {
-            clean: function (parentNode, repeats, value, watchers, target) {
+            clean: function (parentNode, repeats, value, watchers) {
                 var i = value[0],
                     l = value[1],
+                    target = value[2].$namespace(),
                     eles = repeats.splice(i, l);
                 eles.forEach(function (ele) {
                     parentNode.removeChild(ele);
                 });
-                splice(watchers, target, i, l);
+                // just splice one time
+                if (!value.done) {
+                    splice(watchers, target, i, l);
+                    value.done = true;
+                }
                 return true;
             },
             dp: function (data, patch) {
+                patch.args.push(data);
                 return patch.args;
             }
         }
