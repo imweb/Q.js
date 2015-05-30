@@ -31,7 +31,10 @@
                             des: '反正就是游玩',
                             author: '你',
                             pics: []
-                        })
+                        });
+                    }
+                    if (listVm.albums.length < 3) {
+                        return alert('你已经删除掉创建的相册!');
                     }
                     listVm.albums[0].pics.push({
                         url: value
