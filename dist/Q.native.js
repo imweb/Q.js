@@ -1200,9 +1200,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'class': function (value) {
 	        var el = this.el,
 	            arg = this.arg;
-	        value ?
-	            _.addClass(el, arg) :
-	            _.removeClass(el, arg);
+	        if (arg) {
+	            value ?
+	                _.addClass(el, arg) :
+	                _.removeClass(el, arg);
+	        } else {
+	            if (this.lastVal) {
+	                _.removeClass(el, this.lastVal);
+	            }
+	            if (value) {
+	                _.addClass(el, value);
+	                this.lastVal = value;
+	            }
+	        }
 	    },
 	    value: function (value) {
 	        var el = this.el;
