@@ -1171,7 +1171,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    text: function (value) {
 	        value !== undefined &&
-	            (this.el.textContent = value);
+	            (this.el.textContent =
+	                value == null ?
+	                    '' :
+	                    value.toString());
 	    },
 	    on: {
 	        bind: function () {
