@@ -1,4 +1,5 @@
 var gulp = require('gulp')
+  , karma = require('karma').server
   , uglify = require('gulp-uglify')
   , maxmin = require('maxmin')
   , map = require('map-stream')
@@ -125,6 +126,18 @@ gulp.task('native-min', ['native'], function (done) {
       naSize.print();
       done();
     });
+});
+
+gulp.task('karma-native', function (done) {
+  karma.start({
+    configFile: __dirname + '/native.conf.js'
+  }, done);
+});
+
+gulp.task('karma-jquery', function (done) {
+  karma.start({
+    configFile: __dirname + '/jquery.conf.js'
+  }, done);
 });
 
 gulp.task('default', ['jquery-min', 'zepto-min', 'native-min']);
