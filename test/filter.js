@@ -8,6 +8,7 @@ describe('filter', function () {
             },
             filters: {
                 append: function (val, str, oldVal) {
+                    (this instanceof Q).should.be.ok;
                     if (oldVal) oldVal.should.equal('hello');
                     return [val, str].join(' ');
                 }

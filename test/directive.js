@@ -22,6 +22,40 @@ describe('custom', function () {
     });
 });
 
+describe('class', function () {
+    it('should able to toggle class', function () {
+        var vm = new Q({
+            el: '#class1',
+            data: {
+                toggle: true
+            }
+        });
+
+        var toggle = $('.toggle-me', '#class1');
+        toggle.length.should.equal(1);
+
+        vm.$set('toggle', false);
+        toggle.hasClass('toggle-me').should.equal(false);
+    });
+
+    it('should able to set a class', function () {
+        var vm = new Q({
+            el: '#class2',
+            data: {
+                classname: 'oneclass'
+            }
+        });
+
+        var div = $('div', '#class2');
+        div.hasClass('oneclass').should.equal(true);
+
+        vm.$set('classname', 'anotherclass');
+        div.hasClass('oneclass').should.equal(false);
+        div.hasClass('anotherclass').should.equal(true);
+
+    });
+});
+
 describe('if', function () {
     it('should able to use if directive', function () {
         var vm = new Q({
@@ -193,21 +227,6 @@ describe('repeat', function () {
             { msg: 'world' }
         ]);
         done();
-    });
-
-    it('should able to toggle class', function () {
-        var vm = new Q({
-            el: '#tpl4',
-            data: {
-                toggle: true
-            }
-        });
-
-        var toggle = $('.toggle-me', '#tpl4');
-        toggle.length.should.equal(1);
-
-        vm.$set('toggle', false);
-        toggle.hasClass('toggle-me').should.equal(false);
     });
 
     it('should throw a error when a filter hasn\'t implemented', function () {
