@@ -1,10 +1,10 @@
 var gulp = require('gulp')
+  , karma = require('karma').server
   , uglify = require('gulp-uglify')
   , maxmin = require('maxmin')
   , map = require('map-stream')
   , webpack = require('gulp-webpack')
-  , config = require('./webpack.config')
-  , mochaPhantomJS = require('gulp-mocha-phantomjs');
+  , config = require('./webpack.config');
 
 function Size(name) {
   this._name = name;
@@ -39,17 +39,12 @@ var jqSize = new Size('Q.js')
   , naSize = new Size('Q.native.js');
 
 
-gulp.task('test', function () {
-  gulp.src('test/*.html')
-    .pipe(mochaPhantomJS());
-});
-
-gulp.task('report', function () {
-  gulp.src('test/*.html')
-    .pipe(mochaPhantomJS({
-      'reporter': 'xunit',
-      'output': 'tests/results/result.xml'
-    }));
+gulp.task('test', function (done) {
+  karma.start({
+    configFile: __dirname + '/native.conf.js',
+    singleRun: true,
+    browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+  }, done);
 });
 
 gulp.task('jquery', function (done) {
@@ -125,6 +120,18 @@ gulp.task('native-min', ['native'], function (done) {
       naSize.print();
       done();
     });
+});
+
+gulp.task('karma-native', function (done) {
+  karma.start({
+    configFile: __dirname + '/native.conf.js'
+  });
+});
+
+gulp.task('karma-jquery', function (done) {
+  karma.start({
+    configFile: __dirname + '/jquery.conf.js'
+  });
 });
 
 gulp.task('default', ['jquery-min', 'zepto-min', 'native-min']);

@@ -4,37 +4,43 @@
   "description": "fake-MVVM library",
   "main": "dist/Q.js",
   "scripts": {
-    "test": "gulp report"
+    "test": "gulp test"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.8.10",
-    "gulp-mocha-phantomjs": "^0.5.3",
     "gulp-uglify": "^1.1.0",
     "gulp-webpack": "^1.1.2",
     "jquery": "^1.9.1",
+    "karma": "^0.12.35",
+    "karma-browserify": "^4.2.1",
+    "karma-chrome-launcher": "^0.1.12",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-mocha": "^0.1.10",
+    "karma-mocha-reporter": "^1.0.2",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-safari-launcher": "^0.1.1",
     "map-stream": "0.0.5",
     "maxmin": "^1.0.0",
-    "mocha": "^2.1.0",
+    "mocha": "^2.2.5",
+    "phantomjs": "^1.9.17",
     "should": "^4.4.2",
     "webpack": "^1.9.5"
   },
   "lego": {
     "main": "dist/Q.js",
-    "category" : "1",
-    "categoryName" : "基础库",
+    "category": "1",
+    "categoryName": "基础库",
     "dependencies": {
       "jquery": "^1.9.1"
     },
     "devDependencies": {
       "gulp": "^3.8.10",
-      "gulp-mocha-phantomjs": "^0.5.3",
       "gulp-uglify": "^1.1.0",
       "gulp-webpack": "^1.1.2",
       "map-stream": "0.0.5",
       "maxmin": "^1.0.0",
-      "mocha": "^2.1.0",
       "should": "^4.4.2",
       "webpack": "^1.9.5"
     }

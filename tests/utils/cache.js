@@ -1,4 +1,4 @@
-var Cache = require('./cache');
+var Cache = require('../../src/core/cache');
 
 describe('cache', function () {
     it('should able to cache data', function () {
