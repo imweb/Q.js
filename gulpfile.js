@@ -40,17 +40,12 @@ var jqSize = new Size('Q.js')
   , naSize = new Size('Q.native.js');
 
 
-gulp.task('test', function () {
-  gulp.src('test/*.html')
-    .pipe(mochaPhantomJS());
-});
-
-gulp.task('report', function () {
-  gulp.src('test/*.html')
-    .pipe(mochaPhantomJS({
-      'reporter': 'xunit',
-      'output': 'tests/results/result.xml'
-    }));
+gulp.task('test', function (done) {
+  karma.start({
+    configFile: __dirname + '/native.conf.js',
+    singleRun: true,
+    browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+  }, done);
 });
 
 gulp.task('jquery', function (done) {
@@ -131,13 +126,13 @@ gulp.task('native-min', ['native'], function (done) {
 gulp.task('karma-native', function (done) {
   karma.start({
     configFile: __dirname + '/native.conf.js'
-  }, done);
+  });
 });
 
 gulp.task('karma-jquery', function (done) {
   karma.start({
     configFile: __dirname + '/jquery.conf.js'
-  }, done);
+  });
 });
 
 gulp.task('default', ['jquery-min', 'zepto-min', 'native-min']);

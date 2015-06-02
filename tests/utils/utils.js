@@ -1,5 +1,17 @@
 module.exports = function (_) {
 
+    var div;
+
+    before(function () {
+        div = document.createElement('div');
+        div.innerHTML =
+            '<div id="container">\
+                <p id="item"></p>\
+                <button id="button">test</button>\
+            </div>';
+        document.body.appendChild(div);
+    });
+
     describe('utils', function () {
         it('should find a element', function () {
             var els = _.find('#container');
@@ -75,6 +87,10 @@ module.exports = function (_) {
             _.isObject(new Function()).should.not.ok;
             _.isObject([]).should.ok;
         });
+    });
+
+    after(function () {
+        document.body.removeChild(div);
     });
 
 };
