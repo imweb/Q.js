@@ -4,8 +4,7 @@ var gulp = require('gulp')
   , maxmin = require('maxmin')
   , map = require('map-stream')
   , webpack = require('gulp-webpack')
-  , config = require('./webpack.config')
-  , mochaPhantomJS = require('gulp-mocha-phantomjs');
+  , config = require('./webpack.config');
 
 function Size(name) {
   this._name = name;
