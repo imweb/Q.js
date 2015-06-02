@@ -133,7 +133,7 @@ module.exports = function (Q) {
             vm.$set('exist', true);
 
             $('#if1 p').length.should.equal(1);
-            $('#if1 p')[0].innerText.should.equal('hello world');
+            $('#if1 p')[0].textContent.should.equal('hello world');
         });
     });
 
@@ -224,8 +224,8 @@ module.exports = function (Q) {
             setTimeout(function () {
                 var lis = $('li', '#tpl1');
                 lis.length.should.equal(2);
-                lis[0].innerText.should.equal('hello');
-                lis[1].innerText.should.equal('world');
+                lis[0].textContent.should.equal('hello');
+                lis[1].textContent.should.equal('world');
                 done();
             }, 100);
         });
@@ -246,7 +246,7 @@ module.exports = function (Q) {
             setTimeout(function () {
                 var lis = $('li', '#tpl1');
                 lis.length.should.equal(1);
-                lis[0].innerText.should.equal('nihao');
+                lis[0].textContent.should.equal('nihao');
                 done();
             }, 100);
         });
@@ -265,11 +265,11 @@ module.exports = function (Q) {
                 var divs = $('div', '#tpl2'), ps;
                 divs.length.should.equal(2);
                 ps = $(divs[0]).find('p');
-                ps[0].innerText.should.equal('hello');
-                ps[1].innerText.should.equal('world');
+                ps[0].textContent.should.equal('hello');
+                ps[1].textContent.should.equal('world');
                 ps = $(divs[1]).find('p');
-                ps[0].innerText.should.equal('hello');
-                ps[1].innerText.should.equal('qq');
+                ps[0].textContent.should.equal('hello');
+                ps[1].textContent.should.equal('qq');
                 done();
             }, 200);
         });
@@ -321,7 +321,7 @@ module.exports = function (Q) {
                 var ps = $('#multi-repeat div p');
                 ps.length.should.equal(4);
                 for (var i = 0, l = ps.length; i < l; i++) {
-                    ps[i].innerText.should.equal('hello');
+                    ps[i].textContent.should.equal('hello');
                 }
                 vm.$set('msgs', [{
                     text: 'nihao'
@@ -333,7 +333,7 @@ module.exports = function (Q) {
                     ps = $('#multi-repeat div p');
                     ps.length.should.equal(4);
                     for (var i = 0, l = ps.length; i < l; i++) {
-                        ps[i].innerText.should.equal('nihao');
+                        ps[i].textContent.should.equal('nihao');
                     }
                     done();
                 }, 200);
