@@ -44,7 +44,19 @@ gulp.task('test', function (done) {
     configFile: __dirname + '/native.conf.js',
     singleRun: true,
     browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
-  }, done);
+  }, function () {
+    karma.start({
+      configFile: __dirname + '/jquery.conf.js',
+      singleRun: true,
+      browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+    }, function () {
+      karma.start({
+        configFile: __dirname + '/zepto.conf.js',
+        singleRun: true,
+        browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+      });
+    }, done);
+  });
 });
 
 gulp.task('jquery', function (done) {
@@ -131,6 +143,12 @@ gulp.task('karma-native', function (done) {
 gulp.task('karma-jquery', function (done) {
   karma.start({
     configFile: __dirname + '/jquery.conf.js'
+  });
+});
+
+gulp.task('karma-zepto', function (done) {
+  karma.start({
+    configFile: __dirname + '/zepto.conf.js'
   });
 });
 

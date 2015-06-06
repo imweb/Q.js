@@ -1,4 +1,4 @@
-var Q = require('../dist/Q');
+var Q = require('../src/Q');
 
 require('./spec/data')(Q);
 require('./spec/class')(Q);
