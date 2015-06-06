@@ -5,7 +5,9 @@ var $ = require('zepto'),
     _map = {};
 
 module.exports = {
-    find: $,
+    find: function (selector) {
+        return this.slice.call($(selector), 0);
+    },
     contains: $.contains,
     data: function (el, key, value) {
         var uid = el[_expando] = el[_expando] || ++_uid,

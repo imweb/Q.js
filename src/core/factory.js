@@ -1,6 +1,7 @@
 module.exports = function (_) {
 
     var Data = require('./data'),
+        events = require('./events'),
         MARK = /\{\{(.+?)\}\}/,
         mergeOptions = require('./strats').mergeOptions,
         clas = require('./class'),
@@ -41,6 +42,8 @@ module.exports = function (_) {
                         options.el;
             // element references
             this.$$ = {};
+            // set parent vm
+            this.$parent = options._parent;
             // merge options
             options = this.$options = mergeOptions(
                 this.constructor.options,
@@ -184,64 +187,16 @@ module.exports = function (_) {
          * @param {String} e
          */
         $emit: function (e) {
-            this._emit.apply(this, arguments);
+            var args = _.slice.call(arguments, 1);
+            events._emit.call(this, e, _.slice.call(args, 0));
             // emit data change
             if (e.indexOf('data:') === 0) {
-                var args = _.slice.call(arguments, 1);
                 e = e.substring(5);
+                events._callDataChange.call(this, e, _.slice.call(args, 0));
                 args.unshift(e);
-                this._callDataChange.apply(this, args);
-                this._emit('datachange', args);
+                events._emit.call(this, 'datachange', args);
             }
             return this;
-        },
-
-        _emit: function (key) {
-            var cbs = this._events[key];
-            if (cbs) {
-                var i = arguments.length - 1,
-                    args = new Array(i);
-                while (i--) {
-                    args[i] = arguments[i + 1];
-                }
-                i = 0
-                cbs = cbs.length > 1 ?
-                    _.slice.call(cbs, 0) :
-                    cbs;
-                for (var l = cbs.length; i < l; i++) {
-                    cbs[i].apply(this, args);
-                }
-            }
-        },
-
-        _clearWatch: function (namespace) {
-            namespace = namespace + '.';
-            var key;
-            for (key in this._watchers) {
-                if (~key.indexOf(namespace)) {
-                    this._watchers[key].length = 0;
-                }
-            }
-        },
-
-        _callDataChange: function (key) {
-            var keys = key.split('.'),
-                self = { _events: this._watchers },
-                args = _.slice.call(arguments, 1),
-                _emit = this._emit, key;
-            args.unshift(key);
-            // TODO It must use a better way
-            if (args[1] instanceof Data && 'length' in args[1]) this._clearWatch(key);
-            _emit.apply(self, args);
-            for (; keys.length > 0;) {
-                key = keys.join('.');
-                args[0] = key + '**deep**';
-                args[1] = this.data(key);
-                _emit.apply(self, args);
-                keys.pop();
-            }
-            // emit vm is change
-            _emit.apply(self, ['**deep**', this]);
         },
         /**
          * Setup the scope of an instance, which contains:

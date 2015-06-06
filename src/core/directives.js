@@ -112,7 +112,8 @@ module.exports = {
 
             childVm = new Child({
                 el: el,
-                data: data.$get()
+                data: data.$get(),
+                _parent: vm
             });
 
             vm._children.push(childVm);
@@ -126,15 +127,14 @@ module.exports = {
             }();
 
             // unidirectional binding
-            vm.$on('datachange', function (args) {
-                var prop = args[0];
+            vm.$on('datachange', function (prop, value) {
                 if (!target || ~prop.indexOf(target)) {
                     var start = target.length,
                         childProp;
 
                     start && (start += 1);
                     childProp = prop.substring(start, prop.length);
-                    childVm.$set(childProp, args[1]);
+                    childVm.$set(childProp, value);
                 }
             });
         }
