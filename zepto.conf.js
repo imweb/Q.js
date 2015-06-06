@@ -1,6 +1,8 @@
 // Karma configuration
 // Generated on Mon Jun 01 2015 22:00:18 GMT+0800 (CST)
 
+var fs = require('fs');
+
 module.exports = function(config) {
   config.set({
 
@@ -17,8 +19,7 @@ module.exports = function(config) {
     files: [
       'node_modules/should/should.js',
       'http://cdn.qplus.com/qqun/qun/homework/js/es5-shim.js',
-      'http://zeptojs.com/zepto.js',
-      'tests/native.js'
+      'tests/zepto.js'
     ],
 
 
@@ -30,8 +31,9 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'tests/*.js': ['browserify']
+      'tests/*.js': 'browserify'
     },
+
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
@@ -63,6 +65,12 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: false,
+
+    browserify: {
+        configure: function(bundle) {
+            bundle.require(__dirname + '/vendor/zepto.1.6.js', { expose: 'zepto' })
+        }
+    }
   });
 };

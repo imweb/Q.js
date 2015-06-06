@@ -1,4 +1,4 @@
-var Q = require('../src/Q.native'),
+var Q = require('../src/Q.zepto'),
     utils = require('../src/core/utils'),
     _ = require('../src/adapter/utils.native');
 

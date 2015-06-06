@@ -203,9 +203,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function (_) {
 
 	    var Data = __webpack_require__(6),
+	        events = __webpack_require__(7),
 	        MARK = /\{\{(.+?)\}\}/,
-	        mergeOptions = __webpack_require__(7).mergeOptions,
-	        clas = __webpack_require__(8),
+	        mergeOptions = __webpack_require__(8).mergeOptions,
+	        clas = __webpack_require__(9),
 	        _doc = document;
 
 	    function _inDoc(ele) {
@@ -216,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._init(options);
 	    }
 	    Q.options = {
-	        directives: __webpack_require__(9),
+	        directives: __webpack_require__(10),
 	        filters: {}
 	    };
 	    Q.get = function (selector) {
@@ -243,6 +244,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        options.el;
 	            // element references
 	            this.$$ = {};
+	            // set parent vm
+	            this.$parent = options._parent;
 	            // merge options
 	            options = this.$options = mergeOptions(
 	                this.constructor.options,
@@ -386,64 +389,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @param {String} e
 	         */
 	        $emit: function (e) {
-	            this._emit.apply(this, arguments);
+	            var args = _.slice.call(arguments, 1);
+	            events._emit.call(this, e, _.slice.call(args, 0));
 	            // emit data change
 	            if (e.indexOf('data:') === 0) {
-	                var args = _.slice.call(arguments, 1);
 	                e = e.substring(5);
+	                events._callDataChange.call(this, e, _.slice.call(args, 0));
 	                args.unshift(e);
-	                this._callDataChange.apply(this, args);
-	                this._emit('datachange', args);
+	                events._emit.call(this, 'datachange', args);
 	            }
 	            return this;
-	        },
-
-	        _emit: function (key) {
-	            var cbs = this._events[key];
-	            if (cbs) {
-	                var i = arguments.length - 1,
-	                    args = new Array(i);
-	                while (i--) {
-	                    args[i] = arguments[i + 1];
-	                }
-	                i = 0
-	                cbs = cbs.length > 1 ?
-	                    _.slice.call(cbs, 0) :
-	                    cbs;
-	                for (var l = cbs.length; i < l; i++) {
-	                    cbs[i].apply(this, args);
-	                }
-	            }
-	        },
-
-	        _clearWatch: function (namespace) {
-	            namespace = namespace + '.';
-	            var key;
-	            for (key in this._watchers) {
-	                if (~key.indexOf(namespace)) {
-	                    this._watchers[key].length = 0;
-	                }
-	            }
-	        },
-
-	        _callDataChange: function (key) {
-	            var keys = key.split('.'),
-	                self = { _events: this._watchers },
-	                args = _.slice.call(arguments, 1),
-	                _emit = this._emit, key;
-	            args.unshift(key);
-	            // TODO It must use a better way
-	            if (args[1] instanceof Data && 'length' in args[1]) this._clearWatch(key);
-	            _emit.apply(self, args);
-	            for (; keys.length > 0;) {
-	                key = keys.join('.');
-	                args[0] = key + '**deep**';
-	                args[1] = this.data(key);
-	                _emit.apply(self, args);
-	                keys.pop();
-	            }
-	            // emit vm is change
-	            _emit.apply(self, ['**deep**', this]);
 	        },
 	        /**
 	         * Setup the scope of an instance, which contains:
@@ -543,7 +498,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * bind rendered template
 	         */
-	        _templateBind: __webpack_require__(10),
+	        _templateBind: __webpack_require__(11),
 
 	        /**
 	         * bind rendered template
@@ -981,6 +936,66 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var Data = __webpack_require__(6),
+	    _ = __webpack_require__(1);
+
+	function _clearWatch(namespace) {
+	    namespace = namespace + '.';
+	    var key;
+	    for (key in this._watchers) {
+	        if (~key.indexOf(namespace)) {
+	            this._watchers[key].length = 0;
+	        }
+	    }
+	}
+
+	function _emit(key, args, target) {
+	    // set the trigger target is pass in or this
+	    target = target || this;
+	    var cbs = this._events[key];
+	    if (cbs) {
+	        var i = 0;
+	        cbs = cbs.length > 1 ?
+	            _.slice.call(cbs, 0) :
+	            cbs;
+	        for (var l = cbs.length; i < l; i++) {
+	            cbs[i].apply(target, args);
+	        }
+	    }
+	    // emit parent
+	    if (key.indexOf('data:') !== 0 && this.$parent) {
+	        _emit.call(this.$parent, key, args, target);
+	    }
+	}
+
+	function _callDataChange(key, args) {
+	    var keys = key.split('.'),
+	        self = { _events: this._watchers };
+	    // TODO It must use a better way
+	    if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+	    _emit.call(self, key, args);
+	    for (; keys.length > 0;) {
+	        key = keys.join('.');
+	        key = key + '**deep**';
+	        args[0] = this.data(key);
+	        _emit.call(self, key, args);
+	        keys.pop();
+	    }
+	    // emit vm is change
+	    _emit.call(self, '**deep**', [this]);
+	};
+
+	module.exports = {
+	    _clearWatch: _clearWatch,
+	    _emit: _emit,
+	    _callDataChange: _callDataChange
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var _ = __webpack_require__(1);
 
 	var strats = {};
@@ -1048,12 +1063,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Modules map
 	var modules = {},
-	    mergeOptions = __webpack_require__(7).mergeOptions,
+	    mergeOptions = __webpack_require__(8).mergeOptions,
 	    listeners = {};
 
 	function _define(name, options) {
@@ -1123,7 +1138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1240,7 +1255,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            childVm = new Child({
 	                el: el,
-	                data: data.$get()
+	                data: data.$get(),
+	                _parent: vm
 	            });
 
 	            vm._children.push(childVm);
@@ -1254,15 +1270,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }();
 
 	            // unidirectional binding
-	            vm.$on('datachange', function (args) {
-	                var prop = args[0];
+	            vm.$on('datachange', function (prop, value) {
 	                if (!target || ~prop.indexOf(target)) {
 	                    var start = target.length,
 	                        childProp;
 
 	                    start && (start += 1);
 	                    childProp = prop.substring(start, prop.length);
-	                    childVm.$set(childProp, args[1]);
+	                    childVm.$set(childProp, value);
 	                }
 	            });
 	        }
@@ -1306,15 +1321,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(11)
+	    repeat: __webpack_require__(12)
 	};
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(12),
+	var parse = __webpack_require__(13),
 	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
@@ -1366,7 +1381,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1508,7 +1523,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var cache = new (__webpack_require__(5))(1000);
