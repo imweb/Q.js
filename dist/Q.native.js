@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.8
+ * Q.js v0.3.9
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1557,10 +1557,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            insert = (methods[method] || {}).insert;
 
 	        // if dp exists, proceess data
-	        dp && (clean = methods['default'].clean);
+	        dp && (value = dp(value, patch));
 
 	        _.nextTick(function () {
 	            // clean up repeats dom
+
 	            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
 	                return;
 	            }
