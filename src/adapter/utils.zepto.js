@@ -6,7 +6,8 @@ var $ = require('zepto'),
 
 module.exports = {
     find: function (selector) {
-        return this.slice.call($(selector), 0);
+        // zepto just use document.querySelectorAll
+        return this.slice.call(document.querySelectorAll(selector), 0);
     },
     contains: $.contains,
     data: function (el, key, value) {

@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.8
+ * Q.js v0.3.9
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -969,16 +969,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function _callDataChange(key, args) {
-	    var keys = key.split('.'),
+	    var props, nArgs,
+	        keys = key.split('.'),
 	        self = { _events: this._watchers };
-	    // TODO It must use a better way
-	    if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+	    // TODO It must use a better way to clear all watch
+	    // if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
 	    _emit.call(self, key, args);
 	    for (; keys.length > 0;) {
 	        key = keys.join('.');
-	        key = key + '**deep**';
-	        args[0] = this.data(key);
-	        _emit.call(self, key, args);
+	        props = key + '**deep**';
+	        nArgs = _.slice.call(args, 0);
+	        nArgs[0] = this.data(key);
+	        _emit.call(self, props, nArgs);
 	        keys.pop();
 	    }
 	    // emit vm is change
@@ -1485,17 +1487,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    vm.$watch(target, function (value, oldVal, patch) {
 	        value = vm.applyFilters(value, readFilters);
-	        var method = patch ? patch.method : 'default',
+	        var method = (!readFilters.length && patch) ? patch.method : 'default',
+	            dp = (methods[method] || {}).dp,
 	            clean = (methods[method] || {}).clean,
-	            insert = (methods[method] || {}).insert,
-	            dp = (methods[method] || {}).dp;
+	            insert = (methods[method] || {}).insert;
 
-	        // if dp exists and readFilters.length === 0, proceess data
-	        dp && !readFilters.length ?
-	            (value = dp(value, patch)) : (clean = methods['default'].clean);
+	        // if dp exists, proceess data
+	        dp && (value = dp(value, patch));
 
 	        _.nextTick(function () {
 	            // clean up repeats dom
+
 	            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
 	                return;
 	            }
