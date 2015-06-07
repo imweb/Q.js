@@ -971,8 +971,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _callDataChange(key, args) {
 	    var keys = key.split('.'),
 	        self = { _events: this._watchers };
-	    // TODO It must use a better way
-	    if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+	    // TODO It must use a better way to clear all watch
+	    // if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
 	    _emit.call(self, key, args);
 	    for (; keys.length > 0;) {
 	        key = keys.join('.');

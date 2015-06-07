@@ -81,7 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    defer = window.requestAnimationFrame ||
 	        window.webkitRequestAnimationFrame ||
 	        setTimeout,
-	    cache = new (__webpack_require__(5))(1000),
+	    cache = new (__webpack_require__(11))(1000),
 	    _qtid = 0;
 
 	function walk($el, cb, setting) {
@@ -187,7 +187,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 	    find: function (selector) {
-	        return this.slice.call($(selector), 0);
+	        // zepto just use document.querySelectorAll
+	        return this.slice.call(document.querySelectorAll(selector), 0);
 	    },
 	    contains: $.contains,
 	    data: function (el, key, value) {
@@ -224,11 +225,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function (_) {
 
-	    var Data = __webpack_require__(6),
-	        events = __webpack_require__(7),
+	    var Data = __webpack_require__(5),
+	        events = __webpack_require__(6),
 	        MARK = /\{\{(.+?)\}\}/,
-	        mergeOptions = __webpack_require__(8).mergeOptions,
-	        clas = __webpack_require__(9),
+	        mergeOptions = __webpack_require__(7).mergeOptions,
+	        clas = __webpack_require__(8),
 	        _doc = document;
 
 	    function _inDoc(ele) {
@@ -239,7 +240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._init(options);
 	    }
 	    Q.options = {
-	        directives: __webpack_require__(10),
+	        directives: __webpack_require__(9),
 	        filters: {}
 	    };
 	    Q.get = function (selector) {
@@ -520,7 +521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * bind rendered template
 	         */
-	        _templateBind: __webpack_require__(11),
+	        _templateBind: __webpack_require__(10),
 
 	        /**
 	         * bind rendered template
@@ -594,118 +595,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
-	 *
-	 * @param {Number} limit
-	 * @constructor
-	 */
-
-	function Cache (limit) {
-	    this.size = 0;
-	    this.limit = limit;
-	    this.head = this.tail = undefined;
-	    this._keymap = {};
-	}
-
-	var p = Cache.prototype;
-
-	/**
-	 * Put <value> into the cache associated with <key>.
-	 * Returns the entry which was removed to make room for
-	 * the new entry. Otherwise undefined is returned.
-	 * (i.e. if there was enough room already).
-	 *
-	 * @param {String} key
-	 * @param {*} value
-	 * @return {Entry|undefined}
-	 */
-
-	p.put = function (key, value) {
-	    var entry = {
-	        key:key,
-	        value:value
-	    }
-	    this._keymap[key] = entry;
-	    if (this.tail) {
-	        this.tail.newer = entry;
-	        entry.older = this.tail;
-	    } else {
-	        this.head = entry;
-	    }
-	    this.tail = entry;
-	    if (this.size === this.limit) {
-	        return this.shift();
-	    } else {
-	        this.size++;
-	    }
-	};
-
-	/**
-	 * Purge the least recently used (oldest) entry from the
-	 * cache. Returns the removed entry or undefined if the
-	 * cache was empty.
-	 */
-
-	p.shift = function () {
-	    var entry = this.head;
-	    if (entry) {
-	        this.head = this.head.newer;
-	        this.head.older = undefined;
-	        entry.newer = entry.older = undefined;
-	        this._keymap[entry.key] = undefined;
-	    }
-	    return entry;
-	};
-
-	/**
-	 * Get and register recent use of <key>. Returns the value
-	 * associated with <key> or undefined if not in cache.
-	 *
-	 * @param {String} key
-	 * @param {Boolean} returnEntry
-	 * @return {Entry|*}
-	 */
-
-	p.get = function (key, returnEntry) {
-	    var entry = this._keymap[key];
-	    if (entry === undefined) return;
-	    if (entry === this.tail) {
-	        return returnEntry ?
-	            entry :
-	            entry.value;
-	    }
-	  // HEAD--------------TAIL
-	  //   <.older   .newer>
-	  //  <--- add direction --
-	  //   A  B  C  <D>  E
-	    if (entry.newer) {
-	        if (entry === this.head) {
-	            this.head = entry.newer;
-	        }
-	        entry.newer.older = entry.older; // C <-- E.
-	    }
-	    if (entry.older) {
-	        entry.older.newer = entry.newer; // C. --> E
-	    }
-	    entry.newer = undefined; // D --x
-	    entry.older = this.tail; // D. --> E
-	    if (this.tail) {
-	        this.tail.newer = entry; // E. <-- D
-	    }
-	    this.tail = entry;
-	    return returnEntry ?
-	        entry :
-	        entry.value;
-	}
-
-	module.exports = Cache;
-
-
-/***/ },
-/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -955,10 +844,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Data = __webpack_require__(6),
+	var Data = __webpack_require__(5),
 	    _ = __webpack_require__(1);
 
 	function _clearWatch(namespace) {
@@ -993,8 +882,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _callDataChange(key, args) {
 	    var keys = key.split('.'),
 	        self = { _events: this._watchers };
-	    // TODO It must use a better way
-	    if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+	    // TODO It must use a better way to clear all watch
+	    // if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
 	    _emit.call(self, key, args);
 	    for (; keys.length > 0;) {
 	        key = keys.join('.');
@@ -1015,7 +904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1085,12 +974,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Modules map
 	var modules = {},
-	    mergeOptions = __webpack_require__(8).mergeOptions,
+	    mergeOptions = __webpack_require__(7).mergeOptions,
 	    listeners = {};
 
 	function _define(name, options) {
@@ -1160,7 +1049,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1343,15 +1232,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(12)
+	    repeat: __webpack_require__(13)
 	};
 
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(13),
+	var parse = __webpack_require__(12),
 	    _ = __webpack_require__(1);
 
 	module.exports = function (el, options) {
@@ -1403,7 +1292,162 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
+	 *
+	 * @param {Number} limit
+	 * @constructor
+	 */
+
+	function Cache (limit) {
+	    this.size = 0;
+	    this.limit = limit;
+	    this.head = this.tail = undefined;
+	    this._keymap = {};
+	}
+
+	var p = Cache.prototype;
+
+	/**
+	 * Put <value> into the cache associated with <key>.
+	 * Returns the entry which was removed to make room for
+	 * the new entry. Otherwise undefined is returned.
+	 * (i.e. if there was enough room already).
+	 *
+	 * @param {String} key
+	 * @param {*} value
+	 * @return {Entry|undefined}
+	 */
+
+	p.put = function (key, value) {
+	    var entry = {
+	        key:key,
+	        value:value
+	    }
+	    this._keymap[key] = entry;
+	    if (this.tail) {
+	        this.tail.newer = entry;
+	        entry.older = this.tail;
+	    } else {
+	        this.head = entry;
+	    }
+	    this.tail = entry;
+	    if (this.size === this.limit) {
+	        return this.shift();
+	    } else {
+	        this.size++;
+	    }
+	};
+
+	/**
+	 * Purge the least recently used (oldest) entry from the
+	 * cache. Returns the removed entry or undefined if the
+	 * cache was empty.
+	 */
+
+	p.shift = function () {
+	    var entry = this.head;
+	    if (entry) {
+	        this.head = this.head.newer;
+	        this.head.older = undefined;
+	        entry.newer = entry.older = undefined;
+	        this._keymap[entry.key] = undefined;
+	    }
+	    return entry;
+	};
+
+	/**
+	 * Get and register recent use of <key>. Returns the value
+	 * associated with <key> or undefined if not in cache.
+	 *
+	 * @param {String} key
+	 * @param {Boolean} returnEntry
+	 * @return {Entry|*}
+	 */
+
+	p.get = function (key, returnEntry) {
+	    var entry = this._keymap[key];
+	    if (entry === undefined) return;
+	    if (entry === this.tail) {
+	        return returnEntry ?
+	            entry :
+	            entry.value;
+	    }
+	  // HEAD--------------TAIL
+	  //   <.older   .newer>
+	  //  <--- add direction --
+	  //   A  B  C  <D>  E
+	    if (entry.newer) {
+	        if (entry === this.head) {
+	            this.head = entry.newer;
+	        }
+	        entry.newer.older = entry.older; // C <-- E.
+	    }
+	    if (entry.older) {
+	        entry.older.newer = entry.newer; // C. --> E
+	    }
+	    entry.newer = undefined; // D --x
+	    entry.older = this.tail; // D. --> E
+	    if (this.tail) {
+	        this.tail.newer = entry; // E. <-- D
+	    }
+	    this.tail = entry;
+	    return returnEntry ?
+	        entry :
+	        entry.value;
+	}
+
+	module.exports = Cache;
+
+
+/***/ },
 /* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var cache = new (__webpack_require__(11))(1000);
+	/**
+	 * click: onclick | filter1 | filter2
+	 * click: onclick , keydown: onkeydown
+	 * value1 | filter1 | filter2
+	 * value - 1 | filter1 | filter2   don't support
+	 */
+	function parse(str) {
+	    var hit = cache.get(str);
+	    if (hit) return hit;
+	    var exps = str.trim().split(/ *\, */),
+	        eventReg = /^([\w\-]+)\:/,
+	        keyReg = /^[\w\-]+$/,
+	        arr = [];
+	    exps.forEach(function (exp) {
+	        var res = {},
+	            match = exp.match(eventReg),
+	            filters, exp;
+	        if (match) {
+	            res.arg = match[1];
+	            exp = exp.substring(match[0].length).trim();
+	        }
+	        filters = exp.split(/ *\| */);
+	        exp = filters.shift();
+	        if (keyReg.test(exp)) {
+	            res.target = exp;
+	        } else {
+	            res.exp = exp;
+	        }
+	        res.filters = filters;
+	        arr.push(res);
+	    });
+	    cache.put(str, arr);
+	    return arr;
+	}
+
+	module.exports = parse;
+
+
+/***/ },
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1542,49 +1586,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }, false, true);
 	}
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var cache = new (__webpack_require__(5))(1000);
-	/**
-	 * click: onclick | filter1 | filter2
-	 * click: onclick , keydown: onkeydown
-	 * value1 | filter1 | filter2
-	 * value - 1 | filter1 | filter2   don't support
-	 */
-	function parse(str) {
-	    var hit = cache.get(str);
-	    if (hit) return hit;
-	    var exps = str.trim().split(/ *\, */),
-	        eventReg = /^([\w\-]+)\:/,
-	        keyReg = /^[\w\-]+$/,
-	        arr = [];
-	    exps.forEach(function (exp) {
-	        var res = {},
-	            match = exp.match(eventReg),
-	            filters, exp;
-	        if (match) {
-	            res.arg = match[1];
-	            exp = exp.substring(match[0].length).trim();
-	        }
-	        filters = exp.split(/ *\| */);
-	        exp = filters.shift();
-	        if (keyReg.test(exp)) {
-	            res.target = exp;
-	        } else {
-	            res.exp = exp;
-	        }
-	        res.filters = filters;
-	        arr.push(res);
-	    });
-	    cache.put(str, arr);
-	    return arr;
-	}
-
-	module.exports = parse;
 
 
 /***/ }
