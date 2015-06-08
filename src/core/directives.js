@@ -128,6 +128,8 @@ module.exports = {
 
             // unidirectional binding
             vm.$on('datachange', function (prop, value) {
+                // stop child vm datachange bubble
+                if (this !== vm) return;
                 if (!target || ~prop.indexOf(target)) {
                     var start = target.length,
                         childProp;

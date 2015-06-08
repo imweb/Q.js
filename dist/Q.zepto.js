@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.9
+ * Q.js v0.3.10
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -986,7 +986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    // emit parent
-	    if (key.indexOf('data:') !== 0 && this.$parent) {
+	    if (key.indexOf('data:') && this.$parent) {
 	        _emit.call(this.$parent, key, args, target);
 	    }
 	}
@@ -1296,6 +1296,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // unidirectional binding
 	            vm.$on('datachange', function (prop, value) {
+	                // stop child vm datachange bubble
+	                if (this !== vm) return;
 	                if (!target || ~prop.indexOf(target)) {
 	                    var start = target.length,
 	                        childProp;

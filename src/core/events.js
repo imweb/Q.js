@@ -25,7 +25,7 @@ function _emit(key, args, target) {
         }
     }
     // emit parent
-    if (key.indexOf('data:') !== 0 && this.$parent) {
+    if (key.indexOf('data:') && this.$parent) {
         _emit.call(this.$parent, key, args, target);
     }
 }
