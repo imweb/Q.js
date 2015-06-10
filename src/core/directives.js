@@ -36,10 +36,22 @@ module.exports = {
         var arg = this.arg,
             el = this.el;
         // property
-        if (arg in el) {
-            el[arg] = value;
+        if (arg === 'style') {
+            if (typeof value === 'object') {
+                for (var k in value) {
+                    if (value.hasOwnProperty(k)) {
+                        el.style[k] = value[k];
+                    }
+                }
+            } else {
+                el.setAttribute(arg, value);
+            }
         } else {
-            el.setAttribute(arg, value);
+            if (arg in el) {
+                el[arg] = value;
+            } else {
+                el.setAttribute(arg, value);
+            }
         }
     },
     text: function (value) {

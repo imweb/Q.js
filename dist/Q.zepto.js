@@ -66,8 +66,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var utils = __webpack_require__(1),
-	    _ = __webpack_require__(2),
-	    factory = __webpack_require__(3)
+	    _ = __webpack_require__(3),
+	    factory = __webpack_require__(5)
 
 	_.extend(utils, _);
 	module.exports = factory(utils);
@@ -81,7 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    defer = window.requestAnimationFrame ||
 	        window.webkitRequestAnimationFrame ||
 	        setTimeout,
-	    cache = new (__webpack_require__(5))(1000),
+	    cache = new (__webpack_require__(2))(1000),
 	    _qtid = 0;
 
 	function walk($el, cb, setting) {
@@ -179,6 +179,118 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/**
+	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
+	 *
+	 * @param {Number} limit
+	 * @constructor
+	 */
+
+	function Cache (limit) {
+	    this.size = 0;
+	    this.limit = limit;
+	    this.head = this.tail = undefined;
+	    this._keymap = {};
+	}
+
+	var p = Cache.prototype;
+
+	/**
+	 * Put <value> into the cache associated with <key>.
+	 * Returns the entry which was removed to make room for
+	 * the new entry. Otherwise undefined is returned.
+	 * (i.e. if there was enough room already).
+	 *
+	 * @param {String} key
+	 * @param {*} value
+	 * @return {Entry|undefined}
+	 */
+
+	p.put = function (key, value) {
+	    var entry = {
+	        key:key,
+	        value:value
+	    }
+	    this._keymap[key] = entry;
+	    if (this.tail) {
+	        this.tail.newer = entry;
+	        entry.older = this.tail;
+	    } else {
+	        this.head = entry;
+	    }
+	    this.tail = entry;
+	    if (this.size === this.limit) {
+	        return this.shift();
+	    } else {
+	        this.size++;
+	    }
+	};
+
+	/**
+	 * Purge the least recently used (oldest) entry from the
+	 * cache. Returns the removed entry or undefined if the
+	 * cache was empty.
+	 */
+
+	p.shift = function () {
+	    var entry = this.head;
+	    if (entry) {
+	        this.head = this.head.newer;
+	        this.head.older = undefined;
+	        entry.newer = entry.older = undefined;
+	        this._keymap[entry.key] = undefined;
+	    }
+	    return entry;
+	};
+
+	/**
+	 * Get and register recent use of <key>. Returns the value
+	 * associated with <key> or undefined if not in cache.
+	 *
+	 * @param {String} key
+	 * @param {Boolean} returnEntry
+	 * @return {Entry|*}
+	 */
+
+	p.get = function (key, returnEntry) {
+	    var entry = this._keymap[key];
+	    if (entry === undefined) return;
+	    if (entry === this.tail) {
+	        return returnEntry ?
+	            entry :
+	            entry.value;
+	    }
+	  // HEAD--------------TAIL
+	  //   <.older   .newer>
+	  //  <--- add direction --
+	  //   A  B  C  <D>  E
+	    if (entry.newer) {
+	        if (entry === this.head) {
+	            this.head = entry.newer;
+	        }
+	        entry.newer.older = entry.older; // C <-- E.
+	    }
+	    if (entry.older) {
+	        entry.older.newer = entry.newer; // C. --> E
+	    }
+	    entry.newer = undefined; // D --x
+	    entry.older = this.tail; // D. --> E
+	    if (this.tail) {
+	        this.tail.newer = entry; // E. <-- D
+	    }
+	    this.tail = entry;
+	    return returnEntry ?
+	        entry :
+	        entry.value;
+	}
+
+	module.exports = Cache;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var $ = __webpack_require__(4),
 	    _extend = $.extend,
 	    _expando = 'QDataUid',
@@ -220,16 +332,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 3 */
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function (_) {
 
-	    var Data = __webpack_require__(6),
-	        events = __webpack_require__(7),
+	    var Data = __webpack_require__(8),
+	        events = __webpack_require__(9),
 	        MARK = /\{\{(.+?)\}\}/,
-	        mergeOptions = __webpack_require__(8).mergeOptions,
-	        clas = __webpack_require__(9),
+	        mergeOptions = __webpack_require__(7).mergeOptions,
+	        clas = __webpack_require__(6),
 	        _doc = document;
 
 	    function _inDoc(ele) {
@@ -521,7 +639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * bind rendered template
 	         */
-	        _templateBind: __webpack_require__(11),
+	        _templateBind: __webpack_require__(12),
 
 	        /**
 	         * bind rendered template
@@ -588,125 +706,152 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
-	 *
-	 * @param {Number} limit
-	 * @constructor
-	 */
-
-	function Cache (limit) {
-	    this.size = 0;
-	    this.limit = limit;
-	    this.head = this.tail = undefined;
-	    this._keymap = {};
-	}
-
-	var p = Cache.prototype;
-
-	/**
-	 * Put <value> into the cache associated with <key>.
-	 * Returns the entry which was removed to make room for
-	 * the new entry. Otherwise undefined is returned.
-	 * (i.e. if there was enough room already).
-	 *
-	 * @param {String} key
-	 * @param {*} value
-	 * @return {Entry|undefined}
-	 */
-
-	p.put = function (key, value) {
-	    var entry = {
-	        key:key,
-	        value:value
-	    }
-	    this._keymap[key] = entry;
-	    if (this.tail) {
-	        this.tail.newer = entry;
-	        entry.older = this.tail;
-	    } else {
-	        this.head = entry;
-	    }
-	    this.tail = entry;
-	    if (this.size === this.limit) {
-	        return this.shift();
-	    } else {
-	        this.size++;
-	    }
-	};
-
-	/**
-	 * Purge the least recently used (oldest) entry from the
-	 * cache. Returns the removed entry or undefined if the
-	 * cache was empty.
-	 */
-
-	p.shift = function () {
-	    var entry = this.head;
-	    if (entry) {
-	        this.head = this.head.newer;
-	        this.head.older = undefined;
-	        entry.newer = entry.older = undefined;
-	        this._keymap[entry.key] = undefined;
-	    }
-	    return entry;
-	};
-
-	/**
-	 * Get and register recent use of <key>. Returns the value
-	 * associated with <key> or undefined if not in cache.
-	 *
-	 * @param {String} key
-	 * @param {Boolean} returnEntry
-	 * @return {Entry|*}
-	 */
-
-	p.get = function (key, returnEntry) {
-	    var entry = this._keymap[key];
-	    if (entry === undefined) return;
-	    if (entry === this.tail) {
-	        return returnEntry ?
-	            entry :
-	            entry.value;
-	    }
-	  // HEAD--------------TAIL
-	  //   <.older   .newer>
-	  //  <--- add direction --
-	  //   A  B  C  <D>  E
-	    if (entry.newer) {
-	        if (entry === this.head) {
-	            this.head = entry.newer;
-	        }
-	        entry.newer.older = entry.older; // C <-- E.
-	    }
-	    if (entry.older) {
-	        entry.older.newer = entry.newer; // C. --> E
-	    }
-	    entry.newer = undefined; // D --x
-	    entry.older = this.tail; // D. --> E
-	    if (this.tail) {
-	        this.tail.newer = entry; // E. <-- D
-	    }
-	    this.tail = entry;
-	    return returnEntry ?
-	        entry :
-	        entry.value;
-	}
-
-	module.exports = Cache;
-
-
-/***/ },
 /* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Modules map
+	var modules = {},
+	    mergeOptions = __webpack_require__(7).mergeOptions,
+	    listeners = {};
+
+	function _define(name, options) {
+	    var module = modules[name] = this.extend(options || {});
+	    return module;
+	}
+
+	function _require(name, callback) {
+	    return modules[name] || this;
+	}
+
+	function _create(o) {
+	    function F() {}
+	    F.prototype = o;
+	    return new F();
+	}
+
+	function _extend(extendOptions) {
+	    extendOptions = extendOptions || {};
+	    var Super = this,
+	        Sub = createClass(extendOptions.name || 'QComponent');
+	    Sub.prototype = _create(Super.prototype);
+	    Sub.prototype.constructor = Sub;
+	    Sub.options = mergeOptions(
+	        Super.options,
+	        extendOptions
+	    );
+	    Sub['super'] = Super;
+	    Sub.extend = Super.extend;
+	    Sub.get = Super.get;
+	    Sub.all = Super.all;
+	    return Sub;
+	}
+
+	function createClass (name) {
+	    return new Function(
+	        'return function ' + name +
+	        ' (options) { this._init(options) }'
+	    )();
+	}
+
+	module.exports = {
+	    /**
+	     * define
+	     * define a component
+	     * @param {String} name
+	     * @param {Object} options
+	     */
+	    define: _define,
+	    /**
+	     * require
+	     * require(name)
+	     * require(names, callback)
+	     * require a component
+	     * @param {String} name
+	     * @param {Array} names
+	     * @param {Function} callback
+	     */
+	    require: _require,
+	    /**
+	     * extend
+	     * extend the class
+	     * @param {Object} options
+	     */
+	    extend: _extend
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1);
+
+	var strats = {};
+	strats.created =
+	strats.ready =
+	strats.attached =
+	strats.detached =
+	strats.compiled =
+	strats.beforeDestroy =
+	strats.destroyed =
+	strats.paramAttributes = function (parentVal, childVal) {
+	    return childVal ?
+	        parentVal ?
+	            parentVal.concat(childVal) :
+	                Array.isArray(childVal) ?
+	                    childVal :
+	                        [childVal] :
+	        parentVal;
+	};
+	strats.methods =
+	strats.directives = function (parentVal, childVal) {
+	  if (!childVal) return parentVal;
+	  if (!parentVal) return childVal;
+	  return _.extend({}, parentVal, childVal);
+	};
+
+	var defaultStrat = function (parentVal, childVal) {
+	    return childVal === undefined ?
+	        parentVal :
+	        childVal;
+	};
+
+	/**
+	 * Option overwriting strategies are functions that handle
+	 * how to merge a parent option value and a child option
+	 * value into the final value.
+	 *
+	 * All strategy functions follow the same signature:
+	 *
+	 * @param {*} parentVal
+	 * @param {*} childVal
+	 * @param {Vue} [vm]
+	 */
+	function mergeOptions(parent, child, vm) {
+	    var options = {}, key;
+	    for (key in parent) {
+	        merge(key);
+	    }
+	    for (key in child) {
+	        if (!(parent.hasOwnProperty(key))) {
+	            merge(key);
+	        }
+	    }
+	    function merge(key) {
+	        var strat = strats[key] || defaultStrat;
+	        options[key] = strat(parent[key], child[key], vm, key);
+	    }
+	    return options;
+	}
+
+	module.exports = {
+	    strats: strats,
+	    mergeOptions: mergeOptions
+	}
+
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -956,10 +1101,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Data = __webpack_require__(6),
+	var Data = __webpack_require__(8),
 	    _ = __webpack_require__(1);
 
 	function _clearWatch(namespace) {
@@ -1018,151 +1163,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1);
-
-	var strats = {};
-	strats.created =
-	strats.ready =
-	strats.attached =
-	strats.detached =
-	strats.compiled =
-	strats.beforeDestroy =
-	strats.destroyed =
-	strats.paramAttributes = function (parentVal, childVal) {
-	    return childVal ?
-	        parentVal ?
-	            parentVal.concat(childVal) :
-	                Array.isArray(childVal) ?
-	                    childVal :
-	                        [childVal] :
-	        parentVal;
-	};
-	strats.methods =
-	strats.directives = function (parentVal, childVal) {
-	  if (!childVal) return parentVal;
-	  if (!parentVal) return childVal;
-	  return _.extend({}, parentVal, childVal);
-	};
-
-	var defaultStrat = function (parentVal, childVal) {
-	    return childVal === undefined ?
-	        parentVal :
-	        childVal;
-	};
-
-	/**
-	 * Option overwriting strategies are functions that handle
-	 * how to merge a parent option value and a child option
-	 * value into the final value.
-	 *
-	 * All strategy functions follow the same signature:
-	 *
-	 * @param {*} parentVal
-	 * @param {*} childVal
-	 * @param {Vue} [vm]
-	 */
-	function mergeOptions(parent, child, vm) {
-	    var options = {}, key;
-	    for (key in parent) {
-	        merge(key);
-	    }
-	    for (key in child) {
-	        if (!(parent.hasOwnProperty(key))) {
-	            merge(key);
-	        }
-	    }
-	    function merge(key) {
-	        var strat = strats[key] || defaultStrat;
-	        options[key] = strat(parent[key], child[key], vm, key);
-	    }
-	    return options;
-	}
-
-	module.exports = {
-	    strats: strats,
-	    mergeOptions: mergeOptions
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Modules map
-	var modules = {},
-	    mergeOptions = __webpack_require__(8).mergeOptions,
-	    listeners = {};
-
-	function _define(name, options) {
-	    var module = modules[name] = this.extend(options || {});
-	    return module;
-	}
-
-	function _require(name, callback) {
-	    return modules[name] || this;
-	}
-
-	function _create(o) {
-	    function F() {}
-	    F.prototype = o;
-	    return new F();
-	}
-
-	function _extend(extendOptions) {
-	    extendOptions = extendOptions || {};
-	    var Super = this,
-	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = _create(Super.prototype);
-	    Sub.prototype.constructor = Sub;
-	    Sub.options = mergeOptions(
-	        Super.options,
-	        extendOptions
-	    );
-	    Sub['super'] = Super;
-	    Sub.extend = Super.extend;
-	    Sub.get = Super.get;
-	    Sub.all = Super.all;
-	    return Sub;
-	}
-
-	function createClass (name) {
-	    return new Function(
-	        'return function ' + name +
-	        ' (options) { this._init(options) }'
-	    )();
-	}
-
-	module.exports = {
-	    /**
-	     * define
-	     * define a component
-	     * @param {String} name
-	     * @param {Object} options
-	     */
-	    define: _define,
-	    /**
-	     * require
-	     * require(name)
-	     * require(names, callback)
-	     * require a component
-	     * @param {String} name
-	     * @param {Array} names
-	     * @param {Function} callback
-	     */
-	    require: _require,
-	    /**
-	     * extend
-	     * extend the class
-	     * @param {Object} options
-	     */
-	    extend: _extend
-	};
-
-
-/***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1204,10 +1204,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var arg = this.arg,
 	            el = this.el;
 	        // property
-	        if (arg in el) {
-	            el[arg] = value;
+	        if (arg === 'style') {
+	            if (typeof value === 'object') {
+	                for (var k in value) {
+	                    if (value.hasOwnProperty(k)) {
+	                        el.style[k] = value[k];
+	                    }
+	                }
+	            } else {
+	                el.setAttribute(arg, value);
+	            }
 	        } else {
-	            el.setAttribute(arg, value);
+	            if (arg in el) {
+	                el[arg] = value;
+	            } else {
+	                el.setAttribute(arg, value);
+	            }
 	        }
 	    },
 	    text: function (value) {
@@ -1348,67 +1360,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    },
-	    repeat: __webpack_require__(12)
+	    repeat: __webpack_require__(11)
 	};
 
 
 /***/ },
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var parse = __webpack_require__(13),
-	    _ = __webpack_require__(1);
-
-	module.exports = function (el, options) {
-	    options = options || {};
-
-	    var self = this,
-	        directives = self.$options.directives,
-	        index = options.index,
-	        data = options.data || self,
-	        namespace = options.namespace;
-
-	    _.walk([el], function (node, res, setting) {
-	        res.forEach(function (obj) {
-	            var name = obj.name.substring(2),
-	                directive = directives[name],
-	                descriptors = parse(obj.value);
-	            directive &&
-	                descriptors.forEach(function (descriptor) {
-	                    var readFilters = self._makeReadFilters(descriptor.filters),
-	                        key = descriptor.target,
-	                        target = namespace ? ([namespace, key].join('.')) : key,
-	                        update = _.isObject(directive) ? directive.update : directive,
-	                        that = _.extend({
-	                            el: node,
-	                            vm: self,
-	                            data: function (key) {
-	                                var arr = [];
-	                                namespace && arr.push(namespace);
-	                                key && arr.push(key);
-	                                return self.data(arr.join('.'));
-	                            },
-	                            namespace: namespace,
-	                            setting: setting
-	                        }, descriptor, {
-	                            filters: readFilters
-	                        });
-
-	                    update && self.$watch(target, function (value, oldValue) {
-	                        value = self.applyFilters(value, readFilters, oldValue);
-	                        update.call(that, value, oldValue);
-	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
-	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
-	                });
-	        });
-	    }, {
-	        useCache: options.useCache
-	    });
-	};
-
-
-/***/ },
-/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1550,10 +1507,65 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var parse = __webpack_require__(13),
+	    _ = __webpack_require__(1);
+
+	module.exports = function (el, options) {
+	    options = options || {};
+
+	    var self = this,
+	        directives = self.$options.directives,
+	        index = options.index,
+	        data = options.data || self,
+	        namespace = options.namespace;
+
+	    _.walk([el], function (node, res, setting) {
+	        res.forEach(function (obj) {
+	            var name = obj.name.substring(2),
+	                directive = directives[name],
+	                descriptors = parse(obj.value);
+	            directive &&
+	                descriptors.forEach(function (descriptor) {
+	                    var readFilters = self._makeReadFilters(descriptor.filters),
+	                        key = descriptor.target,
+	                        target = namespace ? ([namespace, key].join('.')) : key,
+	                        update = _.isObject(directive) ? directive.update : directive,
+	                        that = _.extend({
+	                            el: node,
+	                            vm: self,
+	                            data: function (key) {
+	                                var arr = [];
+	                                namespace && arr.push(namespace);
+	                                key && arr.push(key);
+	                                return self.data(arr.join('.'));
+	                            },
+	                            namespace: namespace,
+	                            setting: setting
+	                        }, descriptor, {
+	                            filters: readFilters
+	                        });
+
+	                    update && self.$watch(target, function (value, oldValue) {
+	                        value = self.applyFilters(value, readFilters, oldValue);
+	                        update.call(that, value, oldValue);
+	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
+	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
+	                });
+	        });
+	    }, {
+	        useCache: options.useCache
+	    });
+	};
+
+
+/***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var cache = new (__webpack_require__(5))(1000);
+	var cache = new (__webpack_require__(2))(1000);
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown
