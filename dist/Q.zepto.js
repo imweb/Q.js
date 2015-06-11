@@ -82,7 +82,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        window.webkitRequestAnimationFrame ||
 	        setTimeout,
 	    cache = new (__webpack_require__(2))(1000),
-	    _qtid = 0;
+	    _qtid = 0,
+	    slice = [].slice;
 
 	function walk($el, cb, setting) {
 	    var i, j, l, el, atts, res, qtid;
@@ -114,14 +115,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            res.length > 0 &&
 	                cb(el, res, setting);
 	        }
-	        if (el.childNodes.length && !setting.stop) walk(el.childNodes, cb, setting);
+	        if (el.childNodes.length && !setting.stop) walk(slice.call(el.childNodes, 0), cb, setting);
 	        // reset stop
 	        setting.stop = false;
 	    }
 	}
 
 	module.exports = {
-	    slice: [].slice,
+	    slice: slice,
 	    noop: noop,
 	    /**
 	     * Add class with compatibility for IE & SVG
@@ -167,7 +168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return typeof o === 'object';
 	    },
 	    nextTick: function (cb, ctx) {
-	        ctx ?
+	        return ctx ?
 	            defer(function () { cb.call(ctx) }, 0) :
 	            defer(cb, 0);
 	    },
@@ -411,7 +412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // initialize data and scope inheritance.
 	            this._initScope();
 	            // call created hook
-	            this._callHook('created')
+	            this._callHook('created');
 	            // start compilation
 	            if (this.$el) {
 	                // cache the instance
@@ -899,6 +900,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        self = this;
 	    _.extend(this, data);
 
+	    // data change
+	    options.top || (this._changes = []);
+	    // timouter
+	    options.top || (this._timer = null);
 	    // all key need to traverse
 	    this._keys = keys;
 	    // parent data container
@@ -967,6 +972,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	                self[key];
 	        });
 	        return res;
+	    },
+	    /**
+	     * change
+	     */
+	    $change: function (key, value, oldVal, patch) {
+	        var top = this._top;
+	        clearTimeout(top._timer);
+	        top._changes.push(['data:' + key, value, oldVal, patch]);
+	        top._timer = _.nextTick(function () {
+	            top._changes.forEach(function (args) {
+	                top.$emit.apply(top, args);
+	            });
+	            top._changes.length = 0;
+	        });
 	    }
 	});
 
@@ -987,7 +1006,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.length++;
 	        }
 	        // value, oldValue, patch
-	        this._top.$emit('data:' + this.$namespace(), this, null, {
+	        this.$change(this.$namespace(), this, null, {
 	            method: 'push',
 	            args: args
 	        });
@@ -1001,7 +1020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var res = this[--this.length];
 	        delete this[this.length];
 	        this._keys.pop();
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this.$change(this.$namespace(), this);
 	        return res;
 	    },
 	    /**
@@ -1017,7 +1036,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[l]._namespace = l + '');
 	        }
 	        _prefix(this, 0, value);
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this.$change(this.$namespace(), this);
 	        return this;
 	    },
 	    /**
@@ -1033,14 +1052,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[i]._namespace = i + '');
 	        }
 	        this._keys.pop();
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this.$change(this.$namespace(), this);
 	        return res;
 	    },
 	    /**
 	     * touch
 	     */
 	    touch: function (key) {
-	        this._top.$emit('data:' + this.$namespace(key), this);
+	        this.$change(this.$namespace(key), this);
 	    },
 	    /**
 	     * indexOf
@@ -1075,7 +1094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.length -= l;
 	        this._keys.splice(this.length, l);
-	        this._top.$emit('data:' + this.$namespace(), this, null, patch);
+	        this.$change(this.$namespace(), this, null, patch);
 	    },
 	    /**
 	     * forEach
@@ -1477,31 +1496,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // if dp exists, proceess data
 	        dp && (value = dp(value, patch));
 
-	        _.nextTick(function () {
+	        // _.nextTick(function () {
 	            // clean up repeats dom
 
-	            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
-	                return;
-	            }
+	        if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
+	            return;
+	        }
 
-	            var fragment = document.createDocumentFragment(),
-	                itemNode;
-	            value.forEach(function (obj, i) {
-	                itemNode = _.clone(tpl);
-	                vm._templateBind(itemNode, {
-	                    data: obj,
-	                    namespace: obj.$namespace(),
-	                    immediate: true,
-	                    useCache: true
-	                });
-	                // TODO this must refactor
-	                repeats.push(itemNode);
-	                fragment.appendChild(itemNode);
+	        var fragment = document.createDocumentFragment(),
+	            itemNode;
+	        value.forEach(function (obj, i) {
+	            itemNode = _.clone(tpl);
+	            vm._templateBind(itemNode, {
+	                data: obj,
+	                namespace: obj.$namespace(),
+	                immediate: true,
+	                useCache: true
 	            });
-
-	            insert && insert(parentNode, fragment, ref);
-	            vm.$emit('repeat-render');
+	            // TODO this must refactor
+	            repeats.push(itemNode);
+	            fragment.appendChild(itemNode);
 	        });
+
+	        insert && insert(parentNode, fragment, ref);
+	        vm.$emit('repeat-render');
+	        // });
 	    }, false, true);
 	}
 
@@ -1551,7 +1570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    update && self.$watch(target, function (value, oldValue) {
 	                        value = self.applyFilters(value, readFilters, oldValue);
 	                        update.call(that, value, oldValue);
-	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
+	                    }, typeof data[key] === 'object', typeof options.immediate === 'boolean' ? options.immediate : (data[key] !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 	        });
