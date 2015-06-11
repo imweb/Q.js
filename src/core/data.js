@@ -43,10 +43,6 @@ function Data(options) {
         self = this;
     _.extend(this, data);
 
-    // data change
-    options.top || (this._changes = []);
-    // timouter
-    options.top || (this._timer = null);
     // all key need to traverse
     this._keys = keys;
     // parent data container
@@ -96,7 +92,7 @@ _.extend(Data.prototype, {
     $set: function (key, value) {
         var oldValue = this[key];
         _prefix(this, key, value);
-        this._top.$emit('data:' + this.$namespace(key), this[key], oldValue);
+        this.$change(this.$namespace(key), this[key], oldValue);
         return this;
     },
     /**
@@ -120,15 +116,7 @@ _.extend(Data.prototype, {
      * change
      */
     $change: function (key, value, oldVal, patch) {
-        var top = this._top;
-        clearTimeout(top._timer);
-        top._changes.push(['data:' + key, value, oldVal, patch]);
-        top._timer = _.nextTick(function () {
-            top._changes.forEach(function (args) {
-                top.$emit.apply(top, args);
-            });
-            top._changes.length = 0;
-        });
+        this._top.$emit('data:' + key, value, oldVal, patch);
     }
 });
 
