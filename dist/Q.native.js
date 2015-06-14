@@ -340,7 +340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    },
 	    add: function (el, evt, fn, vm) {
-	        if (!vm || NO_DELEGATOR[evt]) { 
+	        if (!vm || NO_DELEGATOR[evt]) {
 	            el.addEventListener(evt, fn);
 	        } else {
 	            var $el = vm.$el,

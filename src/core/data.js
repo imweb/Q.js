@@ -116,7 +116,8 @@ _.extend(Data.prototype, {
      * change
      */
     $change: function (key, value, oldVal, patch) {
-        this._top.$emit('data:' + key, value, oldVal, patch);
+        this._top.$emit &&
+            this._top.$emit('data:' + key, value, oldVal, patch);
     }
 });
 

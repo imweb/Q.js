@@ -118,7 +118,7 @@ module.exports = {
             // merge data
             mergeTarget &&
                 Object.keys(mergeTarget).forEach(function (key) {
-                    !data[key] &&
+                    key in data ||
                         data.$set(key, mergeTarget[key]);
                 });
 
