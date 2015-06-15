@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.10
+ * Q.js v0.4.0
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -82,7 +82,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        window.webkitRequestAnimationFrame ||
 	        setTimeout,
 	    cache = new (__webpack_require__(2))(1000),
-	    _qtid = 0;
+	    _qtid = 0,
+	    slice = [].slice;
 
 	function walk($el, cb, setting) {
 	    var i, j, l, el, atts, res, qtid;
@@ -114,14 +115,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            res.length > 0 &&
 	                cb(el, res, setting);
 	        }
-	        if (el.childNodes.length && !setting.stop) walk(el.childNodes, cb, setting);
+	        if (el.childNodes.length && !setting.stop) walk(slice.call(el.childNodes, 0), cb, setting);
 	        // reset stop
 	        setting.stop = false;
 	    }
 	}
 
 	module.exports = {
-	    slice: [].slice,
+	    slice: slice,
 	    noop: noop,
 	    /**
 	     * Add class with compatibility for IE & SVG
@@ -167,7 +168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return typeof o === 'object';
 	    },
 	    nextTick: function (cb, ctx) {
-	        ctx ?
+	        return ctx ?
 	            defer(function () { cb.call(ctx) }, 0) :
 	            defer(cb, 0);
 	    },
@@ -452,7 +453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // initialize data and scope inheritance.
 	            this._initScope();
 	            // call created hook
-	            this._callHook('created')
+	            this._callHook('created');
 	            // start compilation
 	            if (this.$el) {
 	                // cache the instance
@@ -901,7 +902,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * prefix data
 	 */
 	function _prefix(up, key, value) {
-	    if (+key + '' === key) key = +key;
 	    var options = {
 	        data: value,
 	        up: up,
@@ -914,8 +914,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                new Data(options);
 	    } else {
 	        up[key] = value;
-	        if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	    }
+	    if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	}
 
 	function _isArray(obj) {
@@ -924,7 +924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _getLength(keys) {
 	    return keys.filter(function (key) {
-	        return +key + '' === key;
+	        return typeof key === 'number';
 	    }).length;
 	}
 
@@ -936,8 +936,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Data(options) {
 	    var data = options.data,
 	        keys = Object.keys(options.data || {})
-	            .filter(function (key) { return key.indexOf('_') !== 0; }),
+	            .filter(function (key) { return key.indexOf('_') !== 0; })
+	            .map(function (num) {
+	                return +num + '' === num ? +num : num;
+	            }),
 	        self = this;
+
 	    _.extend(this, data);
 
 	    // all key need to traverse
@@ -989,7 +993,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    $set: function (key, value) {
 	        var oldValue = this[key];
 	        _prefix(this, key, value);
-	        this._top.$emit('data:' + this.$namespace(key), this[key], oldValue);
+	        this.$change(this.$namespace(key), this[key], oldValue);
 	        return this;
 	    },
 	    /**
@@ -1008,6 +1012,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                self[key];
 	        });
 	        return res;
+	    },
+	    /**
+	     * change
+	     */
+	    $change: function (key, value, oldVal, patch) {
+	        this._top.$emit &&
+	            this._top.$emit('data:' + key, value, oldVal, patch);
 	    }
 	});
 
@@ -1028,7 +1039,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.length++;
 	        }
 	        // value, oldValue, patch
-	        this._top.$emit('data:' + this.$namespace(), this, null, {
+	        this.$change(this.$namespace(), this, null, {
 	            method: 'push',
 	            args: args
 	        });
@@ -1042,7 +1053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var res = this[--this.length];
 	        delete this[this.length];
 	        this._keys.pop();
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this.$change(this.$namespace(), this);
 	        return res;
 	    },
 	    /**
@@ -1058,7 +1069,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[l]._namespace = l + '');
 	        }
 	        _prefix(this, 0, value);
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        this.$change(this.$namespace(), this);
 	        return this;
 	    },
 	    /**
@@ -1074,14 +1085,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[i]._namespace = i + '');
 	        }
 	        this._keys.pop();
-	        this._top.$emit('data:' + this.$namespace(), this);
+	        delete this[this.length];
+	        this.$change(this.$namespace(), this);
 	        return res;
 	    },
 	    /**
 	     * touch
 	     */
 	    touch: function (key) {
-	        this._top.$emit('data:' + this.$namespace(key), this);
+	        this.$change(this.$namespace(key), this);
 	    },
 	    /**
 	     * indexOf
@@ -1116,7 +1128,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.length -= l;
 	        this._keys.splice(this.length, l);
-	        this._top.$emit('data:' + this.$namespace(), this, null, patch);
+	        this.$change(this.$namespace(), this, null, patch);
 	    },
 	    /**
 	     * forEach
@@ -1294,9 +1306,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var key = this.target,
 	                namespace = this.namespace || '',
 	                el = this.el,
-	                vm = this.vm;
-	            _.add(el, 'input onpropertychange change', function (e) {
-	                vm.data(namespace).$set(key, el.value);
+	                vm = this.vm,
+	                data = vm.data(namespace);
+	            _.add(el, 'input propertychange change', function (e) {
+	                data.$set(key, el.value);
 	            }, vm);
 	        },
 	        update: function (value) {
@@ -1327,7 +1340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // merge data
 	            mergeTarget &&
 	                Object.keys(mergeTarget).forEach(function (key) {
-	                    !data[key] &&
+	                    key in data ||
 	                        data.$set(key, mergeTarget[key]);
 	                });
 
@@ -1518,31 +1531,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // if dp exists, proceess data
 	        dp && (value = dp(value, patch));
 
-	        _.nextTick(function () {
+	        // _.nextTick(function () {
 	            // clean up repeats dom
 
-	            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
-	                return;
-	            }
+	        if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
+	            return;
+	        }
 
-	            var fragment = document.createDocumentFragment(),
-	                itemNode;
-	            value.forEach(function (obj, i) {
-	                itemNode = _.clone(tpl);
-	                vm._templateBind(itemNode, {
-	                    data: obj,
-	                    namespace: obj.$namespace(),
-	                    immediate: true,
-	                    useCache: true
-	                });
-	                // TODO this must refactor
-	                repeats.push(itemNode);
-	                fragment.appendChild(itemNode);
+	        var fragment = document.createDocumentFragment(),
+	            itemNode;
+	        value.forEach(function (obj, i) {
+	            itemNode = _.clone(tpl);
+	            vm._templateBind(itemNode, {
+	                data: obj,
+	                namespace: obj.$namespace(),
+	                immediate: true,
+	                useCache: true
 	            });
-
-	            insert && insert(parentNode, fragment, ref);
-	            vm.$emit('repeat-render');
+	            // TODO this must refactor
+	            repeats.push(itemNode);
+	            fragment.appendChild(itemNode);
 	        });
+
+	        insert && insert(parentNode, fragment, ref);
+	        vm.$emit('repeat-render');
+	        // });
 	    }, false, true);
 	}
 
@@ -1592,7 +1605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    update && self.$watch(target, function (value, oldValue) {
 	                        value = self.applyFilters(value, readFilters, oldValue);
 	                        update.call(that, value, oldValue);
-	                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
+	                    }, typeof data[key] === 'object', typeof options.immediate === 'boolean' ? options.immediate : (data[key] !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 	        });

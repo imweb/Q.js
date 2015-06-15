@@ -107,30 +107,30 @@ exports.bind = function () {
         // if dp exists, proceess data
         dp && (value = dp(value, patch));
 
-        _.nextTick(function () {
+        // _.nextTick(function () {
             // clean up repeats dom
 
-            if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
-                return;
-            }
+        if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
+            return;
+        }
 
-            var fragment = document.createDocumentFragment(),
-                itemNode;
-            value.forEach(function (obj, i) {
-                itemNode = _.clone(tpl);
-                vm._templateBind(itemNode, {
-                    data: obj,
-                    namespace: obj.$namespace(),
-                    immediate: true,
-                    useCache: true
-                });
-                // TODO this must refactor
-                repeats.push(itemNode);
-                fragment.appendChild(itemNode);
+        var fragment = document.createDocumentFragment(),
+            itemNode;
+        value.forEach(function (obj, i) {
+            itemNode = _.clone(tpl);
+            vm._templateBind(itemNode, {
+                data: obj,
+                namespace: obj.$namespace(),
+                immediate: true,
+                useCache: true
             });
-
-            insert && insert(parentNode, fragment, ref);
-            vm.$emit('repeat-render');
+            // TODO this must refactor
+            repeats.push(itemNode);
+            fragment.appendChild(itemNode);
         });
+
+        insert && insert(parentNode, fragment, ref);
+        vm.$emit('repeat-render');
+        // });
     }, false, true);
 }

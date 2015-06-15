@@ -39,7 +39,7 @@ module.exports = function (el, options) {
                     update && self.$watch(target, function (value, oldValue) {
                         value = self.applyFilters(value, readFilters, oldValue);
                         update.call(that, value, oldValue);
-                    }, typeof data[key] === 'object', options.immediate || (data[key] !== undefined));
+                    }, typeof data[key] === 'object', typeof options.immediate === 'boolean' ? options.immediate : (data[key] !== undefined));
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
         });

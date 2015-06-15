@@ -68,7 +68,7 @@ module.exports = function (_) {
             // initialize data and scope inheritance.
             this._initScope();
             // call created hook
-            this._callHook('created')
+            this._callHook('created');
             // start compilation
             if (this.$el) {
                 // cache the instance

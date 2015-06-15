@@ -24,21 +24,26 @@
             upload: function () {
                 var value = prompt('填写一个图片地址', 'http://pub.idqqimg.com/pc/misc/connect/files/20140424/e934597ca2314d8da4f3dbe67d41f80d.png');
                 if (value) {
+
                     if (listVm.albums.length === 2) {
                         var d = new Date;
                         listVm.albums.unshift({
                             date: [d.getFullYear(), d.getMonth() + 1, d.getDate()].join('-'),
                             des: '反正就是游玩',
                             author: '你',
-                            pics: []
+                            pics: [{
+                                url: value
+                            }]
+                        });
+                    } else {
+                        listVm.albums[0].pics.push({
+                            url: value
                         });
                     }
                     if (listVm.albums.length < 3) {
                         return alert('你已经删除掉创建的相册!');
                     }
-                    listVm.albums[0].pics.push({
-                        url: value
-                    });
+
                 }
             },
             manage: function () {
