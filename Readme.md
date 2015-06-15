@@ -11,6 +11,8 @@ Q.js
 * 非常小，有足够用的API
 * 借助`jQuery 1.*`能兼容到IE6
 * 借助`Zepto`能兼容各手机浏览器
+* 解决90%的需求，剩下10%允许用`jQuery`或`Zepto`来完成
+* 配合[Ques](https://github.com/miniflycn/Ques)，实现易于扩展的组件化体系
 
 一个简单例子
 ------------
