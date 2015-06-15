@@ -1,183 +1,6 @@
 module.exports = function (Q) {
 
     describe('data', function () {
-        it('should able to get a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.msg.should.equal('hello');
-            vm.list[1].text.should.equal('donaldyang');
-        });
-
-        it('should able to set a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.$set('msg', 'nihao');
-            vm.msg.should.equal('nihao');
-            vm.list[1].$set('text', 'hello');
-            vm.list[1].text.should.equal('hello');
-        });
-
-        it('should able to set a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.list.push({ text: 'nihao' }, { text: 'imweb' });
-            vm.list[2].text.should.equal('nihao');
-            vm.list[3].text.should.equal('imweb');
-            vm.list.length.should.equal(4);
-        });
-
-        it('should able to pop a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.list.pop().text.should.equal('donaldyang');
-            vm.list.length.should.equal(1);
-            vm.list[0].text.should.equal('tencent');
-        });
-
-        it('should able to unshift a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.list.unshift({ text: 'good' });
-            vm.list[0].text.should.equal('good');
-            vm.list[0].$key().should.equal(0);
-            vm.list[1].$key().should.equal(1);
-            vm.list[2].$key().should.equal(2);
-            vm.list.length.should.equal(3);
-        });
-
-        it('should able to shift a vm data', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.list.shift().text.should.equal('tencent');
-            vm.list.length.should.equal(1);
-            vm.list[0].text.should.equal('donaldyang');
-            vm.list[0].$key().should.equal(0);
-        });
-
-        it('should able to call indexOf for a DataArray', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list1: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ],
-                    list2: [
-                        'tencent',
-                        'donaldyang'
-                    ]
-                }
-            });
-
-            vm.list1.indexOf(vm.list1[1]).should.equal(1);
-            vm.list2.indexOf(vm.list2[1]).should.equal(1);
-        });
-
-        it('should able to call splice for a DataArray', function () {
-            var vm = new Q({
-                el: null,
-                data: {
-                    msg: 'hello',
-                    list: [
-                        {
-                            text: 'tencent'
-                        },
-                        {
-                            text: 'donaldyang'
-                        }
-                    ]
-                }
-            });
-
-            vm.list.splice(0, 1);
-            vm.list.length.should.equal(1);
-            vm.list[0].text.should.equal('donaldyang');
-            vm.list[0].$key().should.equal(0);
-        });
-
         it('should return itself when key is undefined', function () {
             var vm = new Q({
                 el: null,
@@ -201,27 +24,9 @@ module.exports = function (Q) {
             vm.$set('test', 'test');
         });
 
-        it('should able traversing a array which has some property', function () {
-            var arr = [1, 2, 3, 4],
-                l = arr.length;
-
-            arr.flag = true;
-            var vm = new Q({
-                el: null,
-                data: {
-                    arr: arr
-                }
-            });
-            vm.arr.length.should.equal(l);
-            vm.arr.forEach(function (item, i) {
-                item.should.equal(i + 1);
-            });
-            vm.arr.flag.should.be.ok;
-        });
-
         it('should able to watch push method', function (done) {
             var vm = new Q({
-                el: 'null',
+                el: null,
                 data: {
                     arr: [1, 2]
                 }
@@ -235,6 +40,59 @@ module.exports = function (Q) {
             });
 
             vm.arr.push(3);
+        });
+
+        it('should able to watch splice method', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    arr: [1, 2, 3]
+                }
+            });
+
+            vm.$watch('arr', function (value, oldVal, patch) {
+                (value[2] === undefined).should.be.true;
+                value.length.should.equal(2);
+                patch.method.should.equal('splice');
+                patch.args.should.eql([1, 1]);
+                done();
+            });
+
+            vm.arr.splice(1, 1);
+        });
+
+        it('should able to watch pop method', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    arr: [1, 2, 3]
+                }
+            });
+
+            vm.$watch('arr', function (value, oldVal, patch) {
+                (value[2] === undefined).should.be.true;
+                value.length.should.equal(2);
+                done();
+            });
+
+            vm.arr.pop();
+        });
+
+        it('should able to watch shift method', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    arr: [1, 2, 3]
+                }
+            });
+
+            vm.$watch('arr', function (value, oldVal, patch) {
+                (value[2] === undefined).should.be.true;
+                value.length.should.equal(2);
+                done();
+            });
+
+            vm.arr.shift();
         });
     });
 

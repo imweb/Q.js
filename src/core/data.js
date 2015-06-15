@@ -4,7 +4,6 @@ var _ = require('./utils');
  * prefix data
  */
 function _prefix(up, key, value) {
-    if (+key + '' === key) key = +key;
     var options = {
         data: value,
         up: up,
@@ -17,8 +16,8 @@ function _prefix(up, key, value) {
                 new Data(options);
     } else {
         up[key] = value;
-        if (!(~up._keys.indexOf(key))) up._keys.push(key);
     }
+    if (!(~up._keys.indexOf(key))) up._keys.push(key);
 }
 
 function _isArray(obj) {
@@ -27,7 +26,7 @@ function _isArray(obj) {
 
 function _getLength(keys) {
     return keys.filter(function (key) {
-        return +key + '' === key;
+        return typeof key === 'number';
     }).length;
 }
 
@@ -39,8 +38,12 @@ function _getLength(keys) {
 function Data(options) {
     var data = options.data,
         keys = Object.keys(options.data || {})
-            .filter(function (key) { return key.indexOf('_') !== 0; }),
+            .filter(function (key) { return key.indexOf('_') !== 0; })
+            .map(function (num) {
+                return +num + '' === num ? +num : num;
+            }),
         self = this;
+
     _.extend(this, data);
 
     // all key need to traverse
@@ -184,6 +187,7 @@ _.extend(DataArray.prototype, Data.prototype, {
                 (this[i]._namespace = i + '');
         }
         this._keys.pop();
+        delete this[this.length];
         this.$change(this.$namespace(), this);
         return res;
     },

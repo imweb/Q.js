@@ -10,5 +10,6 @@ require('./spec/directive')(Q);
 _.extend(utils, _);
 require('./utils/utils')(utils);
 require('./utils/cache');
+require('./utils/data');
 
 

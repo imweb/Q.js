@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.3.10
+ * Q.js v0.4.0
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -340,7 +340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    },
 	    add: function (el, evt, fn, vm) {
-	        if (!vm || NO_DELEGATOR[evt]) {
+	        if (!vm || NO_DELEGATOR[evt]) { 
 	            el.addEventListener(evt, fn);
 	        } else {
 	            var $el = vm.$el,
@@ -902,7 +902,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * prefix data
 	 */
 	function _prefix(up, key, value) {
-	    if (+key + '' === key) key = +key;
 	    var options = {
 	        data: value,
 	        up: up,
@@ -915,8 +914,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                new Data(options);
 	    } else {
 	        up[key] = value;
-	        if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	    }
+	    if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	}
 
 	function _isArray(obj) {
@@ -925,7 +924,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _getLength(keys) {
 	    return keys.filter(function (key) {
-	        return +key + '' === key;
+	        return typeof key === 'number';
 	    }).length;
 	}
 
@@ -937,8 +936,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Data(options) {
 	    var data = options.data,
 	        keys = Object.keys(options.data || {})
-	            .filter(function (key) { return key.indexOf('_') !== 0; }),
+	            .filter(function (key) { return key.indexOf('_') !== 0; })
+	            .map(function (num) {
+	                return +num + '' === num ? +num : num;
+	            }),
 	        self = this;
+
 	    _.extend(this, data);
 
 	    // all key need to traverse
@@ -1014,7 +1017,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * change
 	     */
 	    $change: function (key, value, oldVal, patch) {
-	        this._top.$emit('data:' + key, value, oldVal, patch);
+	        this._top.$emit &&
+	            this._top.$emit('data:' + key, value, oldVal, patch);
 	    }
 	});
 
@@ -1081,6 +1085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[i]._namespace = i + '');
 	        }
 	        this._keys.pop();
+	        delete this[this.length];
 	        this.$change(this.$namespace(), this);
 	        return res;
 	    },
@@ -1301,9 +1306,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var key = this.target,
 	                namespace = this.namespace || '',
 	                el = this.el,
-	                vm = this.vm;
-	            _.add(el, 'input onpropertychange change', function (e) {
-	                vm.data(namespace).$set(key, el.value);
+	                vm = this.vm,
+	                data = vm.data(namespace);
+	            _.add(el, 'input propertychange change', function (e) {
+	                data.$set(key, el.value);
 	            }, vm);
 	        },
 	        update: function (value) {
@@ -1334,7 +1340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // merge data
 	            mergeTarget &&
 	                Object.keys(mergeTarget).forEach(function (key) {
-	                    !data[key] &&
+	                    key in data ||
 	                        data.$set(key, mergeTarget[key]);
 	                });
 
