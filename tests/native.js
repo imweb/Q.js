@@ -11,5 +11,7 @@ _.extend(utils, _);
 require('./utils/utils')(utils);
 require('./utils/cache');
 require('./utils/data');
+require('./utils/events');
+require('./utils/parse');
 
 

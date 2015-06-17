@@ -70,6 +70,25 @@ describe('Data & DataArray', function () {
         data.name.should.equal('Daniel');
     });
 
+    it('should able to set a data using object', function () {
+        var data = new Data({
+            data: {
+                msg: 'hello',
+                firstName: 'Donald',
+                lastName: 'Yang'
+            }
+        });
+
+        data.$set({
+            msg: 'nihao',
+            firstName: 'Daniel'
+        });
+
+        data.msg.should.equal('nihao');
+        data.firstName.should.equal('Daniel');
+        data.lastName.should.equal('Yang');
+    });
+
     it('should able to get the namespace of a data', function () {
         var data = new Data({
             data: {

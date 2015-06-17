@@ -93,9 +93,16 @@ _.extend(Data.prototype, {
      * set the value of the key
      */
     $set: function (key, value) {
-        var oldValue = this[key];
-        _prefix(this, key, value);
-        this.$change(this.$namespace(key), this[key], oldValue);
+        if (typeof key === 'object') {
+            var self = this;
+            Object.keys(key).forEach(function (k) {
+                self.$set(k, key[k]);
+            });
+        } else {
+            var oldValue = this[key];
+            _prefix(this, key, value);
+            this.$change(this.$namespace(key), this[key], oldValue);
+        }
         return this;
     },
     /**

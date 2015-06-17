@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.0
+ * Q.js v0.4.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -927,9 +927,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * set the value of the key
 	     */
 	    $set: function (key, value) {
-	        var oldValue = this[key];
-	        _prefix(this, key, value);
-	        this.$change(this.$namespace(key), this[key], oldValue);
+	        if (typeof key === 'object') {
+	            var self = this;
+	            Object.keys(key).forEach(function (k) {
+	                self.$set(k, key[k]);
+	            });
+	        } else {
+	            var oldValue = this[key];
+	            _prefix(this, key, value);
+	            this.$change(this.$namespace(key), this[key], oldValue);
+	        }
 	        return this;
 	    },
 	    /**
@@ -1129,13 +1136,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var props, nArgs,
 	        keys = key.split('.'),
 	        self = { _events: this._watchers };
-	    // TODO It must use a better way to clear all watch
-	    // if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+
 	    _emit.call(self, key, args);
 	    for (; keys.length > 0;) {
 	        key = keys.join('.');
 	        props = key + '**deep**';
-	        nArgs = _.slice.call(args, 0);
+	        // remove the old value
+	        nArgs = _.slice.call(args, 0, 1);
 	        nArgs[0] = this.data(key);
 	        _emit.call(self, props, nArgs);
 	        keys.pop();
