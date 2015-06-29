@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.1
+ * Q.js v0.4.2
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -509,13 +509,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        $emit: function (e) {
 	            var args = _.slice.call(arguments, 1);
-	            events._emit.call(this, e, _.slice.call(args, 0));
+	            events.emit.call(this, e, _.slice.call(args, 0));
 	            // emit data change
 	            if (e.indexOf('data:') === 0) {
 	                e = e.substring(5);
-	                events._callDataChange.call(this, e, _.slice.call(args, 0));
+	                events.callDataChange.call(this, e, _.slice.call(args, 0));
 	                args.unshift(e);
-	                events._emit.call(this, 'datachange', args);
+	                events.emit.call(this, 'datachange', args);
 	            }
 	            return this;
 	        },
@@ -1103,15 +1103,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Data = __webpack_require__(8),
 	    _ = __webpack_require__(1);
 
-	function _clearWatch(namespace) {
-	    namespace = namespace + '.';
-	    var key;
-	    for (key in this._watchers) {
-	        if (~key.indexOf(namespace)) {
-	            this._watchers[key].length = 0;
-	        }
-	    }
-	}
+
+	// TODO: remove for the present
+	// function _clearWatch(namespace) {
+	//     namespace = namespace + '.';
+	//     var key;
+	//     for (key in this._watchers) {
+	//         if (~key.indexOf(namespace)) {
+	//             this._watchers[key].length = 0;
+	//         }
+	//     }
+	// }
 
 	function _emit(key, args, target) {
 	    // set the trigger target is pass in or this
@@ -1152,9 +1154,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = {
-	    _clearWatch: _clearWatch,
-	    _emit: _emit,
-	    _callDataChange: _callDataChange
+	    emit: _emit,
+	    callDataChange: _callDataChange
 	};
 
 

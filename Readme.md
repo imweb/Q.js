@@ -216,7 +216,7 @@ data: {
 * attr - 设置节点属性（attribute & property）
 
 ```
-<img q-src="url">
+<img q-attr="src: url">
 ```
 
 ```

@@ -26,7 +26,7 @@ describe('events', function () {
         });
 
         var args = ['hello', 1, [2, 3], { v: 'nihao' }];
-        events._emit.call(mock, 'change', args);
+        events.emit.call(mock, 'change', args);
         // it should not be polluted
         args[0].should.equal('hello');
         args[1].should.equal(1);
@@ -46,7 +46,7 @@ describe('events', function () {
 
         var target = {};
 
-        events._emit.call(mock, 'change', [], target);
+        events.emit.call(mock, 'change', [], target);
     });
 
     it('should able call the data change', function (done) {
@@ -60,7 +60,7 @@ describe('events', function () {
             }
         });
 
-        events._callDataChange.call(mock, 'msg', ['newVal', 'oldVal']);
+        events.callDataChange.call(mock, 'msg', ['newVal', 'oldVal']);
     });
 
     it('should able call the data change deep', function (done) {
@@ -82,6 +82,6 @@ describe('events', function () {
         // set lists.0
         mock.lists[0] = 2;
         // call lists.0 change
-        events._callDataChange.call(mock, 'lists.0', [1, 2]);
+        events.callDataChange.call(mock, 'lists.0', [1, 2]);
     });
 });

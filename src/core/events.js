@@ -1,15 +1,17 @@
 var Data = require('./data'),
     _ = require('./utils');
 
-function _clearWatch(namespace) {
-    namespace = namespace + '.';
-    var key;
-    for (key in this._watchers) {
-        if (~key.indexOf(namespace)) {
-            this._watchers[key].length = 0;
-        }
-    }
-}
+
+// TODO: remove for the present
+// function _clearWatch(namespace) {
+//     namespace = namespace + '.';
+//     var key;
+//     for (key in this._watchers) {
+//         if (~key.indexOf(namespace)) {
+//             this._watchers[key].length = 0;
+//         }
+//     }
+// }
 
 function _emit(key, args, target) {
     // set the trigger target is pass in or this
@@ -50,7 +52,6 @@ function _callDataChange(key, args) {
 };
 
 module.exports = {
-    _clearWatch: _clearWatch,
-    _emit: _emit,
-    _callDataChange: _callDataChange
+    emit: _emit,
+    callDataChange: _callDataChange
 };
