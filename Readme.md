@@ -1,7 +1,7 @@
 Q.js
 ====
 
-[![Build Status](https://travis-ci.org/miniflycn/Q.js.svg?branch=master)](https://travis-ci.org/miniflycn/Q.js)
+[![Build Status](https://travis-ci.org/imweb/Q.js.svg?branch=master)](https://travis-ci.org/imweb/Q.js)
 
 > 模仿Vuejs的`伪MVVM`库，下面是使用说明
 
@@ -11,6 +11,8 @@ Q.js
 * 非常小，有足够用的API
 * 借助`jQuery 1.*`能兼容到IE6
 * 借助`Zepto`能兼容各手机浏览器
+* 解决90%的需求，剩下10%允许用`jQuery`或`Zepto`来完成
+* 配合[Ques](https://github.com/miniflycn/Ques)，实现易于扩展的组件化体系
 
 一个简单例子
 ------------
@@ -214,7 +216,7 @@ data: {
 * attr - 设置节点属性（attribute & property）
 
 ```
-<img q-src="url">
+<img q-attr="src: url">
 ```
 
 ```

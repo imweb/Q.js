@@ -3,7 +3,8 @@ var noop = function () {},
         window.webkitRequestAnimationFrame ||
         setTimeout,
     cache = new (require('./cache'))(1000),
-    _qtid = 0;
+    _qtid = 0,
+    slice = [].slice;
 
 function walk($el, cb, setting) {
     var i, j, l, el, atts, res, qtid;
@@ -35,14 +36,14 @@ function walk($el, cb, setting) {
             res.length > 0 &&
                 cb(el, res, setting);
         }
-        if (el.childNodes.length && !setting.stop) walk(el.childNodes, cb, setting);
+        if (el.childNodes.length && !setting.stop) walk(slice.call(el.childNodes, 0), cb, setting);
         // reset stop
         setting.stop = false;
     }
 }
 
 module.exports = {
-    slice: [].slice,
+    slice: slice,
     noop: noop,
     /**
      * Add class with compatibility for IE & SVG
@@ -88,7 +89,7 @@ module.exports = {
         return typeof o === 'object';
     },
     nextTick: function (cb, ctx) {
-        ctx ?
+        return ctx ?
             defer(function () { cb.call(ctx) }, 0) :
             defer(cb, 0);
     },

@@ -88,9 +88,10 @@ module.exports = {
             var key = this.target,
                 namespace = this.namespace || '',
                 el = this.el,
-                vm = this.vm;
-            _.add(el, 'input onpropertychange change', function (e) {
-                vm.data(namespace).$set(key, el.value);
+                vm = this.vm,
+                data = vm.data(namespace);
+            _.add(el, 'input propertychange change', function (e) {
+                data.$set(key, el.value);
             }, vm);
         },
         update: function (value) {
@@ -121,7 +122,7 @@ module.exports = {
             // merge data
             mergeTarget &&
                 Object.keys(mergeTarget).forEach(function (key) {
-                    !data[key] &&
+                    key in data ||
                         data.$set(key, mergeTarget[key]);
                 });
 

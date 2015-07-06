@@ -68,7 +68,7 @@ module.exports = function (_) {
             // initialize data and scope inheritance.
             this._initScope();
             // call created hook
-            this._callHook('created')
+            this._callHook('created');
             // start compilation
             if (this.$el) {
                 // cache the instance
@@ -188,13 +188,13 @@ module.exports = function (_) {
          */
         $emit: function (e) {
             var args = _.slice.call(arguments, 1);
-            events._emit.call(this, e, _.slice.call(args, 0));
+            events.emit.call(this, e, _.slice.call(args, 0));
             // emit data change
             if (e.indexOf('data:') === 0) {
                 e = e.substring(5);
-                events._callDataChange.call(this, e, _.slice.call(args, 0));
+                events.callDataChange.call(this, e, _.slice.call(args, 0));
                 args.unshift(e);
-                events._emit.call(this, 'datachange', args);
+                events.emit.call(this, 'datachange', args);
             }
             return this;
         },

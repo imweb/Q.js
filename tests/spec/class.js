@@ -3,11 +3,16 @@ module.exports = function (Q) {
     before(function () {
         div = document.createElement('div');
         div.innerHTML =
-            '<div id="component" style="display: none">\
+            '<div id="component1" style="display: none">\
                 <p q-text="msg" id="msg1"></p>\
                 <div q-vm="hello" q-with="obj" q-ref="test">\
                     <p q-text="msg | prepend" id="msg2"></p>\
                     <button q-on="click: sayHello" id="test-button">hello</button>\
+                </div>\
+            </div>\
+            <div id="component2" style="display: none">\
+                <div q-vm="nihao">\
+                    <p q-text="isMike | whoSay" id="msg3"></p>\
                 </div>\
             </div>';
         document.body.appendChild(div);
@@ -38,7 +43,7 @@ module.exports = function (Q) {
 
         it('should able to create a child component', function (done) {
             var vm = new Q({
-                el: '#component',
+                el: '#component1',
                 data: {
                     msg: 'hello',
                     obj: {}
@@ -50,8 +55,8 @@ module.exports = function (Q) {
                     (vm.$['test'] instanceof VM)
                         .should.be.ok;
                 });
-                $('#msg1', '#component').text().should.equal('hello');
-                $('#msg2', '#component').text().should.equal('hello world');
+                $('#msg1', '#component1').text().should.equal('hello');
+                $('#msg2', '#component1').text().should.equal('hello world');
 
                 vm.obj.$set('msg', 'hhhh');
                 done();
@@ -59,11 +64,11 @@ module.exports = function (Q) {
         });
 
         it('should able to set the data of a children component', function (done) {
-            var vm = Q.get('#component');
+            var vm = Q.get('#component1');
             vm.$set('msg', 'nihao');
             vm.obj.$set('msg', 'tencent');
-            $('#msg1', '#component').text().should.equal('nihao');
-            $('#msg2', '#component').text().should.equal('hello tencent');
+            $('#msg1', '#component1').text().should.equal('nihao');
+            $('#msg2', '#component1').text().should.equal('hello tencent');
 
             vm.$on('say', function (data) {
                 data.should.equal('hello');
@@ -71,6 +76,33 @@ module.exports = function (Q) {
                 done();
             });
             $('#test-button')[0].click();
+        });
+
+        it('should able extend the child component options automatically', function (done) {
+            Q.define('nihao', {
+                data: {
+                    isMike: false
+                },
+                filters: {
+                    whoSay: function (isMike) {
+                        return 'Nihao ' + (isMike ? 'Mike' : 'Daniel');
+                    }
+                }
+            });
+
+            var vm = new Q({
+                el: '#component2'
+            });
+
+            $('#msg3', '#component2').text().should.equal('Nihao Daniel');
+            vm.isMike.should.be.not.ok;
+
+            setTimeout(function () {
+                vm.$set('isMike', true);
+                $('#msg3', '#component2').text().should.equal('Nihao Mike');
+                vm.isMike.should.be.ok;
+                done();
+            }, 100);
         });
     });
 

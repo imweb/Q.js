@@ -1,15 +1,17 @@
 var Data = require('./data'),
     _ = require('./utils');
 
-function _clearWatch(namespace) {
-    namespace = namespace + '.';
-    var key;
-    for (key in this._watchers) {
-        if (~key.indexOf(namespace)) {
-            this._watchers[key].length = 0;
-        }
-    }
-}
+
+// TODO: remove for the present
+// function _clearWatch(namespace) {
+//     namespace = namespace + '.';
+//     var key;
+//     for (key in this._watchers) {
+//         if (~key.indexOf(namespace)) {
+//             this._watchers[key].length = 0;
+//         }
+//     }
+// }
 
 function _emit(key, args, target) {
     // set the trigger target is pass in or this
@@ -34,13 +36,13 @@ function _callDataChange(key, args) {
     var props, nArgs,
         keys = key.split('.'),
         self = { _events: this._watchers };
-    // TODO It must use a better way to clear all watch
-    // if (args[1] instanceof Data && 'length' in args[1]) _clearWatch(key);
+
     _emit.call(self, key, args);
     for (; keys.length > 0;) {
         key = keys.join('.');
         props = key + '**deep**';
-        nArgs = _.slice.call(args, 0);
+        // remove the old value
+        nArgs = _.slice.call(args, 0, 1);
         nArgs[0] = this.data(key);
         _emit.call(self, props, nArgs);
         keys.pop();
@@ -50,7 +52,6 @@ function _callDataChange(key, args) {
 };
 
 module.exports = {
-    _clearWatch: _clearWatch,
-    _emit: _emit,
-    _callDataChange: _callDataChange
+    emit: _emit,
+    callDataChange: _callDataChange
 };
