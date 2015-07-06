@@ -61,6 +61,9 @@ module.exports = {
                     '' :
                     value.toString());
     },
+    html: function(value) {
+        this.el.innerHTML = value && value.toString() || '';
+    },
     on: {
         bind: function () {
             var self = this,
