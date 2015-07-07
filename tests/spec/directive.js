@@ -32,6 +32,9 @@ module.exports = function (Q) {
             <div id="attr2" style="display: none">\
                 <span q-attr="data-id: id">id</span>\
             </div>\
+            <div id="attr3" style="display: none">\
+                <span q-attr="style: styles">styles</span>\
+            </div>\
             <ul id="tpl1" style="display: none">\
                 <li q-repeat="items" q-text="msg"></li>\
             </ul>\
@@ -158,6 +161,19 @@ module.exports = function (Q) {
             });
 
             $('#attr2 span')[0].getAttribute('data-id').should.equal('2');
+        });
+
+        it('should able to set style', function () {
+            var attrTpl2 = new Q({
+                el: '#attr3',
+                data: {
+                    styles: {
+                        fontWeight: 'bold'
+                    }
+                }
+            });
+
+            $('#attr3 span')[0].style.fontWeight.should.equal('bold');
         });
     });
 
