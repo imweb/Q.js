@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.2
+ * Q.js v0.4.3
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -335,6 +335,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function Q(options) {
 	        this._init(options);
 	    }
+	    // exports utils
+	    Q._ = _;
 	    Q.options = {
 	        directives: __webpack_require__(10),
 	        filters: {}
@@ -1225,6 +1227,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                value == null ?
 	                    '' :
 	                    value.toString());
+	    },
+	    html: function(value) {
+	        this.el.innerHTML = value && value.toString() || '';
 	    },
 	    on: {
 	        bind: function () {

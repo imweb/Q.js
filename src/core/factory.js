@@ -14,6 +14,8 @@ module.exports = function (_) {
     function Q(options) {
         this._init(options);
     }
+    // exports utils
+    Q._ = _;
     Q.options = {
         directives: require('./directives'),
         filters: {}
