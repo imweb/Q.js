@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.3
+ * Q.js v0.4.5
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -647,11 +647,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!names.length) return [];
 	            var filters = this.$options.filters,
 	                self = this;
-	            return names.map(function (name) {
-	                var args = name.split(' '),
-	                    reader;
-	                name = args.shift();
-	                reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
+	            return names.map(function (args) {
+	                // 需要修改args 必须复制
+	                args = [].concat(args);
+	                var name = args.shift();
+	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
 	                return function (value, oldVal) {
 	                    return args ?
 	                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
@@ -783,6 +783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        [childVal] :
 	        parentVal;
 	};
+	strats.filters =
 	strats.methods =
 	strats.directives = function (parentVal, childVal) {
 	  if (!childVal) return parentVal;
@@ -1165,7 +1166,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(1);
+	var _ = __webpack_require__(1),
+	    strats = __webpack_require__(7);
 
 	module.exports = {
 	    show: function (value) {
@@ -1279,11 +1281,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // component reference
 	                ref = el.getAttribute('q-ref') || false,
 	                key = el.getAttribute('q-with') || '',
+	                extend = el.getAttribute('q-extend'),
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
 	                data = vm.data(target),
 	                Child = vm.constructor.require(name),
 	                mergeTarget = Child.options.data,
+	                options,
 	                childVm;
 
 	            // merge data
@@ -1293,11 +1297,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        data.$set(key, mergeTarget[key]);
 	                });
 
-	            childVm = new Child({
+	            options = {
 	                el: el,
 	                data: data.$get(),
 	                _parent: vm
-	            });
+	            };
+
+	            if (extend && (extend = vm.$options.extend[extend])) {
+	                if (extend.data || extend.el || extend._parent) throw new Error('Extend Error');
+	                options = strats.mergeOptions(options, extend);
+	            }
+
+	            childVm = new Child(options);
 
 	            vm._children.push(childVm);
 	            ref && !function () {
@@ -1578,30 +1589,103 @@ return /******/ (function(modules) { // webpackBootstrap
 	function parse(str) {
 	    var hit = cache.get(str);
 	    if (hit) return hit;
-	    var exps = str.trim().split(/ *\, */),
-	        eventReg = /^([\w\-]+)\:/,
-	        keyReg = /^[\w\-]+$/,
-	        arr = [];
-	    exps.forEach(function (exp) {
-	        var res = {},
-	            match = exp.match(eventReg),
-	            filters, exp;
-	        if (match) {
-	            res.arg = match[1];
-	            exp = exp.substring(match[0].length).trim();
+
+	    var arr = [];
+	    var words = getWords(str);
+	    var exps = splitArrayByItem(words, ',');
+	    var keyReg = /^[\w\-]+$/;
+
+	    exps.forEach(function(exp) {
+	        var pipes = splitArrayByItem(exp, '|');
+	        var targetInfo = pipes[0];
+	        var res = {
+	            filters: pipes.slice(1)
+	        };
+	        if (targetInfo[1] === ':') {
+	            res.arg = targetInfo[0];
+	            targetInfo.splice(0, 2);
 	        }
-	        filters = exp.split(/ *\| */);
-	        exp = filters.shift();
-	        if (keyReg.test(exp)) {
-	            res.target = exp;
+	        if (keyReg.test(targetInfo[0])) {
+	            res.target = targetInfo[0];
 	        } else {
-	            res.exp = exp;
+	            // 'click: select(this)' 词法分析保准不把()分割成单独单词
+	            res.exp = targetInfo[0];
 	        }
-	        res.filters = filters;
 	        arr.push(res);
 	    });
 	    cache.put(str, arr);
 	    return arr;
+	}
+
+	/**
+	 * 词法分析
+	 * @param {string} str
+	 * @return {Array<string>} 
+	 */
+	function getWords(str) {
+	    var words = [];
+	    var quote = null; // 在引号中 ' or "
+	    var quoteEscape = false; // 引号中上一个字符为\转义
+	    var w = ''; // pending word
+	    var spaces = /[\s]/; // 空格
+	    var oneCharWord = /[|,:]/; // 必须单个字符的单词
+
+	    function push() {
+	        w && words.push(w);
+	        w = '';
+	    }
+
+	    for (var i = 0; i < str.length; i++) {
+	        var ch = str.charAt(i);
+	        if (quote) {
+	            if (quoteEscape) {
+	                // leave escape
+	                quoteEscape = false;
+	                w += ch;
+	            } else if (ch === '\\') {
+	                // enter escape
+	                quoteEscape = true;
+	            } else if (ch === quote) {
+	                // leave quote
+	                quote = false;
+	                push();
+	            } else {
+	                w += ch;
+	            }
+	        } else if (ch === '\'' || ch === '"') {
+	            // enter quote
+	            push();
+	            quote = ch;
+	        } else if (spaces.test(ch)) {
+	            push();
+	        } else if (oneCharWord.test(ch)) {
+	            push();
+	            words.push(ch);
+	        } else {
+	            w += ch;
+	        }
+	    }
+	    push();
+	    return words;
+	}
+
+	/**
+	 * 分割数组
+	 * @param {Array} arr
+	 * @param {Object} item
+	 * @return {Array<Array>}
+	 */
+	function splitArrayByItem(arr, item) {
+	    var result = [[]];
+	    for (var i in arr) {
+	        var curr = arr[i];
+	        if (item === curr) {
+	            result.push([]);
+	        } else {
+	            result[result.length - 1].push(curr);
+	        }
+	    }
+	    return result;
 	}
 
 	module.exports = parse;

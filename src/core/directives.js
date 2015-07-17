@@ -1,4 +1,5 @@
-var _ = require('./utils');
+var _ = require('./utils'),
+    strats = require('./strats');
 
 module.exports = {
     show: function (value) {
@@ -112,11 +113,13 @@ module.exports = {
                 // component reference
                 ref = el.getAttribute('q-ref') || false,
                 key = el.getAttribute('q-with') || '',
+                extend = el.getAttribute('q-extend'),
                 namespace = this.namespace,
                 target = namespace ? ([namespace, key].join('.')) : key,
                 data = vm.data(target),
                 Child = vm.constructor.require(name),
                 mergeTarget = Child.options.data,
+                options,
                 childVm;
 
             // merge data
@@ -126,11 +129,18 @@ module.exports = {
                         data.$set(key, mergeTarget[key]);
                 });
 
-            childVm = new Child({
+            options = {
                 el: el,
                 data: data.$get(),
                 _parent: vm
-            });
+            };
+
+            if (extend && (extend = vm.$options.extend[extend])) {
+                if (extend.data || extend.el || extend._parent) throw new Error('Extend Error');
+                options = strats.mergeOptions(options, extend);
+            }
+
+            childVm = new Child(options);
 
             vm._children.push(childVm);
             ref && !function () {
