@@ -723,6 +723,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Sub.extend = Super.extend;
 	    Sub.get = Super.get;
 	    Sub.all = Super.all;
+	    Sub.require = Super.require;
 	    return Sub;
 	}
 
