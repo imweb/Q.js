@@ -247,7 +247,25 @@ data: {
 <div q-on="click: showMsg"></div>
 ```
 * model - 双向绑定（只支持input、textarea）
-* vm - 创建子VM(ViewModel, 一个Q对象的实例)
+* vm - 创建子VM(ViewModel, 一个Q对象的实例)，例如：
+
+```
+<b>
+    <c q-vm="d"></c>
+</b>
+```
+
+则c节点会绑定一个d component的实例，d component需要事先定义(Ques自动集成了该过程)，例如：
+
+```
+Q.define('d', {
+    data: {},
+    methods: {},
+    filters: {},
+    directives: {}
+});
+```
+
 * ref - 创建子VM在父级嵌套VM中的引用，例如：
 
 ```
