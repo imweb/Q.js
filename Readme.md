@@ -247,7 +247,64 @@ data: {
 <div q-on="click: showMsg"></div>
 ```
 * model - 双向绑定（只支持input、textarea）
-* vm - 创建子VM(ViewModel,一个Q对象的实例)
+* vm - 创建子VM(ViewModel, 一个Q对象的实例)
+* ref - 创建子VM在父级嵌套VM中的引用，例如：
+
+```
+<b>
+    <c q-vm="c" q-ref="c"></c>
+</b>
+```
+
+表示，如果b是b component的VM实例，则`b.$.c`可以引用到c component的VM实例
+
+* with - 创建子VM在父级嵌套VM中对应的数据，例如：
+
+```
+<b>
+    <c q-vm="c" q-with="xxx"></c>
+</b>
+```
+
+表示c component的VM实例对应的data是`b.xxx`
+
+* extend - 创建子VM在父级嵌套VM中对应的extend参数，例如：
+
+```
+<b>
+    <c q-vm="c" q-extend="c" q-click="submit"></c>
+</b>
+```
+
+其中c的参数为：
+
+```
+{
+    methods: {
+        submit: function () {
+            console.log('hello');
+        }
+    }
+}
+```
+
+则，c的VM参数`options`，将扩展自b的对应extend参数`options.extend['c']`，所以如果b的参数是这样的：
+
+```
+{
+    extend: {
+        c: {
+            methods: {
+                submit: function () {
+                    console.log('nihao')
+                }
+            }
+        }
+    }
+}
+```
+
+则单击c component实际会打印`nihao`。
 
 * if - 是否使用模版
 
