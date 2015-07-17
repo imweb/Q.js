@@ -7,7 +7,7 @@ describe('parse', function () {
         commands.length.should.equal(1);
         command.arg.should.equal('click');
         command.target.should.equal('onclick');
-        command.filters.should.eql(['filter1', 'filter2']);
+        command.filters.should.eql([['filter1'], ['filter2']]);
     });
 
     it('should parse multi-commands', function () {
@@ -30,7 +30,17 @@ describe('parse', function () {
         commands.length.should.equal(1);
         command.should.eql({
             target: 'value1',
-            filters: ['filter1', 'filter2']
+            filters: [['filter1'], ['filter2']]
+        });
+    });
+
+    it('should able to parse quotes', function () {
+        var commands = parse('value1 | filter1 "\\" & \' are quotes"'),
+            command = commands[0];
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'value1',
+            filters: [['filter1', '" & \' are quotes']]
         });
     });
 });

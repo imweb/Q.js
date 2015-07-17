@@ -326,11 +326,11 @@ module.exports = function (_) {
             if (!names.length) return [];
             var filters = this.$options.filters,
                 self = this;
-            return names.map(function (name) {
-                var args = name.split(' '),
-                    reader;
-                name = args.shift();
-                reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
+            return names.map(function (args) {
+                // 需要修改args 必须复制
+                args = [].concat(args);
+                var name = args.shift();
+                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
                 return function (value, oldVal) {
                     return args ?
                         reader.apply(self, [value].concat(args.push(oldVal) && args)) :
