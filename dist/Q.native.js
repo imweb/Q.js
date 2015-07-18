@@ -759,6 +759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    listeners = {};
 
 	function _define(name, options) {
+	    if (modules[name]) return false;
 	    var module = modules[name] = this.extend(options || {});
 	    return module;
 	}
@@ -788,6 +789,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Sub.get = Super.get;
 	    Sub.all = Super.all;
 	    Sub.require = Super.require;
+	    Sub.define = Super.define;
 	    return Sub;
 	}
 
