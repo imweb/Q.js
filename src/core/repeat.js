@@ -98,6 +98,8 @@ exports.bind = function () {
     _.walk([tpl], _.noop, { useCache: true });
 
     vm.$watch(target, function (value, oldVal, patch) {
+        // if value is undefined just return
+        if (value === undefined) return;
         value = vm.applyFilters(value, readFilters);
         var method = (!readFilters.length && patch) ? patch.method : 'default',
             dp = (methods[method] || {}).dp,
@@ -106,9 +108,6 @@ exports.bind = function () {
 
         // if dp exists, proceess data
         dp && (value = dp(value, patch));
-
-        // _.nextTick(function () {
-            // clean up repeats dom
 
         if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
             return;
@@ -131,6 +130,5 @@ exports.bind = function () {
 
         insert && insert(parentNode, fragment, ref);
         vm.$emit('repeat-render');
-        // });
     }, false, true);
 }

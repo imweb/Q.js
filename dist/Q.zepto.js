@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.5
+ * Q.js v0.4.6
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1367,7 +1367,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                parentNode = tpl.parentNode,
 	                ref = document.createComment('q-if'),
 	                hasInit = false,
-	                exist = false,
+	                exist = true,
 	                key = this.target,
 	                namespace = this.namespace,
 	                target = namespace ? ([namespace, key].join('.')) : key,
@@ -1377,27 +1377,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            tpl.removeAttribute('q-if');
 	            this.setting.stop = true;
-	            parentNode.replaceChild(ref, tpl);
 
 	            vm.$watch(target, function (value, oldVal) {
 	                value = vm.applyFilters(value, readFilters, oldVal);
+	                if (!hasInit && value === true) {
+	                    hasInit = true;
+	                    vm._templateBind(tpl, {
+	                        data: data,
+	                        namespace: namespace,
+	                        immediate: true
+	                    });
+	                }
 	                // need to init
 	                if (value === exist) return;
 	                // bind
 	                if (value === true) {
 	                    parentNode.replaceChild(tpl, ref);
-	                    !hasInit && vm._templateBind(tpl, {
-	                        data: data,
-	                        namespace: namespace,
-	                        immediate: true
-	                    });
 	                    exist = value;
 	                // unbind
 	                } else if (value === false) {
 	                    parentNode.replaceChild(ref, tpl);
 	                    exist = value;
 	                }
-	            });
+	            }, false, true);
 	        }
 	    },
 	    repeat: __webpack_require__(11)
@@ -1508,6 +1510,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.walk([tpl], _.noop, { useCache: true });
 
 	    vm.$watch(target, function (value, oldVal, patch) {
+	        // if value is undefined just return
+	        if (value === undefined) return;
 	        value = vm.applyFilters(value, readFilters);
 	        var method = (!readFilters.length && patch) ? patch.method : 'default',
 	            dp = (methods[method] || {}).dp,
@@ -1516,9 +1520,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        // if dp exists, proceess data
 	        dp && (value = dp(value, patch));
-
-	        // _.nextTick(function () {
-	            // clean up repeats dom
 
 	        if (clean && clean(parentNode, repeats, value, vm._watchers, target) === true) {
 	            return;
@@ -1541,7 +1542,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        insert && insert(parentNode, fragment, ref);
 	        vm.$emit('repeat-render');
-	        // });
 	    }, false, true);
 	}
 

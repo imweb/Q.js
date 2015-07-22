@@ -173,7 +173,7 @@ module.exports = {
                 parentNode = tpl.parentNode,
                 ref = document.createComment('q-if'),
                 hasInit = false,
-                exist = false,
+                exist = true,
                 key = this.target,
                 namespace = this.namespace,
                 target = namespace ? ([namespace, key].join('.')) : key,
@@ -183,27 +183,29 @@ module.exports = {
 
             tpl.removeAttribute('q-if');
             this.setting.stop = true;
-            parentNode.replaceChild(ref, tpl);
 
             vm.$watch(target, function (value, oldVal) {
                 value = vm.applyFilters(value, readFilters, oldVal);
+                if (!hasInit && value === true) {
+                    hasInit = true;
+                    vm._templateBind(tpl, {
+                        data: data,
+                        namespace: namespace,
+                        immediate: true
+                    });
+                }
                 // need to init
                 if (value === exist) return;
                 // bind
                 if (value === true) {
                     parentNode.replaceChild(tpl, ref);
-                    !hasInit && vm._templateBind(tpl, {
-                        data: data,
-                        namespace: namespace,
-                        immediate: true
-                    });
                     exist = value;
                 // unbind
                 } else if (value === false) {
                     parentNode.replaceChild(ref, tpl);
                     exist = value;
                 }
-            });
+            }, false, true);
         }
     },
     repeat: require('./repeat')

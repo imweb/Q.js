@@ -23,6 +23,9 @@ module.exports = function (Q) {
             <div id="if1" style="display: none">\
                 <p q-if="exist" q-text="msg"></p>\
             </div>\
+            <div id="if2" style="display: none">\
+                <p q-if="exist" q-text="msg"></p>\
+            </div>\
             <div id="custom1" style="display: none;">\
                 <p q-msg="msg"></p>\
             </div>\
@@ -42,6 +45,9 @@ module.exports = function (Q) {
                 <div q-repeat="items">\
                     <p q-repeat="msgs" q-text="text"></p>\
                 </div>\
+            </div>\
+            <div id="tpl3" style="display: none">\
+                <div q-repeat="items"></div>\
             </div>\
             <div id="tpl5" style="display: none">\
                 <a q-text="msg | noexist"></a>\
@@ -134,6 +140,19 @@ module.exports = function (Q) {
             $('#if1 p').length.should.equal(0);
 
             vm.$set('exist', true);
+
+            $('#if1 p').length.should.equal(1);
+            $('#if1 p')[0].textContent.should.equal('hello world');
+        });
+
+        it('should able to use if directive', function () {
+            var vm = new Q({
+                el: '#if2',
+                data: {
+                    exist: true,
+                    msg: 'hello world'
+                }
+            });
 
             $('#if1 p').length.should.equal(1);
             $('#if1 p')[0].textContent.should.equal('hello world');
@@ -265,6 +284,13 @@ module.exports = function (Q) {
                 lis[0].textContent.should.equal('nihao');
                 done();
             }, 100);
+        });
+
+        it('should not throw a error when array is not defined', function () {
+            new Q({
+                el: '#tpl3',
+                data: {}
+            });
         });
 
         it('should able multiple repeat', function (done) {
