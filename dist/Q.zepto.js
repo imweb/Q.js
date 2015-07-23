@@ -1284,10 +1284,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                namespace = this.namespace || '',
 	                el = this.el,
 	                vm = this.vm,
-	                data = vm.data(namespace);
+	                data = vm.data(namespace),
+	                composing = false;
 	            _.add(el, 'input propertychange change', function (e) {
+	                if (composing) return;
 	                data.$set(key, el.value);
 	            }, vm);
+	            _.add(el, 'compositionstart', function (e) {
+	                composing = true;
+	            });
+	            _.add(el, 'compositionend', function (e) {
+	                composing = false;
+	            });
 	        },
 	        update: function (value) {
 	            this.el.value = value;
