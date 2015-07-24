@@ -177,6 +177,9 @@ module.exports = {
     },
     'if': {
         bind: function () {
+            // return if el is a template
+            if (!this.el.parentNode) return;
+
             var tpl = this.el,
                 parentNode = tpl.parentNode,
                 ref = document.createComment('q-if'),

@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.6
+ * Q.js v0.4.7
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1371,6 +1371,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    'if': {
 	        bind: function () {
+	            // return if el is a template
+	            if (!this.el.parentNode) return;
+
 	            var tpl = this.el,
 	                parentNode = tpl.parentNode,
 	                ref = document.createComment('q-if'),
@@ -1518,9 +1521,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.walk([tpl], _.noop, { useCache: true });
 
 	    vm.$watch(target, function (value, oldVal, patch) {
+	        value = vm.applyFilters(value, readFilters);
 	        // if value is undefined just return
 	        if (value === undefined) return;
-	        value = vm.applyFilters(value, readFilters);
 	        var method = (!readFilters.length && patch) ? patch.method : 'default',
 	            dp = (methods[method] || {}).dp,
 	            clean = (methods[method] || {}).clean,

@@ -98,9 +98,9 @@ exports.bind = function () {
     _.walk([tpl], _.noop, { useCache: true });
 
     vm.$watch(target, function (value, oldVal, patch) {
+        value = vm.applyFilters(value, readFilters);
         // if value is undefined just return
         if (value === undefined) return;
-        value = vm.applyFilters(value, readFilters);
         var method = (!readFilters.length && patch) ? patch.method : 'default',
             dp = (methods[method] || {}).dp,
             clean = (methods[method] || {}).clean,
