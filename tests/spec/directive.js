@@ -27,7 +27,7 @@ module.exports = function (Q) {
                 <p q-if="exist" q-text="msg"></p>\
             </div>\
             <div id="if3" style="display: none">\
-                <p q-if="exist" q-text="msg" q-on="click: click"></p>\
+                <button q-if="exist" q-on="click: click"></button>\
             </div>\
             <div id="custom1" style="display: none;">\
                 <p q-msg="msg"></p>\
@@ -166,8 +166,7 @@ module.exports = function (Q) {
             var vm = new Q({
                 el: '#if3',
                 data: {
-                    exist: true,
-                    msg: 'hello'
+                    exist: true
                 },
                 methods: {
                     click: function () {
@@ -176,7 +175,7 @@ module.exports = function (Q) {
                 }
             });
 
-            $('#if3 p')[0].click();
+            $('#if3 button')[0].click();
         });
     });
 

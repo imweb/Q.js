@@ -761,11 +761,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        extendOptions
 	    );
 	    Sub['super'] = Super;
-	    Sub.extend = Super.extend;
-	    Sub.get = Super.get;
-	    Sub.all = Super.all;
-	    Sub.require = Super.require;
-	    Sub.define = Super.define;
+	    ['extend', 'get', 'all', 'require', 'define'].forEach(function (key) {
+	        Sub[key] = Super[key];
+	    })
 	    return Sub;
 	}
 

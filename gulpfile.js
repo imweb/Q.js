@@ -38,7 +38,6 @@ var jqSize = new Size('Q.js')
   , zeSize = new Size('Q.zepto.js')
   , naSize = new Size('Q.native.js');
 
-
 gulp.task('test', function (done) {
   karma.start({
     configFile: __dirname + '/native.conf.js',

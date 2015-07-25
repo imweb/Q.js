@@ -5,6 +5,7 @@ var Q = require('../src/Q.native'),
 require('./spec/data')(Q);
 require('./spec/class')(Q);
 require('./spec/directive')(Q);
+require('./spec/filters')(Q);
 
 // extend _
 _.extend(utils, _);

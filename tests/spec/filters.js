@@ -34,23 +34,27 @@ module.exports = function (Q) {
                     },
 
                     fmt: function(obj, pattern, oldValue) {
-                        return pattern.replace(/\$\{([^}]*)\}/g, function(str) {
-                            var $1 = str.substring(2, str.length - 1);
-                            if (!$1) {
-                                return obj;
-                            }
-                            var prop = undefined;
-                            try {
-                                prop = eval(
-                                    ['obj', $1]
-                                        .join($1.charAt(0) !== '[' ? '.' : '')
-                                );
-                            } catch (ex) {}
-                            return prop !== undefined ? prop : str;
-                        });
+
+                        return pattern.replace(/\\/g, '')
+                            .replace(/\$\{([^}]*)\}/g, function(str) {
+                                var $1 = str.substring(2, str.length - 1);
+                                if (!$1) {
+                                    return obj;
+                                }
+                                var prop = undefined;
+                                try {
+                                    prop = eval(
+                                        ['obj', $1]
+                                            .join($1.charAt(0) !== '[' ? '.' : '')
+                                    );
+                                } catch (ex) {}
+                                return prop !== undefined ? prop : str;
+                            });
                     }
                 }
             });
+
+            console.log('china\\\'s capital');
 
             $('#filter1 .text1').text().should
                 .equal('china\'s capital is Beijing');
