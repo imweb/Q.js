@@ -1678,21 +1678,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cache = new (__webpack_require__(2))(1000),
 	    tokens = [
-	        ['space', /^ +/],
-	        ['arg', /^([\w\-]+):/, function (captures, status) {
+	        // space
+	        [/^ +/],
+	        // arg
+	        [/^([\w\-]+):/, function (captures, status) {
 	            status.token.arg = captures[1];
 	        }],
-	        ['function', /^([\w]+)\((.+?)\)/, function (captures, status) {
+	        // function
+	        [/^([\w]+)\((.+?)\)/, function (captures, status) {
 	            status.token.target = captures[1];
 	            status.token.param = captures[2].split(/ *, */);
 	        }],
-	        ['target', /^([\w\-]+)/, function (captures, status) {
+	        // target
+	        [/^([\w\-]+)/, function (captures, status) {
 	            status.token.target = captures[1];
 	        }],
-	        ['filter', /^(?=\|)/, function (captures, status) {
+	        // filter
+	        [/^(?=\|)/, function (captures, status) {
 	            status.filter = true;
 	        }],
-	        ['next', /,/, function (captures, status, res) {
+	        // next
+	        [/,/, function (captures, status, res) {
 	            res.push(status.token);
 	            status.token = {
 	                filters: []
@@ -1701,14 +1707,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ],
 	    filterREG = /^(.+?)(?=,|$)/,
 	    filterTokens = [
-	        ['space', /^ +/],
-	        ['filter', /^\| *([\w\-]+)/, function (captures, filters) {
+	        // space
+	        [/^ +/],
+	        // filter
+	        [/^\| *([\w\-]+)/, function (captures, filters) {
 	            filters.push([captures[1]]);
 	        }],
-	        ['string', /^(['"])(((\\['"])?([^\1])*)+)\1/, function (captures, filters) {
+	        // string
+	        [/^(['"])(((\\['"])?([^\1])*)+)\1/, function (captures, filters) {
 	            filters[filters.length - 1].push(captures[3]);
 	        }],
-	        ['arg', /^([\w\-]+)/, function (captures, filters) {
+	        // arg
+	        [/^([\w\-]+)/, function (captures, filters) {
 	            filters[filters.length - 1].push(captures[1]);
 	        }]
 	    ];
@@ -1742,11 +1752,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    while (str.length) {
 	        for (i = 0; i < l; i++) {
-	            if (captures = tokens[i][1].exec(str)) {
+	            if (captures = tokens[i][0].exec(str)) {
 	                has = true;
-	                foo = tokens[i][2];
+	                foo = tokens[i][1];
 	                foo && foo(captures, status, res);
-	                str = str.replace(tokens[i][1], '');
+	                str = str.replace(tokens[i][0], '');
 	                if (status.filter) {
 	                    captures = filterREG.exec(str);
 	                    parseFilter(captures[0].trim(), status.token);
@@ -1773,11 +1783,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        has = false;
 	    while (str.length) {
 	        for (i = 0; i < l; i++) {
-	            if (captures = filterTokens[i][1].exec(str)) {
+	            if (captures = filterTokens[i][0].exec(str)) {
 	                has = true;
-	                foo = filterTokens[i][2];
+	                foo = filterTokens[i][1];
 	                foo && foo(captures, token.filters);
-	                str = str.replace(filterTokens[i][1], '');
+	                str = str.replace(filterTokens[i][0], '');
 	                break;
 	            }
 	        }
