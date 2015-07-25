@@ -68,19 +68,25 @@ module.exports = {
     on: {
         bind: function () {
             var self = this,
-                key = this.target || this.exp.match(/^[\w\-]+/)[0],
-                expression = this.exp,
+                key = this.target,
+                param = this.param,
                 filters = this.filters,
                 vm = this.vm,
                 handler = vm.applyFilters(this.vm[key], filters),
-                data = expression && self.data();
+                data = param && (~param.indexOf('this')) && self.data();
             _.add(this.el, this.arg, function (e) {
                 if (!handler || typeof handler !== 'function') {
                     return _.warn('You need implement the ' + key + ' method.');
                 }
-                expression ?
-                    handler.call(vm, data) :
-                    handler.apply(vm, arguments);
+                var args = [];
+                param ?
+                    param.forEach(function (arg) {
+                        if (arg === 'e') args.push(e);
+                        else if (arg === 'this') args.push(data);
+                    }):
+                    args.push(e);
+
+                handler.apply(vm, args);
             });
         }
     },
@@ -192,7 +198,6 @@ module.exports = {
                 data = this.data(),
                 vm = this.vm;
 
-            tpl.removeAttribute('q-if');
             this.setting.stop = true;
 
             vm.$watch(target, function (value, oldVal) {

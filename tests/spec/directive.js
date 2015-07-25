@@ -26,6 +26,9 @@ module.exports = function (Q) {
             <div id="if2" style="display: none">\
                 <p q-if="exist" q-text="msg"></p>\
             </div>\
+            <div id="if3" style="display: none">\
+                <p q-if="exist" q-text="msg" q-on="click: click"></p>\
+            </div>\
             <div id="custom1" style="display: none;">\
                 <p q-msg="msg"></p>\
             </div>\
@@ -48,6 +51,7 @@ module.exports = function (Q) {
             </div>\
             <div id="tpl3" style="display: none">\
                 <div q-repeat="items"></div>\
+                <div q-repeat="lists | noresult"></div>\
             </div>\
             <div id="tpl5" style="display: none">\
                 <a q-text="msg | noexist"></a>\
@@ -156,6 +160,23 @@ module.exports = function (Q) {
 
             $('#if1 p').length.should.equal(1);
             $('#if1 p')[0].textContent.should.equal('hello world');
+        });
+
+        it('should just click one time for if directive', function (done) {
+            var vm = new Q({
+                el: '#if3',
+                data: {
+                    exist: true,
+                    msg: 'hello'
+                },
+                methods: {
+                    click: function () {
+                        done();
+                    }
+                }
+            });
+
+            $('#if3 p')[0].click();
         });
     });
 
@@ -286,13 +307,6 @@ module.exports = function (Q) {
             }, 100);
         });
 
-        it('should not throw a error when array is not defined', function () {
-            new Q({
-                el: '#tpl3',
-                data: {}
-            });
-        });
-
         it('should able multiple repeat', function (done) {
             new Q({
                 el: '#tpl2',
@@ -314,6 +328,20 @@ module.exports = function (Q) {
                 ps[1].textContent.should.equal('qq');
                 done();
             }, 200);
+        });
+
+        it('should not throw a error when array is not defined', function () {
+            new Q({
+                el: '#tpl3',
+                data: {
+                    lists: {}
+                },
+                filters: {
+                    noresult: function (v) {
+                        return v['xxx'];
+                    }
+                }
+            });
         });
 
         it('should not throw a error when repeat element has been modified', function (done) {

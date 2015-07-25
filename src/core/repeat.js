@@ -81,8 +81,7 @@ exports.bind = function () {
     // return
     if (!parentNode || setting.stop) return;
 
-    // remove repeat mark
-    tpl.removeAttribute('q-repeat');
+    // stop binding
     setting.stop = true;
 
     key = this.target;
@@ -94,8 +93,6 @@ exports.bind = function () {
     vm = this.vm;
 
     parentNode.replaceChild(ref, tpl);
-    // cache tpl
-    _.walk([tpl], _.noop, { useCache: true });
 
     vm.$watch(target, function (value, oldVal, patch) {
         value = vm.applyFilters(value, readFilters);

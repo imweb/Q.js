@@ -17,7 +17,7 @@ module.exports = function(config) {
     files: [
       'node_modules/should/should.js',
       'http://cdn.qplus.com/qqun/qun/homework/js/es5-shim.js',
-      'http://zeptojs.com/zepto.js',
+      'http://pub.idqqimg.com/guagua/qiqimobile/js/libs/zepto.min-e0859e89.js',
       'tests/native.js'
     ],
 

@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.4.7
+ * Q.js v0.4.8
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -82,24 +82,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	        window.webkitRequestAnimationFrame ||
 	        setTimeout,
 	    cache = new (__webpack_require__(2))(1000),
+	    // priority directives
+	    priorities = ['vm', 'repeat', 'if'],
 	    _qtid = 0,
 	    slice = [].slice;
+
+	function _loopPriority(el, res, setting) {
+	    var attr;
+
+	    // TODO need optimization
+	    for (var j = 0, l = priorities.length; j < l; j++) {
+	        attr = 'q-' + priorities[j];
+	        if (el.hasAttribute(attr)) {
+	            res.push({
+	                name: attr,
+	                value: el.getAttribute(attr)
+	            });
+
+	            el.removeAttribute(attr);
+	            // has priority directive
+	            return true;
+	        }
+	    }
+	}
 
 	function walk($el, cb, setting) {
 	    var i, j, l, el, atts, res, qtid;
 	    for (i = 0; el = $el[i++];) {
 	        if (el.nodeType === 1) {
-	            if (
-	                setting.useCache &&
-	                    (qtid = el.getAttribute('qtid')) &&
-	                    (res = cache.get(qtid))
-	            ) {
-	                el.removeAttribute('qtid');
-	            } else {
-	                atts = el.attributes;
-	                l = atts.length;
-	                res = [];
-	                for (j = 0; j < l; j++) {
+	            atts = el.attributes;
+	            res = [];
+
+	            // loop the priority directive
+	            if (!_loopPriority(el, res, setting)) {
+	                // loop other directive
+	                for (j = 0, l = atts.length; j < l; j++) {
 	                    atts[j].name.indexOf('q-') === 0 &&
 	                        res.push({
 	                            name: atts[j].name,
@@ -1262,19 +1279,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    on: {
 	        bind: function () {
 	            var self = this,
-	                key = this.target || this.exp.match(/^[\w\-]+/)[0],
-	                expression = this.exp,
+	                key = this.target,
+	                param = this.param,
 	                filters = this.filters,
 	                vm = this.vm,
 	                handler = vm.applyFilters(this.vm[key], filters),
-	                data = expression && self.data();
+	                data = param && (~param.indexOf('this')) && self.data();
 	            _.add(this.el, this.arg, function (e) {
 	                if (!handler || typeof handler !== 'function') {
 	                    return _.warn('You need implement the ' + key + ' method.');
 	                }
-	                expression ?
-	                    handler.call(vm, data) :
-	                    handler.apply(vm, arguments);
+	                var args = [];
+	                param ?
+	                    param.forEach(function (arg) {
+	                        if (arg === 'e') args.push(e);
+	                        else if (arg === 'this') args.push(data);
+	                    }):
+	                    args.push(e);
+
+	                handler.apply(vm, args);
 	            });
 	        }
 	    },
@@ -1386,7 +1409,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                data = this.data(),
 	                vm = this.vm;
 
-	            tpl.removeAttribute('q-if');
 	            this.setting.stop = true;
 
 	            vm.$watch(target, function (value, oldVal) {
@@ -1504,8 +1526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // return
 	    if (!parentNode || setting.stop) return;
 
-	    // remove repeat mark
-	    tpl.removeAttribute('q-repeat');
+	    // stop binding
 	    setting.stop = true;
 
 	    key = this.target;
@@ -1517,8 +1538,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    vm = this.vm;
 
 	    parentNode.replaceChild(ref, tpl);
-	    // cache tpl
-	    _.walk([tpl], _.noop, { useCache: true });
 
 	    vm.$watch(target, function (value, oldVal, patch) {
 	        value = vm.applyFilters(value, readFilters);
@@ -1616,10 +1635,47 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var cache = new (__webpack_require__(2))(1000);
+	var cache = new (__webpack_require__(2))(1000),
+	    tokens = [
+	        ['space', /^ +/],
+	        ['arg', /^([\w\-]+):/, function (captures, status) {
+	            status.token.arg = captures[1];
+	        }],
+	        ['function', /^([\w]+)\((.+?)\)/, function (captures, status) {
+	            status.token.target = captures[1];
+	            status.token.param = captures[2].split(/ *, */);
+	        }],
+	        ['target', /^([\w\-]+)/, function (captures, status) {
+	            status.token.target = captures[1];
+	        }],
+	        ['filter', /^(?=\|)/, function (captures, status) {
+	            status.filter = true;
+	        }],
+	        ['next', /,/, function (captures, status, res) {
+	            res.push(status.token);
+	            status.token = {
+	                filters: []
+	            };
+	        }]
+	    ],
+	    filterREG = /^(.+?)(?=,|$)/,
+	    filterTokens = [
+	        ['space', /^ +/],
+	        ['filter', /^\| *([\w\-]+)/, function (captures, filters) {
+	            filters.push([captures[1]]);
+	        }],
+	        ['string', /^(['"])(((\\['"])?([^\1])*)+)\1/, function (captures, filters) {
+	            filters[filters.length - 1].push(captures[3]);
+	        }],
+	        ['arg', /^([\w\-]+)/, function (captures, filters) {
+	            filters[filters.length - 1].push(captures[1]);
+	        }]
+	    ];
 	/**
 	 * click: onclick | filter1 | filter2
 	 * click: onclick , keydown: onkeydown
+	 * click: onclick(this)
+	 * click: onclick(e, this)
 	 * value1 | filter1 | filter2
 	 * value - 1 | filter1 | filter2   don't support
 	 */
@@ -1627,102 +1683,69 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var hit = cache.get(str);
 	    if (hit) return hit;
 
-	    var arr = [];
-	    var words = getWords(str);
-	    var exps = splitArrayByItem(words, ',');
-	    var keyReg = /^[\w\-]+$/;
-
-	    exps.forEach(function(exp) {
-	        var pipes = splitArrayByItem(exp, '|');
-	        var targetInfo = pipes[0];
-	        var res = {
-	            filters: pipes.slice(1)
-	        };
-	        if (targetInfo[1] === ':') {
-	            res.arg = targetInfo[0];
-	            targetInfo.splice(0, 2);
-	        }
-	        if (keyReg.test(targetInfo[0])) {
-	            res.target = targetInfo[0];
-	        } else {
-	            // 'click: select(this)' 词法分析保准不把()分割成单独单词
-	            res.exp = targetInfo[0];
-	        }
-	        arr.push(res);
-	    });
-	    cache.put(str, arr);
-	    return arr;
-	}
-
-	/**
-	 * 词法分析
-	 * @param {string} str
-	 * @return {Array<string>} 
-	 */
-	function getWords(str) {
-	    var words = [];
-	    var quote = null; // 在引号中 ' or "
-	    var quoteEscape = false; // 引号中上一个字符为\转义
-	    var w = ''; // pending word
-	    var spaces = /[\s]/; // 空格
-	    var oneCharWord = /[|,:]/; // 必须单个字符的单词
-
-	    function push() {
-	        w && words.push(w);
-	        w = '';
-	    }
-
-	    for (var i = 0; i < str.length; i++) {
-	        var ch = str.charAt(i);
-	        if (quote) {
-	            if (quoteEscape) {
-	                // leave escape
-	                quoteEscape = false;
-	                w += ch;
-	            } else if (ch === '\\') {
-	                // enter escape
-	                quoteEscape = true;
-	            } else if (ch === quote) {
-	                // leave quote
-	                quote = false;
-	                push();
-	            } else {
-	                w += ch;
+	    var res = [],
+	        captures,
+	        i,
+	        l = tokens.length,
+	        foo,
+	        // if has token or not
+	        has = false,
+	        status = {
+	            // if in filter or not
+	            filter: false,
+	            // just token object
+	            token: {
+	                filters: []
 	            }
-	        } else if (ch === '\'' || ch === '"') {
-	            // enter quote
-	            push();
-	            quote = ch;
-	        } else if (spaces.test(ch)) {
-	            push();
-	        } else if (oneCharWord.test(ch)) {
-	            push();
-	            words.push(ch);
+	        };
+
+	    while (str.length) {
+	        for (i = 0; i < l; i++) {
+	            if (captures = tokens[i][1].exec(str)) {
+	                has = true;
+	                foo = tokens[i][2];
+	                foo && foo(captures, status, res);
+	                str = str.replace(tokens[i][1], '');
+	                if (status.filter) {
+	                    captures = filterREG.exec(str);
+	                    parseFilter(captures[0].trim(), status.token);
+	                    str = str.replace(filterREG, '');
+	                    status.filter = false;
+	                }
+	                break;
+	            }
+	        }
+	        if (has) {
+	            has = false;
 	        } else {
-	            w += ch;
+	            throw new Error('Syntax error at: ' + str);
 	        }
 	    }
-	    push();
-	    return words;
+
+	    res.push(status.token);
+	    cache.put(str, res);
+	    return res;
 	}
 
-	/**
-	 * 分割数组
-	 * @param {Array} arr
-	 * @param {Object} item
-	 * @return {Array<Array>}
-	 */
-	function splitArrayByItem(arr, item) {
-	    var result = [[]];
-	    for (var i in arr) {
-	        var curr = arr[i];
-	        if (item === curr) {
-	            result.push([]);
+	function parseFilter(str, token) {
+	    var i, l = filterTokens.length,
+	        has = false;
+	    while (str.length) {
+	        for (i = 0; i < l; i++) {
+	            if (captures = filterTokens[i][1].exec(str)) {
+	                has = true;
+	                foo = filterTokens[i][2];
+	                foo && foo(captures, token.filters);
+	                str = str.replace(filterTokens[i][1], '');
+	                break;
+	            }
+	        }
+	        if (has) {
+	            has = false;
 	        } else {
-	            result[result.length - 1].push(curr);
+	            throw new Error('Syntax error at: ' + str);
 	        }
 	    }
-	    return result;
 	}
 
 	module.exports = parse;

@@ -35,12 +35,61 @@ describe('parse', function () {
     });
 
     it('should able to parse quotes', function () {
-        var commands = parse('value1 | filter1 "\\" & \' are quotes"'),
+        var commands = parse('value1 | filter1 "hello world"'),
+            command = commands[0];
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'value1',
+            filters: [['filter1', 'hello world']]
+        });
+    });
+
+    it('should able to parse quotes in quotes', function () {
+        var commands = parse('value1 | filter1 "\" & \' are quotes"'),
             command = commands[0];
         commands.length.should.equal(1);
         command.should.eql({
             target: 'value1',
             filters: [['filter1', '" & \' are quotes']]
         });
+    });
+
+    it('should able to parse function the param this', function () {
+        var commands = parse('click: onclick(this)'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            arg: 'click',
+            filters: [],
+            target: 'onclick',
+            param: ['this']
+        })
+    });
+
+    it('should able to parse function the param e', function () {
+        var commands = parse('click: onclick(e)'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            arg: 'click',
+            filters: [],
+            target: 'onclick',
+            param: ['e']
+        })
+    });
+
+    it('should able to parse function the parames e & this', function () {
+        var commands = parse('click: onclick(e, this)'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            arg: 'click',
+            filters: [],
+            target: 'onclick',
+            param: ['e', 'this']
+        })
     });
 });

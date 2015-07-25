@@ -3,24 +3,41 @@ var noop = function () {},
         window.webkitRequestAnimationFrame ||
         setTimeout,
     cache = new (require('./cache'))(1000),
+    // priority directives
+    priorities = ['vm', 'repeat', 'if'],
     _qtid = 0,
     slice = [].slice;
+
+function _loopPriority(el, res, setting) {
+    var attr;
+
+    // TODO need optimization
+    for (var j = 0, l = priorities.length; j < l; j++) {
+        attr = 'q-' + priorities[j];
+        if (el.hasAttribute(attr)) {
+            res.push({
+                name: attr,
+                value: el.getAttribute(attr)
+            });
+
+            el.removeAttribute(attr);
+            // has priority directive
+            return true;
+        }
+    }
+}
 
 function walk($el, cb, setting) {
     var i, j, l, el, atts, res, qtid;
     for (i = 0; el = $el[i++];) {
         if (el.nodeType === 1) {
-            if (
-                setting.useCache &&
-                    (qtid = el.getAttribute('qtid')) &&
-                    (res = cache.get(qtid))
-            ) {
-                el.removeAttribute('qtid');
-            } else {
-                atts = el.attributes;
-                l = atts.length;
-                res = [];
-                for (j = 0; j < l; j++) {
+            atts = el.attributes;
+            res = [];
+
+            // loop the priority directive
+            if (!_loopPriority(el, res, setting)) {
+                // loop other directive
+                for (j = 0, l = atts.length; j < l; j++) {
                     atts[j].name.indexOf('q-') === 0 &&
                         res.push({
                             name: atts[j].name,
