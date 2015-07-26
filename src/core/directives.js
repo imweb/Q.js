@@ -94,7 +94,7 @@ module.exports = {
                     param.forEach(function (arg) {
                         if (arg === 'e') args.push(e);
                         else if (arg === 'this') args.push(data);
-                    }):
+                    }) :
                     args.push(e);
 
                 handler.apply(vm, args);
