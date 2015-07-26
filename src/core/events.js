@@ -1,18 +1,6 @@
 var Data = require('./data'),
     _ = require('./utils');
 
-
-// TODO: remove for the present
-// function _clearWatch(namespace) {
-//     namespace = namespace + '.';
-//     var key;
-//     for (key in this._watchers) {
-//         if (~key.indexOf(namespace)) {
-//             this._watchers[key].length = 0;
-//         }
-//     }
-// }
-
 function _emit(key, args, target) {
     // set the trigger target is pass in or this
     target = target || this;

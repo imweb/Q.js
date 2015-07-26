@@ -140,17 +140,18 @@ _.extend(DataArray.prototype, Data.prototype, {
      */
     push: function (values) {
         values = _.slice.call(arguments, 0);
-        var args = [];
+        var res = [];
         for (var i = 0, l = values.length; i < l; i++) {
             _prefix(this, this.length, values[i]);
             this._keys.push(this.length);
-            args.push(this[this.length]);
+            res.push(this[this.length]);
             this.length++;
         }
         // value, oldValue, patch
         this.$change(this.$namespace(), this, null, {
             method: 'push',
-            args: args
+            res: res,
+            args: values
         });
 
         return this;

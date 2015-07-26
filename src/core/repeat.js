@@ -22,7 +22,7 @@ var _ = require('./utils');
                 parentNode.insertBefore(fragment, ref);
             },
             dp: function (data, patch) {
-                return patch.args;
+                return patch.res;
             }
         },
         splice: {

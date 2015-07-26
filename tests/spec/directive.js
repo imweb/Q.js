@@ -56,12 +56,6 @@ module.exports = function (Q) {
             <div id="tpl5" style="display: none">\
                 <a q-text="msg | noexist"></a>\
             </div>\
-            <div id="component" style="display: none">\
-                <p q-text="msg" id="msg1"></p>\
-                <div q-vm="hello" q-with="obj" q-ref="test">\
-                    <p q-text="msg | prepend" id="msg2"></p>\
-                </div>\
-            </div>\
             <div id="multi-repeat" style="display: none">\
                 <div>\
                     <p q-repeat="msgs" q-text="text"></p>\

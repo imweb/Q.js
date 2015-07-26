@@ -35,6 +35,7 @@ module.exports = function (Q) {
             vm.$watch('arr', function (value, oldVal, patch) {
                 value[2].should.equal(3);
                 patch.method.should.equal('push');
+                patch.res[0].should.equal(3);
                 patch.args[0].should.equal(3);
                 done();
             });

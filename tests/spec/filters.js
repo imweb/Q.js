@@ -54,8 +54,6 @@ module.exports = function (Q) {
                 }
             });
 
-            console.log('china\\\'s capital');
-
             $('#filter1 .text1').text().should
                 .equal('china\'s capital is Beijing');
             $('#filter1 .text2').text().should

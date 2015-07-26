@@ -14,7 +14,12 @@ module.exports = function (Q) {
                 <div q-vm="nihao">\
                     <p q-text="isMike | whoSay" id="msg3"></p>\
                 </div>\
-            </div>';
+            </div>\
+            <div id="component3" style="display: none">\
+                <div q-vm="lala" q-ref="lala">\
+                    <p q-text="msg" id="msg4"></p>\
+                </div>\
+            <div>';
         document.body.appendChild(div);
     });
 
@@ -101,6 +106,24 @@ module.exports = function (Q) {
                 vm.$set('isMike', true);
                 $('#msg3', '#component2').text().should.equal('Nihao Mike');
                 vm.isMike.should.be.ok;
+                done();
+            }, 100);
+        });
+
+        it('should able trigger the parent data change', function (done) {
+            Q.define('lala', {
+                data: {}
+            });
+
+            var vm = new Q({
+                el: '#component3',
+                data: {}
+            });
+
+            setTimeout(function () {
+                vm.$.lala.$set('msg', 'lala');
+                $('#msg4', '#component3').text().should.equal('lala');
+                vm.msg.should.equal('lala');
                 done();
             }, 100);
         });

@@ -1,6 +1,17 @@
 var _ = require('./utils'),
     strats = require('./strats');
 
+var PROP_REG = /^(.*)\.([\w\-]+)$/
+
+function _setProp(vm, prop, value) {
+    if (~prop.indexOf('.')) {
+        prop = PROP_REG.exec(prop);
+        vm.data(prop[1]).$set(prop[2], value);
+    } else {
+        vm.$set(prop, value);
+    }
+}
+
 module.exports = {
     show: function (value) {
         var el = this.el;
@@ -167,16 +178,35 @@ module.exports = {
             }();
 
             // unidirectional binding
-            vm.$on('datachange', function (prop, value) {
-                // stop child vm datachange bubble
-                if (this !== vm) return;
-                if (!target || ~prop.indexOf(target)) {
-                    var start = target.length,
-                        childProp;
+            vm.$on('datachange', function (prop, value, oldVal, patch) {
+                if (this === childVm) {
+                    if (vm._preventChild) {
+                        vm._preventChild = false;
+                    } else {
+                        // prevent parent datachange
+                        this._preventParent = true;
+                        var parentProp = target ? [target, prop].join('.') : prop;
+                        patch ?
+                            vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
+                            _setProp(vm, parentProp, value);
+                    }
+                } else if (this === vm) {
+                    if (childVm._preventParent) {
+                        // this prevent this time
+                        vm._preventParent = false;
+                    } else if (!target || ~prop.indexOf(target)) {
+                        // prevent child datachange
+                        vm._preventChild = true;
 
-                    start && (start += 1);
-                    childProp = prop.substring(start, prop.length);
-                    childVm.$set(childProp, value);
+                        var start = target.length,
+                            childProp;
+
+                        start && (start += 1);
+                        childProp = prop.substring(start, prop.length);
+                        patch ?
+                            childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
+                        _setProp(childVm, childProp, value);
+                    }
                 }
             });
         }

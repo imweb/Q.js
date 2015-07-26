@@ -20,7 +20,7 @@ var cache = new (require('./cache'))(1000),
             status.filter = true;
         }],
         // next
-        [/,/, function (captures, status, res) {
+        [/^,/, function (captures, status, res) {
             res.push(status.token);
             status.token = {
                 filters: []
