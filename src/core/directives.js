@@ -177,26 +177,31 @@ module.exports = {
                     (vm.$[ref] = childVm);
             }();
 
+            // prevent child vm data change to trigger parent vm
+            var _preventChild = false,
+            // prevent parent vm data change to trigger child vm
+                _preventParent = false;
+
             // unidirectional binding
             vm.$on('datachange', function (prop, value, oldVal, patch) {
                 if (this === childVm) {
-                    if (vm._preventChild) {
-                        vm._preventChild = false;
+                    if (_preventChild) {
+                        _preventChild = false;
                     } else {
                         // prevent parent datachange
-                        this._preventParent = true;
+                        _preventParent = true;
                         var parentProp = target ? [target, prop].join('.') : prop;
                         patch ?
                             vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
                             _setProp(vm, parentProp, value);
                     }
                 } else if (this === vm) {
-                    if (childVm._preventParent) {
+                    if (_preventParent) {
                         // this prevent this time
-                        vm._preventParent = false;
+                        _preventParent = false;
                     } else if (!target || ~prop.indexOf(target)) {
                         // prevent child datachange
-                        vm._preventChild = true;
+                        _preventChild = true;
 
                         var start = target.length,
                             childProp;
