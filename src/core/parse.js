@@ -53,7 +53,8 @@ var cache = new (require('./cache'))(1000),
  * value - 1 | filter1 | filter2   don't support
  */
 function parse(str) {
-    var hit = cache.get(str);
+    var name = str;
+        hit = cache.get(name);
     if (hit) return hit;
 
     var res = [],
@@ -96,7 +97,7 @@ function parse(str) {
     }
 
     res.push(status.token);
-    cache.put(str, res);
+    cache.put(name, res);
     return res;
 }
 

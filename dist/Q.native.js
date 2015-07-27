@@ -195,7 +195,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -307,7 +307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	var DELEGATOR_CALLBACKS_KEY = '__cbs__',
 	    NO_DELEGATOR = {
@@ -1203,7 +1203,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    // emit parent
-	    if (key.indexOf('data:') && this.$parent) {
+	    // prevent data: event and hook: event trigger
+	    if (key.indexOf('data:') && key.indexOf('hook:') && this.$parent) {
 	        _emit.call(this.$parent, key, args, target);
 	    }
 	}
@@ -1753,7 +1754,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * value - 1 | filter1 | filter2   don't support
 	 */
 	function parse(str) {
-	    var hit = cache.get(str);
+	    var name = str;
+	        hit = cache.get(name);
 	    if (hit) return hit;
 
 	    var res = [],
@@ -1796,7 +1798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    res.push(status.token);
-	    cache.put(str, res);
+	    cache.put(name, res);
 	    return res;
 	}
 
