@@ -101,5 +101,16 @@ describe('parse', function () {
         command.should.eql({
             filters: []
         });
+    });
+
+    it('should able to parse exclamation filter', function () {
+        var commands = parse('target | !'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'target',
+            filters: [['!']]
+        })
     })
 });
