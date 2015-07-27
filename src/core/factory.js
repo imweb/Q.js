@@ -330,7 +330,7 @@ module.exports = function (_) {
                 // 需要修改args 必须复制
                 args = [].concat(args);
                 var name = args.shift();
-                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
+                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
                 return function (value, oldVal) {
                     return args ?
                         reader.apply(self, [value].concat(args.push(oldVal) && args)) :

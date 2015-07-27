@@ -63,6 +63,9 @@ module.exports = function (Q) {
                 <div>\
                     <p q-repeat="msgs" q-text="text"></p>\
                 </div>\
+            </div>\
+            <div id="el1" style="display: none">\
+                <div id="el-ref1" q-el="ref"></div>\
             </div>';
         document.body.appendChild(div);
     });
@@ -401,6 +404,16 @@ module.exports = function (Q) {
                     done();
                 }, 200);
             }, 200);
+        });
+
+        it('should get a element reference', function (done) {
+            new Q({
+                el: '#el1',
+                ready: function () {
+                    this.$$['ref'].should.equal($('#el-ref1')[0]);
+                    done();
+                }
+            });
         });
     });
 

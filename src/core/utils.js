@@ -96,12 +96,15 @@ module.exports = {
             el.setAttribute('class', cur.trim());
         }
     },
-    noexist: function (name) { throw new Error('Filter ' + name + ' hasn\'t implemented.'); },
-    warn: function () {
-        return (window.console && console.error) ? function (msg) {
-                console.error(msg);
-            } : noop;
+    noexist: function (vm, name) {
+        this.warn(vm);
+        throw new Error('Filter ' + name + ' hasn\'t implemented.');
     },
+    warn: function () {
+        return (window.console && console.error) ? function () {
+                console.error.apply(console, arguments);
+            } : noop;
+    }(),
     isObject: function (o) {
         return typeof o === 'object';
     },

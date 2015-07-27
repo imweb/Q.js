@@ -259,5 +259,10 @@ module.exports = {
             }, false, true);
         }
     },
+    el: {
+        bind: function () {
+            this.vm.$$[this.target] = this.el;
+        }
+    },
     repeat: require('./repeat')
 };

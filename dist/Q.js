@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.2
+ * Q.js v0.5.3
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -178,12 +178,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            el.setAttribute('class', cur.trim());
 	        }
 	    },
-	    noexist: function (name) { throw new Error('Filter ' + name + ' hasn\'t implemented.'); },
-	    warn: function () {
-	        return (window.console && console.error) ? function (msg) {
-	                console.error(msg);
-	            } : noop;
+	    noexist: function (vm, name) {
+	        this.warn(vm);
+	        throw new Error('Filter ' + name + ' hasn\'t implemented.');
 	    },
+	    warn: function () {
+	        return (window.console && console.error) ? function () {
+	                console.error.apply(console, arguments);
+	            } : noop;
+	    }(),
 	    isObject: function (o) {
 	        return typeof o === 'object';
 	    },
@@ -198,7 +201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -328,7 +331,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -668,7 +671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // 需要修改args 必须复制
 	                args = [].concat(args);
 	                var name = args.shift();
-	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
+	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
 	                return function (value, oldVal) {
 	                    return args ?
 	                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
@@ -1433,6 +1436,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    exist = value;
 	                }
 	            }, false, true);
+	        }
+	    },
+	    el: {
+	        bind: function () {
+	            this.vm.$$[this.target] = this.el;
 	        }
 	    },
 	    repeat: __webpack_require__(11)
