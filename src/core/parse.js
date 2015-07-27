@@ -32,7 +32,7 @@ var cache = new (require('./cache'))(1000),
         // space
         [/^ +/],
         // filter
-        [/^\| *([\w\-]+)/, function (captures, filters) {
+        [/^\| *([\w\-\!]+)/, function (captures, filters) {
             filters.push([captures[1]]);
         }],
         // string

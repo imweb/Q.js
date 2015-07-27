@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.1
+ * Q.js v0.5.2
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1692,7 +1692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // space
 	        [/^ +/],
 	        // filter
-	        [/^\| *([\w\-]+)/, function (captures, filters) {
+	        [/^\| *([\w\-\!]+)/, function (captures, filters) {
 	            filters.push([captures[1]]);
 	        }],
 	        // string
