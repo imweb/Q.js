@@ -53,8 +53,11 @@ module.exports = function (Q) {
                 <div q-repeat="items"></div>\
                 <div q-repeat="lists | noresult"></div>\
             </div>\
-            <div id="tpl5" style="display: none">\
+            <div id="text1" style="display: none">\
                 <a q-text="msg | noexist"></a>\
+            </div>\
+            <div id="text2" style="display: none">\
+                <p q-text="object.msg"></p>\
             </div>\
             <div id="multi-repeat" style="display: none">\
                 <div>\
@@ -360,12 +363,25 @@ module.exports = function (Q) {
         it('should throw a error when a filter hasn\'t implemented', function () {
             (function () {
                 var vm = new Q({
-                    el: '#tpl5',
+                    el: '#text1',
                     data: {
                         msg: 'hello'
                     }
                 });
             }).should.throw('Filter noexist hasn\'t implemented.');
+        });
+
+        it('should able to use object.msg', function () {
+            var vm = new Q({
+                el: '#text2',
+                data: {
+                    object: {
+                        msg: 'hello'
+                    }
+                }
+            });
+
+            $('#text2 p').text().should.equal('hello');
         });
 
         it('should able to use double repeat', function (done) {

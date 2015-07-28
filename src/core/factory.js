@@ -95,7 +95,12 @@ module.exports = function (_) {
                     key = keys[i];
                     // key is number
                     if (+key + '' === key) key = +key;
-                    data = data[key];
+                    if (key in data) {
+                        data = data[key];
+                    } else {
+                        // data is undefind
+                        return undefined;
+                    }
                 }
             }
             l && (key = keys[i]);

@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.3
+ * Q.js v0.5.4
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -198,7 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -354,7 +354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -459,7 +459,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    key = keys[i];
 	                    // key is number
 	                    if (+key + '' === key) key = +key;
-	                    data = data[key];
+	                    if (key in data) {
+	                        data = data[key];
+	                    } else {
+	                        // data is undefind
+	                        return undefined;
+	                    }
 	                }
 	            }
 	            l && (key = keys[i]);
@@ -1647,12 +1652,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            setting: setting
 	                        }, descriptor, {
 	                            filters: readFilters
-	                        });
+	                        }),
+	                        tmp = that.data(key);
 
 	                    update && self.$watch(target, function (value, oldValue) {
 	                        value = self.applyFilters(value, readFilters, oldValue);
 	                        update.call(that, value, oldValue);
-	                    }, typeof data[key] === 'object', typeof options.immediate === 'boolean' ? options.immediate : (data[key] !== undefined));
+	                    }, typeof tmp === 'object', typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 	        });
@@ -1680,7 +1686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            status.token.param = captures[2].split(/ *, */);
 	        }],
 	        // target
-	        [/^([\w\-]+)/, function (captures, status) {
+	        [/^([\w\-\.]+)/, function (captures, status) {
 	            status.token.target = captures[1];
 	        }],
 	        // filter

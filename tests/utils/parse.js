@@ -112,5 +112,16 @@ describe('parse', function () {
             target: 'target',
             filters: [['!']]
         })
-    })
+    });
+
+    it('should able to parse pointoperation', function () {
+        var commands = parse('a.b.c | !'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'a.b.c',
+            filters: [['!']]
+        });
+    });
 });
