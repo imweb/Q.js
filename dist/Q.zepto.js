@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.4
+ * Q.js v0.5.5
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -198,7 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -354,7 +354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -1406,7 +1406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_preventParent) {
 	                        // this prevent this time
 	                        _preventParent = false;
-	                    } else if (!target || ~prop.indexOf(target)) {
+	                    } else if (!target || !prop.indexOf(target)) {
 	                        // prevent child datachange
 	                        _preventChild = true;
 
