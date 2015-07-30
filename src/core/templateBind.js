@@ -44,7 +44,5 @@ module.exports = function (el, options) {
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
         });
-    }, {
-        useCache: options.useCache
     });
 };

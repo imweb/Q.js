@@ -107,6 +107,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function walk($el, cb, setting) {
+	    setting = setting || {};
 	    var i, j, l, el, atts, res, qtid;
 	    for (i = 0; el = $el[i++];) {
 	        if (el.nodeType === 1) {
@@ -122,11 +123,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            name: atts[j].name,
 	                            value: atts[j].value
 	                        })
-	                }
-	                if (setting.useCache && !qtid) {
-	                    qtid = qtid || ++_qtid;
-	                    el.setAttribute('qtid', qtid);
-	                    cache.put(qtid, res);
 	                }
 	            }
 	            res.length > 0 &&
@@ -375,6 +371,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _.contains(_doc.documentElement, ele);
 	    }
 
+	    // lifecycle: created -> compiled
+
+	    /**
+	     * Q
+	     * @class
+	     * @param {Object} options
+	     */
 	    function Q(options) {
 	        this._init(options);
 	    }
@@ -384,6 +387,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        directives: __webpack_require__(10),
 	        filters: {}
 	    };
+	    /**
+	     * get
+	     * @param {String | Element} selector
+	     * @return {Q}
+	     */
 	    Q.get = function (selector) {
 	        var ele = _.find(selector)[0];
 	        if (ele) {
@@ -392,6 +400,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return new this({ el: selector });
 	        }
 	    };
+	    /**
+	     * all
+	     * @param {Object} options
+	     */
 	    Q.all = function (options) {
 	        var self = this;
 	        return _.find(options.el).map(function (ele) {
@@ -607,9 +619,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (this._isCompiled) {
 	                return _.warn('$mount() should be called only once');
 	            }
-	            if (typeof el === 'string') {
-	                // TODO for template
-	            }
+	            // TODO for template || we may not do for template
+	            // if (typeof el === 'string') {
+	            //
+	            // }
 	            this._compile(el);
 	            this._isCompiled = true;
 	            this._callHook('compiled');
@@ -653,28 +666,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *
 	         * @param {Element} el
 	         * @param {Object} options
-	         * @return {Element|DocumentFragment}
 	         */
 	        transclue: function (el, options) {
-	            // static template bind
-	            if (_.find('.q-mark', el).length) {
-	                this._renderedBind(el, options);
-	            } else {
-	                this._templateBind(el, options);
-	            }
+	            // just bind template
+	            this._templateBind(el, options);
 	        },
 
 	        /**
 	         * bind rendered template
 	         */
 	        _templateBind: __webpack_require__(12),
-
-	        /**
-	         * bind rendered template
-	         */
-	        _renderedBind: function (el, options) {
-	            var self = this;
-	        },
 
 	        /**
 	         * Trigger all handlers for a hook
@@ -696,8 +697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var filters = this.$options.filters,
 	                self = this;
 	            return names.map(function (args) {
-	                // 需要修改args 必须复制
-	                args = [].concat(args);
+	                args = _.slice.call(args, 0);
 	                var name = args.shift();
 	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
 	                return function (value, oldVal) {
@@ -1333,8 +1333,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    vm: {
 	        bind: function () {
-	            // remove q-vm
-	            this.el.removeAttribute('q-vm');
 	            // stop walk
 	            this.setting.stop = true;
 
@@ -1598,8 +1596,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            vm._templateBind(itemNode, {
 	                data: obj,
 	                namespace: obj.$namespace(),
-	                immediate: true,
-	                useCache: true
+	                immediate: true
 	            });
 	            // TODO this must refactor
 	            repeats.push(itemNode);
@@ -1662,8 +1659,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 	        });
-	    }, {
-	        useCache: options.useCache
 	    });
 	};
 

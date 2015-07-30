@@ -126,8 +126,6 @@ module.exports = {
     },
     vm: {
         bind: function () {
-            // remove q-vm
-            this.el.removeAttribute('q-vm');
             // stop walk
             this.setting.stop = true;
 

@@ -11,6 +11,13 @@ module.exports = function (_) {
         return _.contains(_doc.documentElement, ele);
     }
 
+    // lifecycle: created -> compiled
+
+    /**
+     * Q
+     * @class
+     * @param {Object} options
+     */
     function Q(options) {
         this._init(options);
     }
@@ -20,6 +27,11 @@ module.exports = function (_) {
         directives: require('./directives'),
         filters: {}
     };
+    /**
+     * get
+     * @param {String | Element} selector
+     * @return {Q}
+     */
     Q.get = function (selector) {
         var ele = _.find(selector)[0];
         if (ele) {
@@ -28,6 +40,10 @@ module.exports = function (_) {
             return new this({ el: selector });
         }
     };
+    /**
+     * all
+     * @param {Object} options
+     */
     Q.all = function (options) {
         var self = this;
         return _.find(options.el).map(function (ele) {
@@ -243,9 +259,10 @@ module.exports = function (_) {
             if (this._isCompiled) {
                 return _.warn('$mount() should be called only once');
             }
-            if (typeof el === 'string') {
-                // TODO for template
-            }
+            // TODO for template || we may not do for template
+            // if (typeof el === 'string') {
+            //
+            // }
             this._compile(el);
             this._isCompiled = true;
             this._callHook('compiled');
@@ -289,28 +306,16 @@ module.exports = function (_) {
          *
          * @param {Element} el
          * @param {Object} options
-         * @return {Element|DocumentFragment}
          */
         transclue: function (el, options) {
-            // static template bind
-            if (_.find('.q-mark', el).length) {
-                this._renderedBind(el, options);
-            } else {
-                this._templateBind(el, options);
-            }
+            // just bind template
+            this._templateBind(el, options);
         },
 
         /**
          * bind rendered template
          */
         _templateBind: require('./templateBind'),
-
-        /**
-         * bind rendered template
-         */
-        _renderedBind: function (el, options) {
-            var self = this;
-        },
 
         /**
          * Trigger all handlers for a hook
@@ -332,8 +337,7 @@ module.exports = function (_) {
             var filters = this.$options.filters,
                 self = this;
             return names.map(function (args) {
-                // 需要修改args 必须复制
-                args = [].concat(args);
+                args = _.slice.call(args, 0);
                 var name = args.shift();
                 var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
                 return function (value, oldVal) {

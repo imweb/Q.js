@@ -117,8 +117,7 @@ exports.bind = function () {
             vm._templateBind(itemNode, {
                 data: obj,
                 namespace: obj.$namespace(),
-                immediate: true,
-                useCache: true
+                immediate: true
             });
             // TODO this must refactor
             repeats.push(itemNode);

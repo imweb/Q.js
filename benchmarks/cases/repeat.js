@@ -25,21 +25,13 @@ function prepare(n) {
 
 // add tests
 suite.add('Q.js#repeat', {
-    defer: 'true',
-    fn: function(defer) {
+    fn: function() {
         q.$set('list', prepare(1000));
-        q.$once('repeat-render', function () {
-            defer.resolve();
-        });
     }
 })
 .add('template#render', {
-    defer: true,
-    fn: function(defer) {
-        setTimeout(function () {
-            $('#test').html(tpl(prepare(1000)));
-            defer.resolve();
-        }, 0);
+    fn: function() {
+        $('#test').html(tpl(prepare(1000)));
     }
 })
 // .add('Native#innerText', function() {

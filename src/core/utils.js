@@ -28,6 +28,7 @@ function _loopPriority(el, res, setting) {
 }
 
 function walk($el, cb, setting) {
+    setting = setting || {};
     var i, j, l, el, atts, res, qtid;
     for (i = 0; el = $el[i++];) {
         if (el.nodeType === 1) {
@@ -43,11 +44,6 @@ function walk($el, cb, setting) {
                             name: atts[j].name,
                             value: atts[j].value
                         })
-                }
-                if (setting.useCache && !qtid) {
-                    qtid = qtid || ++_qtid;
-                    el.setAttribute('qtid', qtid);
-                    cache.put(qtid, res);
                 }
             }
             res.length > 0 &&
