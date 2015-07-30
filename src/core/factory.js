@@ -332,8 +332,11 @@ module.exports = function (_) {
                 var name = args.shift();
                 var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
                 return function (value, oldVal) {
+                    // 注意不能修改args
+                    var thisArgs = [value].concat(args || []);
+                    thisArgs.push(oldVal);
                     return args ?
-                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
+                        reader.apply(self, thisArgs) :
                             reader.call(self, value, oldVal);
                 };
             });
