@@ -10,6 +10,15 @@ module.exports = function (Q) {
             vm.data().should.equal(vm);
         });
 
+        it('should able query the data undefined', function () {
+            var vm = new Q({
+                el: null,
+                data: {}
+            });
+
+            (vm.data('a.b.c') === undefined).should.be.true;
+        });
+
         it('should able to watch vm change', function (done) {
             var vm = new Q({
                 el: null,

@@ -92,4 +92,36 @@ describe('parse', function () {
             param: ['e', 'this']
         })
     });
+
+    it('should able to parse no string', function () {
+        var commands = parse(''),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            filters: []
+        });
+    });
+
+    it('should able to parse exclamation filter', function () {
+        var commands = parse('target | !'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'target',
+            filters: [['!']]
+        })
+    });
+
+    it('should able to parse pointoperation', function () {
+        var commands = parse('a.b.c | !'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: 'a.b.c',
+            filters: [['!']]
+        });
+    });
 });

@@ -15,7 +15,8 @@ function _emit(key, args, target) {
         }
     }
     // emit parent
-    if (key.indexOf('data:') && this.$parent) {
+    // prevent data: event and hook: event trigger
+    if (key.indexOf('data:') && key.indexOf('hook:') && this.$parent) {
         _emit.call(this.$parent, key, args, target);
     }
 }

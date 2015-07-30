@@ -34,12 +34,13 @@ module.exports = function (el, options) {
                             setting: setting
                         }, descriptor, {
                             filters: readFilters
-                        });
+                        }),
+                        tmp = that.data(key);
 
                     update && self.$watch(target, function (value, oldValue) {
                         value = self.applyFilters(value, readFilters, oldValue);
                         update.call(that, value, oldValue);
-                    }, typeof data[key] === 'object', typeof options.immediate === 'boolean' ? options.immediate : (data[key] !== undefined));
+                    }, typeof tmp === 'object', typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
         });

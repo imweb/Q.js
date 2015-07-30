@@ -19,7 +19,12 @@ module.exports = function (Q) {
                 <div q-vm="lala" q-ref="lala">\
                     <p q-text="msg" id="msg4"></p>\
                 </div>\
-            <div>';
+            </div>\
+            <div id="component4" style="display: none">\
+                <div q-vm="lala">\
+                    <p q-text="msg"></p>\
+                </div>\
+            </div>';
         document.body.appendChild(div);
     });
 
@@ -126,6 +131,15 @@ module.exports = function (Q) {
                 vm.msg.should.equal('lala');
                 done();
             }, 100);
+        });
+
+        it('should just trigger ready once', function (done) {
+            var vm = new Q({
+                el: '#component4',
+                ready: function () {
+                    done();
+                }
+            });
         });
     });
 

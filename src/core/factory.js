@@ -95,7 +95,12 @@ module.exports = function (_) {
                     key = keys[i];
                     // key is number
                     if (+key + '' === key) key = +key;
-                    data = data[key];
+                    if (key in data) {
+                        data = data[key];
+                    } else {
+                        // data is undefind
+                        return undefined;
+                    }
                 }
             }
             l && (key = keys[i]);
@@ -330,7 +335,7 @@ module.exports = function (_) {
                 // 需要修改args 必须复制
                 args = [].concat(args);
                 var name = args.shift();
-                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(name));
+                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
                 return function (value, oldVal) {
                     // 注意不能修改args
                     var thisArgs = [value].concat(args || []);

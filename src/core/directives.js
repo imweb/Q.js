@@ -199,7 +199,7 @@ module.exports = {
                     if (_preventParent) {
                         // this prevent this time
                         _preventParent = false;
-                    } else if (!target || ~prop.indexOf(target)) {
+                    } else if (!target || !prop.indexOf(target)) {
                         // prevent child datachange
                         _preventChild = true;
 
@@ -257,6 +257,11 @@ module.exports = {
                     exist = value;
                 }
             }, false, true);
+        }
+    },
+    el: {
+        bind: function () {
+            this.vm.$$[this.target] = this.el;
         }
     },
     repeat: require('./repeat')
