@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.5
+ * Q.js v0.5.6
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -742,8 +742,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var name = args.shift();
 	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
 	                return function (value, oldVal) {
+	                    // 注意不能修改args
+	                    var thisArgs = [value].concat(args || []);
+	                    thisArgs.push(oldVal);
 	                    return args ?
-	                        reader.apply(self, [value].concat(args.push(oldVal) && args)) :
+	                        reader.apply(self, thisArgs) :
 	                            reader.call(self, value, oldVal);
 	                };
 	            });
