@@ -1,6 +1,6 @@
 module.exports = function (_) {
 
-    var Data = require('./data'),
+    var Seed = require('./data'),
         events = require('./events'),
         MARK = /\{\{(.+?)\}\}/,
         mergeOptions = require('./strats').mergeOptions,
@@ -81,7 +81,7 @@ module.exports = function (_) {
             // components references
             this.$ = {};
 
-            Data.call(this, options);
+            Seed.call(this, options);
             // this._data = options.data;
             // initialize data and scope inheritance.
             this._initScope();
@@ -93,35 +93,6 @@ module.exports = function (_) {
                 _.data(this.$el, 'QI', this);
                 this.$mount(this.$el);
             }
-        },
-
-        /**
-         * Set data and Element value
-         *
-         * @param {String} key
-         * @param {*} value
-         * @returns {Data}
-         */
-        data: function (key, value) {
-            if (key === undefined) return this;
-            var i = 0, l, data = this;
-            if (~key.indexOf('.')) {
-                var keys = key.split('.');
-                for (l = keys.length; i < l - 1; i++) {
-                    key = keys[i];
-                    // key is number
-                    if (+key + '' === key) key = +key;
-                    if (key in data) {
-                        data = data[key];
-                    } else {
-                        // data is undefind
-                        return undefined;
-                    }
-                }
-            }
-            l && (key = keys[i]);
-            if (value === undefined) return key ? data[key] : data;
-            data.$set(key, value);
         },
         /**
          * Listen on the given `event` with `fn`.
@@ -213,9 +184,13 @@ module.exports = function (_) {
             var args = _.slice.call(arguments, 1);
             events.emit.call(this, e, _.slice.call(args, 0));
             // emit data change
-            if (e.indexOf('data:') === 0) {
+            if (!e.indexOf('data:')) {
                 e = e.substring(5);
-                events.callDataChange.call(this, e, _.slice.call(args, 0));
+                events.callChange.call(this, e, _.slice.call(args, 0));
+            }
+            if (!e.indexOf('deep:')) {
+                e = e.substring(5);
+                events.callDeep.call(this, e, _.slice.call(args, 0));
                 args.unshift(e);
                 events.emit.call(this, 'datachange', args);
             }
@@ -370,7 +345,7 @@ module.exports = function (_) {
         }
     });
 
-    _.extend(Q.prototype, Data.prototype);
+    _.extend(Q.prototype, Seed.prototype);
 
     return Q;
 };

@@ -13,10 +13,13 @@ module.exports = function (Q) {
         it('should able query the data undefined', function () {
             var vm = new Q({
                 el: null,
-                data: {}
+                data: {
+                    b: undefined
+                }
             });
 
             (vm.data('a.b.c') === undefined).should.be.true;
+            (vm.data('b.c') === undefined).should.be.true;
         });
 
         it('should able to watch vm change', function (done) {
@@ -103,6 +106,89 @@ module.exports = function (Q) {
             });
 
             vm.arr.shift();
+        });
+
+        it('should able trigger the child attribute data change', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: {
+                                d: 'hello'
+                            }
+                        }
+                    }
+                }
+            });
+
+            vm.$watch('a.b.c.d', function (value, oldVal) {
+                value.should.equal('nihao');
+                oldVal.should.equal('hello');
+                done();
+            });
+
+            vm.$set('a', {
+                b: {
+                    c: {
+                        d: 'nihao'
+                    }
+                }
+            });
+        });
+
+        it('should able not trigger the child attribute when data not change', function () {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: {
+                                d: 'hello'
+                            }
+                        }
+                    }
+                }
+            });
+
+            vm.$watch('a.b.c.d', function () {
+                throw new Error('should not watch the child attribute no change');
+            });
+
+            vm.$set('a', {
+                b: {
+                    c: {
+                        d: 'hello'
+                    }
+                }
+            });
+        });
+
+        it('should able watch the data changing when set deep', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: 'hello'
+                        }
+                    }
+                }
+            });
+
+            vm.$watch('a.b', function (val, oldVal) {
+                val.$get().should.eql({
+                    c: 'nihao'
+                });
+                done();
+            // deep
+            }, true);
+
+            vm.$set('a', {
+                b: {
+                    c: 'nihao'
+                }
+            });
         });
     });
 

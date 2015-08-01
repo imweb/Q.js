@@ -86,7 +86,7 @@ exports.bind = function () {
 
     key = this.target;
     namespace = this.namespace;
-    target = namespace ? ([namespace, key].join('.')) : key;
+    target = _.get(namespace, key);
     readFilters = this.filters;
     repeats = [];
     ref = document.createComment('q-repeat');
@@ -112,6 +112,7 @@ exports.bind = function () {
 
         var fragment = document.createDocumentFragment(),
             itemNode;
+
         value.forEach(function (obj, i) {
             itemNode = _.clone(tpl);
             vm._templateBind(itemNode, {

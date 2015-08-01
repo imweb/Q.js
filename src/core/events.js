@@ -1,7 +1,7 @@
 var Data = require('./data'),
     _ = require('./utils');
 
-function _emit(key, args, target) {
+function emit(key, args, target) {
     // set the trigger target is pass in or this
     target = target || this;
     var cbs = this._events[key];
@@ -16,31 +16,36 @@ function _emit(key, args, target) {
     }
     // emit parent
     // prevent data: event and hook: event trigger
-    if (key.indexOf('data:') && key.indexOf('hook:') && this.$parent) {
-        _emit.call(this.$parent, key, args, target);
+    if (key.indexOf('data:') && key.indexOf('hook:') && key.indexOf('deep:') && this.$parent) {
+        emit.call(this.$parent, key, args, target);
     }
 }
 
-function _callDataChange(key, args) {
+function callChange(key, args) {
+    var self = {
+        _events: this._watchers
+    };
+    emit.call(self, key, args);
+    emit.call(self, key + '**deep**', args);
+}
+
+function callDeep(key, args) {
     var props, nArgs,
         keys = key.split('.'),
         self = { _events: this._watchers };
 
-    _emit.call(self, key, args);
-    for (; keys.length > 0;) {
+    for (keys.pop(); keys.length > 0; keys.pop()) {
         key = keys.join('.');
         props = key + '**deep**';
         // remove the old value
-        nArgs = _.slice.call(args, 0, 1);
-        nArgs[0] = this.data(key);
-        _emit.call(self, props, nArgs);
-        keys.pop();
+        emit.call(self, props, [this.data(key)]);
     }
     // emit vm is change
-    _emit.call(self, '**deep**', [this]);
-};
+    emit.call(self, '**deep**', [this]);
+}
 
 module.exports = {
-    emit: _emit,
-    callDataChange: _callDataChange
+    emit: emit,
+    callChange: callChange,
+    callDeep: callDeep
 };

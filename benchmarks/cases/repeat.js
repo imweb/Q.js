@@ -24,7 +24,8 @@ function prepare(n) {
 }
 
 // add tests
-suite.add('Q.js#repeat', {
+suite
+.add('Q.js#repeat', {
     fn: function() {
         q.$set('list', prepare(1000));
     }
@@ -32,6 +33,23 @@ suite.add('Q.js#repeat', {
 .add('template#render', {
     fn: function() {
         $('#test').html(tpl(prepare(1000)));
+    }
+})
+.add('fragment#render', {
+    fn: function () {
+        var datas = prepare(1000),
+            fragment = document.createDocumentFragment(),
+            tpl = document.createElement('li'),
+            test = document.getElementById('test'),
+            tmp;
+        for (var i = 0, l = datas.length; i < l; i++) {
+            tmp = tpl.cloneNode();
+            tmp.textContent = datas[i].msg;
+            fragment.appendChild(tmp);
+        }
+        test.innerHTML = '';
+        test.appendChild(fragment);
+
     }
 })
 // .add('Native#innerText', function() {
