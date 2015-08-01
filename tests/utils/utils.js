@@ -87,6 +87,15 @@ module.exports = function (_) {
             _.isObject(new Function()).should.not.ok;
             _.isObject([]).should.ok;
         });
+
+        it('should get the right target', function () {
+            _.get('a.b.c').should.equal('a.b.c');
+            _.get('a.b', 'c.d').should.equal('a.b.c.d');
+            _.get('a', '').should.equal('a');
+            _.get('a.b', undefined).should.equal('a.b');
+            _.get('', 'a.b').should.equal('a.b');
+            _.get(undefined, '').should.equal('');
+        });
     });
 
     after(function () {

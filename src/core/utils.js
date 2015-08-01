@@ -109,5 +109,17 @@ module.exports = {
             defer(function () { cb.call(ctx) }, 0) :
             defer(cb, 0);
     },
+    /**
+     * get
+     * @param {String} namespace
+     * @param {String} key
+     * @returns {String}
+     */
+    get: function (namespace, key) {
+        var arr = [];
+        namespace && arr.push(namespace);
+        key && arr.push(key);
+        return arr.join('.');
+    },
     walk: walk
 };

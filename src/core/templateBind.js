@@ -19,16 +19,13 @@ module.exports = function (el, options) {
                 descriptors.forEach(function (descriptor) {
                     var readFilters = self._makeReadFilters(descriptor.filters),
                         key = descriptor.target,
-                        target = namespace ? ([namespace, key].join('.')) : key,
+                        target = _.get(namespace, key),
                         update = _.isObject(directive) ? directive.update : directive,
                         that = _.extend({
                             el: node,
                             vm: self,
                             data: function (key) {
-                                var arr = [];
-                                namespace && arr.push(namespace);
-                                key && arr.push(key);
-                                return self.data(arr.join('.'));
+                                return self.data(_.get(namespace, key));
                             },
                             namespace: namespace,
                             setting: setting

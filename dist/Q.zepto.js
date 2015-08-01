@@ -188,6 +188,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	            defer(function () { cb.call(ctx) }, 0) :
 	            defer(cb, 0);
 	    },
+	    /**
+	     * get
+	     * @param {String} namespace
+	     * @param {String} key
+	     * @returns {String}
+	     */
+	    get: function (namespace, key) {
+	        var arr = [];
+	        namespace && arr.push(namespace);
+	        key && arr.push(key);
+	        return arr.join('.');
+	    },
 	    walk: walk
 	};
 
@@ -360,7 +372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function (_) {
 
-	    var Data = __webpack_require__(8),
+	    var Seed = __webpack_require__(8),
 	        events = __webpack_require__(9),
 	        MARK = /\{\{(.+?)\}\}/,
 	        mergeOptions = __webpack_require__(7).mergeOptions,
@@ -441,7 +453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // components references
 	            this.$ = {};
 
-	            Data.call(this, options);
+	            Seed.call(this, options);
 	            // this._data = options.data;
 	            // initialize data and scope inheritance.
 	            this._initScope();
@@ -453,35 +465,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _.data(this.$el, 'QI', this);
 	                this.$mount(this.$el);
 	            }
-	        },
-
-	        /**
-	         * Set data and Element value
-	         *
-	         * @param {String} key
-	         * @param {*} value
-	         * @returns {Data}
-	         */
-	        data: function (key, value) {
-	            if (key === undefined) return this;
-	            var i = 0, l, data = this;
-	            if (~key.indexOf('.')) {
-	                var keys = key.split('.');
-	                for (l = keys.length; i < l - 1; i++) {
-	                    key = keys[i];
-	                    // key is number
-	                    if (+key + '' === key) key = +key;
-	                    if (key in data) {
-	                        data = data[key];
-	                    } else {
-	                        // data is undefind
-	                        return undefined;
-	                    }
-	                }
-	            }
-	            l && (key = keys[i]);
-	            if (value === undefined) return key ? data[key] : data;
-	            data.$set(key, value);
 	        },
 	        /**
 	         * Listen on the given `event` with `fn`.
@@ -730,7 +713,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    });
 
-	    _.extend(Q.prototype, Data.prototype);
+	    _.extend(Q.prototype, Seed.prototype);
 
 	    return Q;
 	};
@@ -891,13 +874,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * prefix data
+	 * @param {Data || DataArray} up
+	 * @param {String} key
+	 * @param {*} value
+	 * @param {Boolean} trigger or not
 	 */
-	function _prefix(up, key, value) {
+	function _prefix(up, key, value, trigger) {
 	    var options = {
 	        data: value,
 	        up: up,
 	        top: up._top,
-	        namespace: key + ''
+	        namespace: key + '',
+	        trigger: trigger
 	    };
 	    if (typeof value === 'object' && value !== null) {
 	        up[key] =   _isArray(value) ?
@@ -906,6 +894,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	        up[key] = value;
 	    }
+	    // trigger data change
+	    trigger && up.$change(up.$namespace(key), value);
 	    if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	}
 
@@ -944,10 +934,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // the namespace of data
 	    this._namespace = options.namespace || '';
 	    keys.forEach(function (key) {
-	        _prefix(self, key, data[key]);
+	        _prefix(self, key, data[key], options.trigger);
 	    });
 	    // if it is a array
-	    (Array.isArray(data) || data instanceof DataArray) &&
+	    _isArray(data)  &&
 	        // fix the length
 	        (this.length = _getLength(keys));
 	}
@@ -985,12 +975,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (typeof key === 'object') {
 	            var self = this;
 	            Object.keys(key).forEach(function (k) {
-	                self.$set(k, key[k]);
+	                _prefix(self, k, key[k]);
 	            });
+	            this.$change(this.$namespace(key), this, undefined, true);
 	        } else {
 	            var oldValue = this[key];
 	            _prefix(this, key, value);
-	            this.$change(this.$namespace(key), this[key], oldValue);
+	            this.$change(this.$namespace(key), this[key], oldValue, undefined, true);
 	        }
 	        return this;
 	    },
@@ -1005,18 +996,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            res = [];
 	        }
 	        keys.forEach(function (key) {
-	            res[key] = self[key].$get ?
-	                self[key].$get() :
-	                self[key];
+	            res[key] = self[key] === undefined ?
+	                undefined :
+	                self[key].$get ?
+	                    self[key].$get() :
+	                    self[key];
 	        });
 	        return res;
 	    },
 	    /**
 	     * change
 	     */
-	    $change: function (key, value, oldVal, patch) {
-	        this._top.$emit &&
+	    $change: function (key, value, oldVal, patch, bubb) {
+	        var top = this._top;
+	        if (top.$emit) {
 	            this._top.$emit('data:' + key, value, oldVal, patch);
+	            bubb &&
+	                this._top.$emit('bubb:' + key, value, oldVal, patch);
+	        }
 	    }
 	});
 
@@ -1149,7 +1146,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	module.exports = Data;
+	function Seed(options) {
+	    Data.call(this, options);
+	}
+	_.extend(Seed.prototype, Data.prototype, {
+	    /**
+	     * Set data and Element value
+	     *
+	     * @param {String} key
+	     * @param {*} value
+	     * @returns {Data}
+	     */
+	    data: function (key, value) {
+	        if (key === undefined) return this;
+	        var i = 0, l, data = this, next;
+	        if (~key.indexOf('.')) {
+	            var keys = key.split('.');
+	            for (l = keys.length; i < l - 1; i++) {
+	                key = keys[i];
+	                // key is number
+	                if (+key + '' === key) key = +key;
+	                if (key in data) {
+	                    data = data[key];
+	                } else if (value === undefined) {
+	                    // data is undefind
+	                    return undefined;
+	                } else {
+	                    next = keys[i + 1];
+	                    // next is number
+	                    if (+next + '' == next) {
+	                        // set a array
+	                        data.$set(key, []);
+	                    } else {
+	                        data.$set(key, {});
+	                    }
+	                }
+	            }
+	        }
+	        l && (key = keys[i]);
+	        if (value === undefined) return key ? data[key] : data;
+	        data.$set(key, value);
+	        return data[key];
+	    }
+	});
+
+	module.exports = Seed;
 
 
 /***/ },
@@ -1346,9 +1387,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // component reference
 	                ref = el.getAttribute('q-ref') || false,
 	                key = el.getAttribute('q-with') || '',
-	                extend = el.getAttribute('q-extend'),
 	                namespace = this.namespace,
-	                target = namespace ? ([namespace, key].join('.')) : key,
+	                target = _.get(namespace, key),
 	                data = vm.data(target),
 	                Child = vm.constructor.require(name),
 	                mergeTarget = Child.options.data,
@@ -1357,21 +1397,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // merge data
 	            mergeTarget &&
-	                Object.keys(mergeTarget).forEach(function (key) {
-	                    key in data ||
+	                data ?
+	                    Object.keys(mergeTarget).forEach(function (key) {
+	                        key in data ||
 	                        data.$set(key, mergeTarget[key]);
-	                });
+	                    }) :
+	                    (data = vm.data(target, mergeTarget));
 
 	            options = {
 	                el: el,
 	                data: data.$get(),
 	                _parent: vm
 	            };
-
-	            if (extend && (extend = vm.$options.extend[extend])) {
-	                if (extend.data || extend.el || extend._parent) throw new Error('Extend Error');
-	                options = strats.mergeOptions(options, extend);
-	            }
 
 	            childVm = new Child(options);
 
@@ -1568,7 +1605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    key = this.target;
 	    namespace = this.namespace;
-	    target = namespace ? ([namespace, key].join('.')) : key;
+	    target = _.get(namespace, key);
 	    readFilters = this.filters;
 	    repeats = [];
 	    ref = document.createComment('q-repeat');
@@ -1637,16 +1674,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                descriptors.forEach(function (descriptor) {
 	                    var readFilters = self._makeReadFilters(descriptor.filters),
 	                        key = descriptor.target,
-	                        target = namespace ? ([namespace, key].join('.')) : key,
+	                        target = _.get(namespace, key),
 	                        update = _.isObject(directive) ? directive.update : directive,
 	                        that = _.extend({
 	                            el: node,
 	                            vm: self,
 	                            data: function (key) {
-	                                var arr = [];
-	                                namespace && arr.push(namespace);
-	                                key && arr.push(key);
-	                                return self.data(arr.join('.'));
+	                                return self.data(_.get(namespace, key));
 	                            },
 	                            namespace: namespace,
 	                            setting: setting

@@ -86,7 +86,7 @@ exports.bind = function () {
 
     key = this.target;
     namespace = this.namespace;
-    target = namespace ? ([namespace, key].join('.')) : key;
+    target = _.get(namespace, key);
     readFilters = this.filters;
     repeats = [];
     ref = document.createComment('q-repeat');

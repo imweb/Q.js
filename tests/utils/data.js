@@ -31,7 +31,6 @@ describe('Data & DataArray', function () {
         data.obj.$get().should.eql({
             msg: 'world'
         });
-        (data.obj instanceof Data).should.be.true;
 
         data = new Data({
             data: {

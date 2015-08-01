@@ -2,13 +2,18 @@ var _ = require('./utils');
 
 /**
  * prefix data
+ * @param {Data || DataArray} up
+ * @param {String} key
+ * @param {*} value
+ * @param {Boolean} trigger or not
  */
-function _prefix(up, key, value) {
+function _prefix(up, key, value, trigger) {
     var options = {
         data: value,
         up: up,
         top: up._top,
-        namespace: key + ''
+        namespace: key + '',
+        trigger: trigger
     };
     if (typeof value === 'object' && value !== null) {
         up[key] =   _isArray(value) ?
@@ -17,6 +22,8 @@ function _prefix(up, key, value) {
     } else {
         up[key] = value;
     }
+    // trigger data change
+    trigger && up.$change(up.$namespace(key), value);
     if (!(~up._keys.indexOf(key))) up._keys.push(key);
 }
 
@@ -55,10 +62,10 @@ function Data(options) {
     // the namespace of data
     this._namespace = options.namespace || '';
     keys.forEach(function (key) {
-        _prefix(self, key, data[key]);
+        _prefix(self, key, data[key], options.trigger);
     });
     // if it is a array
-    (Array.isArray(data) || data instanceof DataArray) &&
+    _isArray(data)  &&
         // fix the length
         (this.length = _getLength(keys));
 }
@@ -96,12 +103,13 @@ _.extend(Data.prototype, {
         if (typeof key === 'object') {
             var self = this;
             Object.keys(key).forEach(function (k) {
-                self.$set(k, key[k]);
+                _prefix(self, k, key[k]);
             });
+            this.$change(this.$namespace(key), this, undefined, true);
         } else {
             var oldValue = this[key];
             _prefix(this, key, value);
-            this.$change(this.$namespace(key), this[key], oldValue);
+            this.$change(this.$namespace(key), this[key], oldValue, undefined, true);
         }
         return this;
     },
@@ -116,18 +124,24 @@ _.extend(Data.prototype, {
             res = [];
         }
         keys.forEach(function (key) {
-            res[key] = self[key].$get ?
-                self[key].$get() :
-                self[key];
+            res[key] = self[key] === undefined ?
+                undefined :
+                self[key].$get ?
+                    self[key].$get() :
+                    self[key];
         });
         return res;
     },
     /**
      * change
      */
-    $change: function (key, value, oldVal, patch) {
-        this._top.$emit &&
+    $change: function (key, value, oldVal, patch, bubb) {
+        var top = this._top;
+        if (top.$emit) {
             this._top.$emit('data:' + key, value, oldVal, patch);
+            bubb &&
+                this._top.$emit('bubb:' + key, value, oldVal, patch);
+        }
     }
 });
 
@@ -260,4 +274,48 @@ _.extend(DataArray.prototype, Data.prototype, {
     }
 });
 
-module.exports = Data;
+function Seed(options) {
+    Data.call(this, options);
+}
+_.extend(Seed.prototype, Data.prototype, {
+    /**
+     * Set data and Element value
+     *
+     * @param {String} key
+     * @param {*} value
+     * @returns {Data}
+     */
+    data: function (key, value) {
+        if (key === undefined) return this;
+        var i = 0, l, data = this, next;
+        if (~key.indexOf('.')) {
+            var keys = key.split('.');
+            for (l = keys.length; i < l - 1; i++) {
+                key = keys[i];
+                // key is number
+                if (+key + '' === key) key = +key;
+                if (key in data) {
+                    data = data[key];
+                } else if (value === undefined) {
+                    // data is undefind
+                    return undefined;
+                } else {
+                    next = keys[i + 1];
+                    // next is number
+                    if (+next + '' == next) {
+                        // set a array
+                        data.$set(key, []);
+                    } else {
+                        data.$set(key, {});
+                    }
+                }
+            }
+        }
+        l && (key = keys[i]);
+        if (value === undefined) return key ? data[key] : data;
+        data.$set(key, value);
+        return data[key];
+    }
+});
+
+module.exports = Seed;
