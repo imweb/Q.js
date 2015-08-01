@@ -112,6 +112,7 @@ exports.bind = function () {
 
         var fragment = document.createDocumentFragment(),
             itemNode;
+
         value.forEach(function (obj, i) {
             itemNode = _.clone(tpl);
             vm._templateBind(itemNode, {

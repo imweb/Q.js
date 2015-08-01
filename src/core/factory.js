@@ -184,10 +184,14 @@ module.exports = function (_) {
             var args = _.slice.call(arguments, 1);
             events.emit.call(this, e, _.slice.call(args, 0));
             // emit data change
-            if (e.indexOf('data:') === 0) {
+            if (!e.indexOf('data:')) {
                 e = e.substring(5);
-                events.callDataChange.call(this, e, _.slice.call(args, 0));
+                events.callChange.call(this, e, _.slice.call(args, 0));
+            }
+            if (!e.indexOf('bubb:')) {
+                e = e.substring(5);
                 args.unshift(e);
+                events.callDeep.call(this, e, _.slice.call(args, 0));
                 events.emit.call(this, 'datachange', args);
             }
             return this;

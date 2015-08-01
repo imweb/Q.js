@@ -8,22 +8,30 @@ var _ = require('./utils');
  * @param {Boolean} trigger or not
  */
 function _prefix(up, key, value, trigger) {
-    var options = {
-        data: value,
-        up: up,
-        top: up._top,
-        namespace: key + '',
-        trigger: trigger
-    };
+    var top = up._top,
+        isArray = _isArray(value),
+        options = {
+            data: value,
+            up: up,
+            top: top,
+            namespace: key + '',
+            trigger: isArray ? false : trigger
+        },
+        // old value
+        oldVal = top.data ? top.data(up.$namespace(key)) : undefined;
+
     if (typeof value === 'object' && value !== null) {
-        up[key] =   _isArray(value) ?
+        up[key] =   isArray ?
             new DataArray(options) :
                 new Data(options);
-    } else {
+
+        // trigger data change
+        trigger && up.$change(up.$namespace(key), up[key], oldVal);
+    } else if (oldVal !== value) {
         up[key] = value;
+        // trigger data change
+        trigger && up.$change(up.$namespace(key), value, oldVal);
     }
-    // trigger data change
-    trigger && up.$change(up.$namespace(key), value);
     if (!(~up._keys.indexOf(key))) up._keys.push(key);
 }
 
@@ -103,13 +111,14 @@ _.extend(Data.prototype, {
         if (typeof key === 'object') {
             var self = this;
             Object.keys(key).forEach(function (k) {
-                _prefix(self, k, key[k]);
+                _prefix(self, k, key[k], true);
             });
-            this.$change(this.$namespace(key), this, undefined, true);
+            this.$change(this.$namespace(key), this, undefined, 1);
         } else {
             var oldValue = this[key];
-            _prefix(this, key, value);
-            this.$change(this.$namespace(key), this[key], oldValue, undefined, true);
+            _prefix(this, key, value, true);
+            // just bubble
+            this.$change(this.$namespace(key), this[key], oldValue, undefined, -1);
         }
         return this;
     },
@@ -134,13 +143,16 @@ _.extend(Data.prototype, {
     },
     /**
      * change
+     * type = 0 just change
+     * type = 1 trigger change & bubb
+     * type = -1 just bubb
      */
-    $change: function (key, value, oldVal, patch, bubb) {
+    $change: function (key, value, oldVal, patch, type) {
+        type = type || 0;
         var top = this._top;
         if (top.$emit) {
-            this._top.$emit('data:' + key, value, oldVal, patch);
-            bubb &&
-                this._top.$emit('bubb:' + key, value, oldVal, patch);
+            ~type && this._top.$emit('data:' + key, value, oldVal, patch);
+            !type && this._top.$emit('bubb:' + key, value, oldVal, patch);
         }
     }
 });
@@ -166,7 +178,7 @@ _.extend(DataArray.prototype, Data.prototype, {
             method: 'push',
             res: res,
             args: values
-        });
+        }, 1);
 
         return this;
     },
@@ -177,7 +189,7 @@ _.extend(DataArray.prototype, Data.prototype, {
         var res = this[--this.length];
         delete this[this.length];
         this._keys.pop();
-        this.$change(this.$namespace(), this);
+        this.$change(this.$namespace(), this, null, undefined, 1);
         return res;
     },
     /**
@@ -193,7 +205,7 @@ _.extend(DataArray.prototype, Data.prototype, {
                 (this[l]._namespace = l + '');
         }
         _prefix(this, 0, value);
-        this.$change(this.$namespace(), this);
+        this.$change(this.$namespace(), this, null, undefined, 1);
         return this;
     },
     /**
@@ -210,14 +222,14 @@ _.extend(DataArray.prototype, Data.prototype, {
         }
         this._keys.pop();
         delete this[this.length];
-        this.$change(this.$namespace(), this);
+        this.$change(this.$namespace(), this, null, undefined, 1);
         return res;
     },
     /**
      * touch
      */
     touch: function (key) {
-        this.$change(this.$namespace(key), this);
+        this.$change(this.$namespace(key), this, null, undefined, 1);
     },
     /**
      * indexOf
@@ -252,7 +264,7 @@ _.extend(DataArray.prototype, Data.prototype, {
         }
         this.length -= l;
         this._keys.splice(this.length, l);
-        this.$change(this.$namespace(), this, null, patch);
+        this.$change(this.$namespace(), this, null, patch, 1);
     },
     /**
      * forEach
@@ -312,7 +324,8 @@ _.extend(Seed.prototype, Data.prototype, {
             }
         }
         l && (key = keys[i]);
-        if (value === undefined) return key ? data[key] : data;
+        // if data === undefined, just return
+        if (value === undefined) return data && key ? data[key] : data;
         data.$set(key, value);
         return data[key];
     }

@@ -60,7 +60,7 @@ describe('events', function () {
             }
         });
 
-        events.callDataChange.call(mock, 'msg', ['newVal', 'oldVal']);
+        events.callChange.call(mock, 'msg', ['newVal', 'oldVal']);
     });
 
     it('should able call the data change deep', function (done) {
@@ -82,6 +82,7 @@ describe('events', function () {
         // set lists.0
         mock.lists[0] = 2;
         // call lists.0 change
-        events.callDataChange.call(mock, 'lists.0', [1, 2]);
+        events.callChange.call(mock, 'lists.0', [1, 2]);
+        events.callDeep.call(mock, 'lists.0', [1, 2]);
     });
 });
