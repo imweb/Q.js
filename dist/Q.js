@@ -533,9 +533,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var args = _.slice.call(arguments, 1);
 	            events.emit.call(this, e, _.slice.call(args, 0));
 	            // emit data change
-	            if (e.indexOf('data:') === 0) {
+	            if (!e.indexOf('data:')) {
 	                e = e.substring(5);
-	                events.callDataChange.call(this, e, _.slice.call(args, 0));
+	                events.callChange.call(this, e, _.slice.call(args, 0));
+	            }
+	            if (!e.indexOf('deep:')) {
+	                e = e.substring(5);
+	                events.callDeep.call(this, e, _.slice.call(args, 0));
 	                args.unshift(e);
 	                events.emit.call(this, 'datachange', args);
 	            }
@@ -857,22 +861,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Boolean} trigger or not
 	 */
 	function _prefix(up, key, value, trigger) {
-	    var options = {
-	        data: value,
-	        up: up,
-	        top: up._top,
-	        namespace: key + '',
-	        trigger: trigger
-	    };
+	    var top = up._top,
+	        isArray = _isArray(value),
+	        options = {
+	            data: value,
+	            up: up,
+	            top: top,
+	            namespace: key + '',
+	            trigger: isArray ? false : trigger
+	        },
+	        // old value
+	        oldVal = top.data ? top.data(up.$namespace(key)) : undefined;
+
 	    if (typeof value === 'object' && value !== null) {
-	        up[key] =   _isArray(value) ?
+	        up[key] =   isArray ?
 	            new DataArray(options) :
 	                new Data(options);
-	    } else {
+
+	        // trigger data change
+	        trigger && up.$change(up.$namespace(key), up[key], oldVal);
+	    } else if (oldVal !== value) {
 	        up[key] = value;
+	        // trigger data change
+	        trigger && up.$change(up.$namespace(key), value, oldVal);
 	    }
-	    // trigger data change
-	    trigger && up.$change(up.$namespace(key), value);
 	    if (!(~up._keys.indexOf(key))) up._keys.push(key);
 	}
 
@@ -952,13 +964,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (typeof key === 'object') {
 	            var self = this;
 	            Object.keys(key).forEach(function (k) {
-	                _prefix(self, k, key[k]);
+	                _prefix(self, k, key[k], true);
 	            });
-	            this.$change(this.$namespace(key), this, undefined, true);
+	            this.$change(this.$namespace(key), this, undefined, 1);
 	        } else {
 	            var oldValue = this[key];
-	            _prefix(this, key, value);
-	            this.$change(this.$namespace(key), this[key], oldValue, undefined, true);
+	            _prefix(this, key, value, true);
+	            // just bubble
+	            this.$change(this.$namespace(key), this[key], oldValue, undefined, -1);
 	        }
 	        return this;
 	    },
@@ -983,13 +996,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    /**
 	     * change
+	     * type = 0 just change
+	     * type = 1 trigger change & deep
+	     * type = -1 just deep
 	     */
-	    $change: function (key, value, oldVal, patch, bubb) {
+	    $change: function (key, value, oldVal, patch, type) {
+	        type = type || 0;
 	        var top = this._top;
 	        if (top.$emit) {
-	            this._top.$emit('data:' + key, value, oldVal, patch);
-	            bubb &&
-	                this._top.$emit('bubb:' + key, value, oldVal, patch);
+	            ~type && this._top.$emit('data:' + key, value, oldVal, patch);
+	            type && this._top.$emit('deep:' + key, value, oldVal, patch);
 	        }
 	    }
 	});
@@ -1015,7 +1031,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            method: 'push',
 	            res: res,
 	            args: values
-	        });
+	        }, 1);
 
 	        return this;
 	    },
@@ -1026,7 +1042,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var res = this[--this.length];
 	        delete this[this.length];
 	        this._keys.pop();
-	        this.$change(this.$namespace(), this);
+	        this.$change(this.$namespace(), this, null, undefined, 1);
 	        return res;
 	    },
 	    /**
@@ -1042,7 +1058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[l]._namespace = l + '');
 	        }
 	        _prefix(this, 0, value);
-	        this.$change(this.$namespace(), this);
+	        this.$change(this.$namespace(), this, null, undefined, 1);
 	        return this;
 	    },
 	    /**
@@ -1059,14 +1075,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this._keys.pop();
 	        delete this[this.length];
-	        this.$change(this.$namespace(), this);
+	        this.$change(this.$namespace(), this, null, undefined, 1);
 	        return res;
 	    },
 	    /**
 	     * touch
 	     */
 	    touch: function (key) {
-	        this.$change(this.$namespace(key), this);
+	        this.$change(this.$namespace(key), this, null, undefined, 1);
 	    },
 	    /**
 	     * indexOf
@@ -1101,7 +1117,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        this.length -= l;
 	        this._keys.splice(this.length, l);
-	        this.$change(this.$namespace(), this, null, patch);
+	        this.$change(this.$namespace(), this, null, patch, 1);
 	    },
 	    /**
 	     * forEach
@@ -1161,7 +1177,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 	        l && (key = keys[i]);
-	        if (value === undefined) return key ? data[key] : data;
+	        // if data === undefined, just return
+	        if (value === undefined) return data && key ? data[key] : data;
 	        data.$set(key, value);
 	        return data[key];
 	    }
@@ -1177,7 +1194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Data = __webpack_require__(8),
 	    _ = __webpack_require__(1);
 
-	function _emit(key, args, target) {
+	function emit(key, args, target) {
 	    // set the trigger target is pass in or this
 	    target = target || this;
 	    var cbs = this._events[key];
@@ -1192,33 +1209,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // emit parent
 	    // prevent data: event and hook: event trigger
-	    if (key.indexOf('data:') && key.indexOf('hook:') && this.$parent) {
-	        _emit.call(this.$parent, key, args, target);
+	    if (key.indexOf('data:') && key.indexOf('hook:') && key.indexOf('deep:') && this.$parent) {
+	        emit.call(this.$parent, key, args, target);
 	    }
 	}
 
-	function _callDataChange(key, args) {
+	function callChange(key, args) {
+	    var self = {
+	        _events: this._watchers
+	    };
+	    emit.call(self, key, args);
+	    emit.call(self, key + '**deep**', args);
+	}
+
+	function callDeep(key, args) {
 	    var props, nArgs,
 	        keys = key.split('.'),
 	        self = { _events: this._watchers };
 
-	    _emit.call(self, key, args);
-	    for (; keys.length > 0;) {
+	    for (keys.pop(); keys.length > 0; keys.pop()) {
 	        key = keys.join('.');
 	        props = key + '**deep**';
 	        // remove the old value
-	        nArgs = _.slice.call(args, 0, 1);
-	        nArgs[0] = this.data(key);
-	        _emit.call(self, props, nArgs);
-	        keys.pop();
+	        emit.call(self, props, [this.data(key)]);
 	    }
 	    // emit vm is change
-	    _emit.call(self, '**deep**', [this]);
-	};
+	    emit.call(self, '**deep**', [this]);
+	}
 
 	module.exports = {
-	    emit: _emit,
-	    callDataChange: _callDataChange
+	    emit: emit,
+	    callChange: callChange,
+	    callDeep: callDeep
 	};
 
 
@@ -1608,6 +1630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var fragment = document.createDocumentFragment(),
 	            itemNode;
+
 	        value.forEach(function (obj, i) {
 	            itemNode = _.clone(tpl);
 	            vm._templateBind(itemNode, {

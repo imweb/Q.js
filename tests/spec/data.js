@@ -163,6 +163,33 @@ module.exports = function (Q) {
                 }
             });
         });
+
+        it('should able watch the data changing when set deep', function (done) {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: 'hello'
+                        }
+                    }
+                }
+            });
+
+            vm.$watch('a.b', function (val, oldVal) {
+                val.$get().should.eql({
+                    c: 'nihao'
+                });
+                done();
+            // deep
+            }, true);
+
+            vm.$set('a', {
+                b: {
+                    c: 'nihao'
+                }
+            });
+        });
     });
 
 };

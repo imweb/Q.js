@@ -16,15 +16,17 @@ function emit(key, args, target) {
     }
     // emit parent
     // prevent data: event and hook: event trigger
-    if (key.indexOf('data:') && key.indexOf('hook:') && key.indexOf('bubb:') && this.$parent) {
+    if (key.indexOf('data:') && key.indexOf('hook:') && key.indexOf('deep:') && this.$parent) {
         emit.call(this.$parent, key, args, target);
     }
 }
 
 function callChange(key, args) {
-    emit.call({
+    var self = {
         _events: this._watchers
-    }, key, args);
+    };
+    emit.call(self, key, args);
+    emit.call(self, key + '**deep**', args);
 }
 
 function callDeep(key, args) {
@@ -32,12 +34,11 @@ function callDeep(key, args) {
         keys = key.split('.'),
         self = { _events: this._watchers };
 
-    for (; keys.length > 0;) {
+    for (keys.pop(); keys.length > 0; keys.pop()) {
         key = keys.join('.');
         props = key + '**deep**';
         // remove the old value
         emit.call(self, props, [this.data(key)]);
-        keys.pop();
     }
     // emit vm is change
     emit.call(self, '**deep**', [this]);

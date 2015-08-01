@@ -144,15 +144,15 @@ _.extend(Data.prototype, {
     /**
      * change
      * type = 0 just change
-     * type = 1 trigger change & bubb
-     * type = -1 just bubb
+     * type = 1 trigger change & deep
+     * type = -1 just deep
      */
     $change: function (key, value, oldVal, patch, type) {
         type = type || 0;
         var top = this._top;
         if (top.$emit) {
             ~type && this._top.$emit('data:' + key, value, oldVal, patch);
-            !type && this._top.$emit('bubb:' + key, value, oldVal, patch);
+            type && this._top.$emit('deep:' + key, value, oldVal, patch);
         }
     }
 });

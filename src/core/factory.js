@@ -188,10 +188,10 @@ module.exports = function (_) {
                 e = e.substring(5);
                 events.callChange.call(this, e, _.slice.call(args, 0));
             }
-            if (!e.indexOf('bubb:')) {
+            if (!e.indexOf('deep:')) {
                 e = e.substring(5);
-                args.unshift(e);
                 events.callDeep.call(this, e, _.slice.call(args, 0));
+                args.unshift(e);
                 events.emit.call(this, 'datachange', args);
             }
             return this;
