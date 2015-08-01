@@ -1,4 +1,5 @@
-var Data = require('../../src/core/data');
+var Seed = require('../../src/core/data'),
+    Data = Seed.Data;
 
 describe('Data & DataArray', function () {
     it('should set and get a data', function () {
@@ -20,6 +21,8 @@ describe('Data & DataArray', function () {
                 }
             }
         });
+
+        (data instanceof Data).should.be.true;
 
         // set & get object
         data.obj.$get().should.eql({
@@ -503,5 +506,40 @@ describe('Data & DataArray', function () {
         }).forEach(function (v) {
             (v < 2).should.be.true;
         });
+    });
+
+    it('should ignore the properties prefix _', function () {
+        var data = new Data({
+            data: {}
+        });
+
+        data.$set({
+            _test: 'test'
+        });
+
+        (data._test === undefined).should.be.true;
+    });
+
+    it('should able set the a Data', function () {
+        var data = new Data({
+                data: {
+                    obj: {
+                        msg: 'test'
+                    }
+                }
+            }),
+            container = new Data({
+                data: {
+
+                }
+            });
+
+        container.$set('data', data);
+
+        container.data.should.not.equal(data);
+        data = container.data;
+        data.obj.msg.should.equal('test');
+        data.$namespace().should.equal('data');
+        data.obj.$namespace().should.equal('data.obj');
     });
 })

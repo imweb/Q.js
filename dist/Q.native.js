@@ -1027,7 +1027,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    $set: function (key, value) {
 	        if (typeof key === 'object') {
 	            var self = this;
-	            Object.keys(key).forEach(function (k) {
+	            Object.keys(key).filter(function (k) {
+	                return k.indexOf('_') !== 0;
+	            }).forEach(function (k) {
 	                _prefix(self, k, key[k], true);
 	            });
 	            this.$change(this.$namespace(key), this, undefined, 1);
@@ -1074,6 +1076,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
+	/**
+	 * DataArray
+	 * Something just like Array
+	 * @class
+	 * @param {Object} options
+	 */
 	function DataArray(options) {
 	    Data.call(this, options);
 	}
@@ -1203,9 +1211,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
+	/**
+	 * Seed
+	 * @param {Object} options
+	 */
 	function Seed(options) {
 	    Data.call(this, options);
 	}
+	_.extend(Seed, {
+	    Data: Data,
+	    DataArray: DataArray
+	});
 	_.extend(Seed.prototype, Data.prototype, {
 	    /**
 	     * Set data and Element value
@@ -1233,9 +1249,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    // next is number
 	                    if (+next + '' == next) {
 	                        // set a array
-	                        data.$set(key, []);
+	                        _prefix(data, key, [], true);
 	                    } else {
-	                        data.$set(key, {});
+	                        // set a object
+	                        _prefix(data, key, {}, true);
 	                    }
 	                }
 	            }
@@ -1469,6 +1486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            options = {
 	                el: el,
+	                // TODO maybe need to remove
 	                data: data.$get(),
 	                _parent: vm
 	            };
@@ -1488,9 +1506,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // prevent child vm data change to trigger parent vm
 	            var _preventChild = false,
 	            // prevent parent vm data change to trigger child vm
-	                _preventParent = false;
+	                _preventParent = false,
+	            // data cache
+	                dataCache;
 
-	            // unidirectional binding
+	            // first trigger
+	            target &&
+	                vm.$watch(target, function (value, oldVal, patch) {
+	                    if (_preventParent) return;
+	                    // cache the data when target change
+	                    dataCache = value;
+	                });
+
+	            // second trigger
 	            vm.$on('datachange', function (prop, value, oldVal, patch) {
 	                if (this === childVm) {
 	                    if (_preventChild) {
@@ -1498,7 +1526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    } else {
 	                        // prevent parent datachange
 	                        _preventParent = true;
-	                        var parentProp = target ? [target, prop].join('.') : prop;
+	                        var parentProp = _.get(target, prop);
 	                        patch ?
 	                            vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
 	                            _setProp(vm, parentProp, value);
@@ -1507,7 +1535,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_preventParent) {
 	                        // this prevent this time
 	                        _preventParent = false;
-	                    } else if (!target || !prop.indexOf(target)) {
+	                    // change data need sync
+	                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
 	                        // prevent child datachange
 	                        _preventChild = true;
 
@@ -1519,6 +1548,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        patch ?
 	                            childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
 	                        _setProp(childVm, childProp, value);
+	                    // maybe not need sync, check data cache if exist just sync
+	                    } else if (!target.indexOf(prop) && dataCache) {
+	                        childVm.$set(dataCache);
+	                        // clear the data cache
+	                        dataCache = undefined;
 	                    }
 	                }
 	            });

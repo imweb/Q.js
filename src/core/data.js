@@ -110,7 +110,9 @@ _.extend(Data.prototype, {
     $set: function (key, value) {
         if (typeof key === 'object') {
             var self = this;
-            Object.keys(key).forEach(function (k) {
+            Object.keys(key).filter(function (k) {
+                return k.indexOf('_') !== 0;
+            }).forEach(function (k) {
                 _prefix(self, k, key[k], true);
             });
             this.$change(this.$namespace(key), this, undefined, 1);
@@ -157,6 +159,12 @@ _.extend(Data.prototype, {
     }
 });
 
+/**
+ * DataArray
+ * Something just like Array
+ * @class
+ * @param {Object} options
+ */
 function DataArray(options) {
     Data.call(this, options);
 }
@@ -286,9 +294,17 @@ _.extend(DataArray.prototype, Data.prototype, {
     }
 });
 
+/**
+ * Seed
+ * @param {Object} options
+ */
 function Seed(options) {
     Data.call(this, options);
 }
+_.extend(Seed, {
+    Data: Data,
+    DataArray: DataArray
+});
 _.extend(Seed.prototype, Data.prototype, {
     /**
      * Set data and Element value
@@ -316,9 +332,10 @@ _.extend(Seed.prototype, Data.prototype, {
                     // next is number
                     if (+next + '' == next) {
                         // set a array
-                        data.$set(key, []);
+                        _prefix(data, key, [], true);
                     } else {
-                        data.$set(key, {});
+                        // set a object
+                        _prefix(data, key, {}, true);
                     }
                 }
             }

@@ -155,6 +155,7 @@ module.exports = {
 
             options = {
                 el: el,
+                // TODO maybe need to remove
                 data: data.$get(),
                 _parent: vm
             };
@@ -174,9 +175,19 @@ module.exports = {
             // prevent child vm data change to trigger parent vm
             var _preventChild = false,
             // prevent parent vm data change to trigger child vm
-                _preventParent = false;
+                _preventParent = false,
+            // data cache
+                dataCache;
 
-            // unidirectional binding
+            // first trigger
+            target &&
+                vm.$watch(target, function (value, oldVal, patch) {
+                    if (_preventParent) return;
+                    // cache the data when target change
+                    dataCache = value;
+                });
+
+            // second trigger
             vm.$on('datachange', function (prop, value, oldVal, patch) {
                 if (this === childVm) {
                     if (_preventChild) {
@@ -184,7 +195,7 @@ module.exports = {
                     } else {
                         // prevent parent datachange
                         _preventParent = true;
-                        var parentProp = target ? [target, prop].join('.') : prop;
+                        var parentProp = _.get(target, prop);
                         patch ?
                             vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
                             _setProp(vm, parentProp, value);
@@ -193,7 +204,8 @@ module.exports = {
                     if (_preventParent) {
                         // this prevent this time
                         _preventParent = false;
-                    } else if (!target || !prop.indexOf(target)) {
+                    // change data need sync
+                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
                         // prevent child datachange
                         _preventChild = true;
 
@@ -205,6 +217,11 @@ module.exports = {
                         patch ?
                             childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
                         _setProp(childVm, childProp, value);
+                    // maybe not need sync, check data cache if exist just sync
+                    } else if (!target.indexOf(prop) && dataCache) {
+                        childVm.$set(dataCache);
+                        // clear the data cache
+                        dataCache = undefined;
                     }
                 }
             });
