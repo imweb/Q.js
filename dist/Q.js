@@ -988,8 +988,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            res = [];
 	        }
 	        keys.forEach(function (key) {
-	            res[key] = self[key] === undefined ?
-	                undefined :
+	            res[key] = self[key] == null ?
+	                self[key] :
 	                self[key].$get ?
 	                    self[key].$get() :
 	                    self[key];
@@ -1175,7 +1175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                key = keys[i];
 	                // key is number
 	                if (+key + '' === key) key = +key;
-	                if (key in data) {
+	                if (key in data && data[key] != null) {
 	                    data = data[key];
 	                } else if (value === undefined) {
 	                    // data is undefind
@@ -1449,7 +1449,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // first trigger
 	            target &&
 	                vm.$watch(target, function (value, oldVal, patch) {
-	                    if (_preventParent) return;
+	                    if (_preventParent && target === _preventParent) return;
 	                    // cache the data when target change
 	                    dataCache = value;
 	                });
@@ -1457,12 +1457,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            // second trigger
 	            vm.$on('datachange', function (prop, value, oldVal, patch) {
 	                if (this === childVm) {
-	                    if (_preventChild) {
+	                    if (_preventChild && prop === _preventChild) {
+
 	                        _preventChild = false;
 	                    } else {
-	                        // prevent parent datachange
-	                        _preventParent = true;
 	                        var parentProp = _.get(target, prop);
+	                        // prevent parent datachange
+	                        _preventParent = parentProp;
 	                        patch ?
 	                            vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
 	                            _setProp(vm, parentProp, value);
@@ -1473,19 +1474,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        _preventParent = false;
 	                    // change data need sync
 	                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
-	                        // prevent child datachange
-	                        _preventChild = true;
-
 	                        var start = target.length,
 	                            childProp;
 
 	                        start && (start += 1);
 	                        childProp = prop.substring(start, prop.length);
+	                        // prevent child datachange
+	                        _preventChild = childProp;
+
 	                        patch ?
 	                            childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
 	                        _setProp(childVm, childProp, value);
 	                    // maybe not need sync, check data cache if exist just sync
 	                    } else if (!target.indexOf(prop) && dataCache) {
+	                        // prevent child datachange
+	                        _preventChild = target;
+
 	                        childVm.$set(dataCache);
 	                        // clear the data cache
 	                        dataCache = undefined;
