@@ -135,8 +135,8 @@ _.extend(Data.prototype, {
             res = [];
         }
         keys.forEach(function (key) {
-            res[key] = self[key] === undefined ?
-                undefined :
+            res[key] = self[key] == null ?
+                self[key] :
                 self[key].$get ?
                     self[key].$get() :
                     self[key];
@@ -322,7 +322,7 @@ _.extend(Seed.prototype, Data.prototype, {
                 key = keys[i];
                 // key is number
                 if (+key + '' === key) key = +key;
-                if (key in data) {
+                if (key in data && data[key] != null) {
                     data = data[key];
                 } else if (value === undefined) {
                     // data is undefind
