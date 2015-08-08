@@ -135,28 +135,14 @@ module.exports = {
                 el = this.el,
                 // component reference
                 ref = el.getAttribute('q-ref') || false,
-                key = el.getAttribute('q-with') || '',
-                namespace = this.namespace,
-                target = _.get(namespace, key),
-                data = vm.data(target),
                 Child = vm.constructor.require(name),
-                mergeTarget = Child.options.data,
+                data = Child.options.data,
                 options,
                 childVm;
 
-            // merge data
-            mergeTarget &&
-                data ?
-                    Object.keys(mergeTarget).forEach(function (key) {
-                        key in data ||
-                        data.$set(key, mergeTarget[key]);
-                    }) :
-                    (data = vm.data(target, mergeTarget));
-
             options = {
                 el: el,
-                // TODO maybe need to remove
-                data: data.$get(),
+                data: data,
                 _parent: vm
             };
 
@@ -171,64 +157,6 @@ module.exports = {
                         (vm.$[ref] = [refs, childVm]) :
                     (vm.$[ref] = childVm);
             }();
-
-            // prevent child vm data change to trigger parent vm
-            var _preventChild = false,
-            // prevent parent vm data change to trigger child vm
-                _preventParent = false,
-            // data cache
-                dataCache;
-
-            // first trigger
-            target &&
-                vm.$watch(target, function (value, oldVal, patch) {
-                    if (_preventParent && target === _preventParent) return;
-                    // cache the data when target change
-                    dataCache = value;
-                });
-
-            // second trigger
-            vm.$on('datachange', function (prop, value, oldVal, patch) {
-                if (this === childVm) {
-                    if (_preventChild && prop === _preventChild) {
-
-                        _preventChild = false;
-                    } else {
-                        var parentProp = _.get(target, prop);
-                        // prevent parent datachange
-                        _preventParent = parentProp;
-                        patch ?
-                            vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
-                            _setProp(vm, parentProp, value);
-                    }
-                } else if (this === vm) {
-                    if (_preventParent) {
-                        // this prevent this time
-                        _preventParent = false;
-                    // change data need sync
-                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
-                        var start = target.length,
-                            childProp;
-
-                        start && (start += 1);
-                        childProp = prop.substring(start, prop.length);
-                        // prevent child datachange
-                        _preventChild = childProp;
-
-                        patch ?
-                            childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
-                        _setProp(childVm, childProp, value);
-                    // maybe not need sync, check data cache if exist just sync
-                    } else if (!target.indexOf(prop) && dataCache) {
-                        // prevent child datachange
-                        _preventChild = target;
-
-                        childVm.$set(dataCache);
-                        // clear the data cache
-                        dataCache = undefined;
-                    }
-                }
-            });
         }
     },
     'if': {
