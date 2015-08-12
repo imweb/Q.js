@@ -17,7 +17,7 @@ module.exports = function (el, options) {
                 descriptors = parse(obj.value);
             directive &&
                 descriptors.forEach(function (descriptor) {
-                    var readFilters = self._makeReadFilters(descriptor.filters),
+                    var readFilters = self._makeReadFilters(descriptor.filters, self.data(namespace)),
                         key = descriptor.target,
                         target = _.get(namespace, key),
                         update = _.isObject(directive) ? directive.update : directive,
