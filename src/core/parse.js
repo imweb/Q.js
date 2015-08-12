@@ -12,7 +12,7 @@ var cache = new (require('./cache'))(1000),
             status.token.param = captures[2].split(/ *, */);
         }],
         // target
-        [/^([\w\-\.]+)/, function (captures, status) {
+        [/^([\w\-\.\$]+)/, function (captures, status) {
             status.token.target = captures[1];
         }],
         // filter
@@ -40,7 +40,7 @@ var cache = new (require('./cache'))(1000),
             filters[filters.length - 1].push(captures[3]);
         }],
         // arg
-        [/^([\w\-]+)/, function (captures, filters) {
+        [/^([\w\-\$]+)/, function (captures, filters) {
             filters[filters.length - 1].push(captures[1]);
         }]
     ];

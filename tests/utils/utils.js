@@ -96,6 +96,11 @@ module.exports = function (_) {
             _.get('', 'a.b').should.equal('a.b');
             _.get(undefined, '').should.equal('');
         });
+
+        it('should use $top', function () {
+            _.get('a.b.c', '$top.d').should.equal('d');
+            _.get('', '$top.a.b').should.equal('a.b');
+        });
     });
 
     after(function () {

@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.0
+ * Q.js v1.0.1
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -198,7 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var arr = [];
 	        namespace && arr.push(namespace);
 	        key && arr.push(key);
-	        return arr.join('.');
+	        return arr.join('.').replace(/^(.+\.)?\$top\./, '');
 	    },
 	    walk: walk
 	};
@@ -679,7 +679,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.$emit('hook:' + hook);
 	        },
 
-	        _makeReadFilters: function (names) {
+	        _makeReadFilters: function (names, $this) {
 	            if (!names.length) return [];
 	            var filters = this.$options.filters,
 	                self = this;
@@ -688,9 +688,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var name = args.shift();
 	                var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
 	                return function (value, oldVal) {
-	                    // 注意不能修改args
-	                    var thisArgs = [value].concat(args || []);
+	                    // don't modify args
+	                    var thisArgs = [value].concat(args || []),
+	                        i = thisArgs.indexOf('$this');
 	                    thisArgs.push(oldVal);
+	                    // replace $this
+	                    if (~i) {
+	                        thisArgs[i] = $this;
+	                    }
 	                    return args ?
 	                        reader.apply(self, thisArgs) :
 	                            reader.call(self, value, oldVal);
@@ -1661,7 +1666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                descriptors = parse(obj.value);
 	            directive &&
 	                descriptors.forEach(function (descriptor) {
-	                    var readFilters = self._makeReadFilters(descriptor.filters),
+	                    var readFilters = self._makeReadFilters(descriptor.filters, self.data(namespace)),
 	                        key = descriptor.target,
 	                        target = _.get(namespace, key),
 	                        update = _.isObject(directive) ? directive.update : directive,
@@ -1707,7 +1712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            status.token.param = captures[2].split(/ *, */);
 	        }],
 	        // target
-	        [/^([\w\-\.]+)/, function (captures, status) {
+	        [/^([\w\-\.\$]+)/, function (captures, status) {
 	            status.token.target = captures[1];
 	        }],
 	        // filter
@@ -1735,7 +1740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            filters[filters.length - 1].push(captures[3]);
 	        }],
 	        // arg
-	        [/^([\w\-]+)/, function (captures, filters) {
+	        [/^([\w\-\$]+)/, function (captures, filters) {
 	            filters[filters.length - 1].push(captures[1]);
 	        }]
 	    ];

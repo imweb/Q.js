@@ -119,7 +119,7 @@ module.exports = {
         var arr = [];
         namespace && arr.push(namespace);
         key && arr.push(key);
-        return arr.join('.');
+        return arr.join('.').replace(/^(.+\.)?\$top\./, '');
     },
     walk: walk
 };

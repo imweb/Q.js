@@ -307,7 +307,7 @@ module.exports = function (_) {
             this.$emit('hook:' + hook);
         },
 
-        _makeReadFilters: function (names) {
+        _makeReadFilters: function (names, $this) {
             if (!names.length) return [];
             var filters = this.$options.filters,
                 self = this;
@@ -316,9 +316,14 @@ module.exports = function (_) {
                 var name = args.shift();
                 var reader = (filters[name] ? (filters[name].read || filters[name]) : _.noexist(self, name));
                 return function (value, oldVal) {
-                    // 注意不能修改args
-                    var thisArgs = [value].concat(args || []);
+                    // don't modify args
+                    var thisArgs = [value].concat(args || []),
+                        i = thisArgs.indexOf('$this');
                     thisArgs.push(oldVal);
+                    // replace $this
+                    if (~i) {
+                        thisArgs[i] = $this;
+                    }
                     return args ?
                         reader.apply(self, thisArgs) :
                             reader.call(self, value, oldVal);

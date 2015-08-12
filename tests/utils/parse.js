@@ -124,4 +124,15 @@ describe('parse', function () {
             filters: [['!']]
         });
     });
+
+    it('should able parse $top', function () {
+        var commands = parse('$top.a | !'),
+            command = commands[0];
+
+        commands.length.should.equal(1);
+        command.should.eql({
+            target: '$top.a',
+            filters: [['!']]
+        });
+    })
 });
