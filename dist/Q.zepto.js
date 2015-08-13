@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.6
+ * Q.js v0.5.7
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1496,7 +1496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        // this prevent this time
 	                        _preventParent = false;
 	                    // change data need sync
-	                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
+	                    } else if (!target || !prop.indexOf(target + '.')) {
 	                        var start = target.length,
 	                            childProp;
 

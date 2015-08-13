@@ -206,7 +206,7 @@ module.exports = {
                         // this prevent this time
                         _preventParent = false;
                     // change data need sync
-                    } else if (!target || (prop !== target && !prop.indexOf(target))) {
+                    } else if (!target || !prop.indexOf(target + '.')) {
                         var start = target.length,
                             childProp;
 
