@@ -96,8 +96,8 @@ exports.bind = function () {
 
     vm.$watch(target, function (value, oldVal, patch) {
         value = vm.applyFilters(value, readFilters);
-        // if value is undefined just return
-        if (value === undefined) return;
+        // if value is undefined or null just return
+        if (value == null) return;
         var method = (!readFilters.length && patch) ? patch.method : 'default',
             dp = (methods[method] || {}).dp,
             clean = (methods[method] || {}).clean,

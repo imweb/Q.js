@@ -88,7 +88,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // priority directives
 	    priorities = ['vm', 'repeat', 'if'],
 	    _qtid = 0,
-	    slice = [].slice;
+	    _slice = [].slice,
+	    slice = function () {
+	        try {
+	            _slice.call(document.body.childNodes);
+	            return _slice;
+	        } catch(e) {
+	            return function (i) {
+	                i = i || 0;
+	                var res = [],
+	                    l = this.length;
+	                for (; i < l; i++) {
+	                    res.push(this[i]);
+	                }
+	                return res;
+	            };
+	        }
+	    }();
 
 	function _loopPriority(el, res, setting) {
 	    var attr;
@@ -1275,15 +1291,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var PROP_REG = /^(.*)\.([\w\-]+)$/
 
-	function _setProp(vm, prop, value) {
-	    if (~prop.indexOf('.')) {
-	        prop = PROP_REG.exec(prop);
-	        vm.data(prop[1]).$set(prop[2], value);
-	    } else {
-	        vm.$set(prop, value);
-	    }
-	}
-
 	module.exports = {
 	    show: function (value) {
 	        var el = this.el;
@@ -1339,11 +1346,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    text: function (value) {
+	        var text;
+
 	        value !== undefined &&
-	            (this.el.textContent =
-	                value == null ?
-	                    '' :
-	                    value.toString());
+	            (text = (typeof this.el.textContent === 'string') ?
+	                'textContent' : 'innerText') &&
+	                (this.el[text] =
+	                    value == null ?
+	                        '' :
+	                        value.toString());
 	    },
 	    html: function(value) {
 	        this.el.innerHTML = value && value.toString() || '';
@@ -1443,7 +1454,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                exist = true,
 	                key = this.target,
 	                namespace = this.namespace,
-	                target = namespace ? ([namespace, key].join('.')) : key,
+	                target = _.get(namespace, key),
 	                readFilters = this.filters,
 	                data = this.data(),
 	                vm = this.vm;
@@ -1585,8 +1596,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    vm.$watch(target, function (value, oldVal, patch) {
 	        value = vm.applyFilters(value, readFilters);
-	        // if value is undefined just return
-	        if (value === undefined) return;
+	        // if value is undefined or null just return
+	        if (value == null) return;
 	        var method = (!readFilters.length && patch) ? patch.method : 'default',
 	            dp = (methods[method] || {}).dp,
 	            clean = (methods[method] || {}).clean,

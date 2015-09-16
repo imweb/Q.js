@@ -3,15 +3,6 @@ var _ = require('./utils'),
 
 var PROP_REG = /^(.*)\.([\w\-]+)$/
 
-function _setProp(vm, prop, value) {
-    if (~prop.indexOf('.')) {
-        prop = PROP_REG.exec(prop);
-        vm.data(prop[1]).$set(prop[2], value);
-    } else {
-        vm.$set(prop, value);
-    }
-}
-
 module.exports = {
     show: function (value) {
         var el = this.el;
@@ -67,11 +58,15 @@ module.exports = {
         }
     },
     text: function (value) {
+        var text;
+
         value !== undefined &&
-            (this.el.textContent =
-                value == null ?
-                    '' :
-                    value.toString());
+            (text = (typeof this.el.textContent === 'string') ?
+                'textContent' : 'innerText') &&
+                (this.el[text] =
+                    value == null ?
+                        '' :
+                        value.toString());
     },
     html: function(value) {
         this.el.innerHTML = value && value.toString() || '';
@@ -171,7 +166,7 @@ module.exports = {
                 exist = true,
                 key = this.target,
                 namespace = this.namespace,
-                target = namespace ? ([namespace, key].join('.')) : key,
+                target = _.get(namespace, key),
                 readFilters = this.filters,
                 data = this.data(),
                 vm = this.vm;

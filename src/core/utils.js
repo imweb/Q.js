@@ -6,7 +6,23 @@ var noop = function () {},
     // priority directives
     priorities = ['vm', 'repeat', 'if'],
     _qtid = 0,
-    slice = [].slice;
+    _slice = [].slice,
+    slice = function () {
+        try {
+            _slice.call(document.body.childNodes);
+            return _slice;
+        } catch(e) {
+            return function (i) {
+                i = i || 0;
+                var res = [],
+                    l = this.length;
+                for (; i < l; i++) {
+                    res.push(this[i]);
+                }
+                return res;
+            };
+        }
+    }();
 
 function _loopPriority(el, res, setting) {
     var attr;
