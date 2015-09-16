@@ -1,6 +1,6 @@
 {
   "name": "Q.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "fake-MVVM library",
   "main": "dist/Q.js",
   "scripts": {
