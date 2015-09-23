@@ -249,7 +249,8 @@ data: {
 
 #####\#q-model 
 - 双向绑定（只支持input、textarea）
-####\#q-vm 
+
+#####\#q-vm 
 - 创建子VM(ViewModel, 一个Q对象的实例)，
 例如：
 
@@ -523,8 +524,8 @@ vm.$off('touchApple',  callback1);
 
 
 
-
-
+# 入门教程
+[20个例子入门qjs](https://github.com/imweb/Q.js/blob/master/doc/tutorial.md)
 
 
 
