@@ -6,7 +6,15 @@ var PROP_REG = /^(.*)\.([\w\-]+)$/
 module.exports = {
     show: function (value) {
         var el = this.el;
-        if (value) el.style.display = 'block';
+        if (value) {
+            el.style.display = '';
+            
+            var display = el.currentStyle ? el.currentStyle.display : getComputedStyle(el, null).display;
+            
+            if (display === 'none') {
+                el.style.display = 'block';
+            }
+        }
         else el.style.display = 'none';
     },
     'class': function (value) {
