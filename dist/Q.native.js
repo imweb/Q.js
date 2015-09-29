@@ -1358,8 +1358,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = {
 	    show: function (value) {
 	        var el = this.el;
-	        if (value) el.style.display = 'block';
-	        else el.style.display = 'none';
+	        // TODO refactor & compatibility later
+	        if (value) {
+	            el.style.display = '';
+	            var display = el.currentStyle ?
+	                el.currentStyle.display :
+	                    getComputedStyle(el, null).display;
+	            if (display === 'none') {
+	                el.style.display = 'block';
+	            }
+	        } else {
+	            el.style.display = 'none';
+	        }
 	    },
 	    'class': function (value) {
 	        var el = this.el,

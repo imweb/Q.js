@@ -49,7 +49,10 @@ module.exports = function (Q) {
             </div>\
             <div id="el1" style="display: none">\
                 <div id="el-ref1" q-el="ref"></div>\
-            </div>';
+            </div>\
+            <div id="show1" q-show="isShow" style="display: none"></div>\
+            <style>#show2 { display: none; }</style>\
+            <div id="show2" q-show="isShow"></div>';
         document.body.appendChild(div);
     });
 
@@ -273,6 +276,34 @@ module.exports = function (Q) {
                 el: '#el1',
                 ready: function () {
                     this.$$['ref'].should.equal($('#el-ref1')[0]);
+                    done();
+                }
+            });
+        });
+    });
+
+    describe('show', function (done) {
+        it('should show a element', function (done) {
+            new Q({
+                el: '#show1',
+                data: {
+                    isShow: true
+                },
+                ready: function () {
+                    $('#show1')[0].style.display.should.equal('');
+                    done();
+                }
+            });
+        });
+
+        it('should show a block when its display is none', function (done) {
+            new Q({
+                el: '#show2',
+                data: {
+                    isShow: true
+                },
+                ready: function () {
+                    $('#show2')[0].style.display.should.equal('block');
                     done();
                 }
             });
