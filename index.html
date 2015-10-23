@@ -5,7 +5,7 @@
     <title>Q.js by imweb</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
@@ -38,7 +38,7 @@
 
 <p>脚本：</p>
 
-<div class="highlight highlight-js"><pre><span class="pl-k">var</span> vm <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Q</span>({
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> vm <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Q</span>({
     el<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>#demo<span class="pl-pds">'</span></span>,
     data<span class="pl-k">:</span> {
         msg<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>hello<span class="pl-pds">'</span></span>
@@ -106,13 +106,13 @@ vm.$options.data === data // -&gt; true
 <li>得到data中msg的值：</li>
 </ul>
 
-<div class="highlight highlight-javascript"><pre>vm.msg <span class="pl-c">// -&gt; hello</span></pre></div>
+<div class="highlight highlight-source-js"><pre>vm.msg <span class="pl-c">// -&gt; hello</span></pre></div>
 
 <ul>
 <li>设置msg的值</li>
 </ul>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> obj <span class="pl-k">=</span> {
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> obj <span class="pl-k">=</span> {
     msg<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>hello world!<span class="pl-pds">'</span></span>
 };
 vm.$set(<span class="pl-s"><span class="pl-pds">'</span>msg<span class="pl-pds">'</span></span>, obj.msg); <span class="pl-c">// -&gt; hello world!</span></pre></div>
@@ -153,7 +153,7 @@ vm.$set(<span class="pl-s"><span class="pl-pds">'</span>msg<span class="pl-pds">
 
 <p>Q.js中，默认的prefix是<code>q</code>，directiveId是<code>text</code>，expression是<code>message</code>。这个directive的作用是，当Q实例中<code>message</code>这一属性的值发生变化时，告知Q.js去更新这个节点的文本内容。这里表示<code>message</code>(key)对应的数据(value)，用<code>text</code>指令进行操作，<code>text</code>指令是在该节点塞入文字。例如：</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> myText <span class="pl-k">=</span> Q.get(<span class="pl-s"><span class="pl-pds">'</span>#myText<span class="pl-pds">'</span></span>); <span class="pl-c">//Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息</span></pre></div>
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> myText <span class="pl-k">=</span> Q.get(<span class="pl-s"><span class="pl-pds">'</span>#myText<span class="pl-pds">'</span></span>); <span class="pl-c">//Q.get():获取一个Q实例，遵循restful风格，如果不存在则创建一个，并把节点的dom信息</span></pre></div>
 
 <h3>
 <a id="自定义directive" class="anchor" href="#%E8%87%AA%E5%AE%9A%E4%B9%89directive" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义<code>directive</code>
@@ -339,4 +339,3 @@ function key(handler, key) {
   
   </body>
 </html>
-
