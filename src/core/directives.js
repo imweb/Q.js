@@ -116,7 +116,12 @@ module.exports = {
                 composing = false;
             _.add(el, 'input propertychange change', function (e) {
                 if (composing) return;
-                data.$set(key, el.value);
+                var keys = key.split('.'),
+                    field = data[keys.shift()];
+                for (var i = 0, l = keys.length - 1; i < l; ++i) {
+                    field = field[keys[i]];
+                }
+                field.$set(keys.pop(), el.value);
             }, vm);
             _.add(el, 'compositionstart', function (e) {
                 composing = true;
