@@ -1,7 +1,10 @@
 var DELEGATOR_CALLBACKS_KEY = '__cbs__',
     NO_DELEGATOR = {
         // prevent mouseover trigger more than one time
-        mouseover: true
+        mouseover: true,
+        change: true,
+        input: true,
+        porpertychange: true
     };
 var _extend = function (target, srcs) {
         srcs = [].splice.call(arguments, 1);
@@ -30,6 +33,12 @@ function data(el, key, value) {
     return (data[key] = value);
 }
 
+function add(el, evt, fn) {
+    evt.split(' ').forEach(function (e) {
+        el.addEventListener(e, fn, false);
+    });
+}
+
 module.exports = {
     find: function (selector) {
         return this.slice.call(document.querySelectorAll(selector), 0);
@@ -46,15 +55,15 @@ module.exports = {
         });
     },
     add: function (el, evt, fn, vm) {
-        if (!vm || NO_DELEGATOR[evt]) { 
-            el.addEventListener(evt, fn);
+        if (!vm || NO_DELEGATOR[evt]) {
+            add(el, evt, fn);
         } else {
             var $el = vm.$el,
                 cbs = data($el, DELEGATOR_CALLBACKS_KEY);
             if (!cbs) {
                 cbs = [];
                 data($el, DELEGATOR_CALLBACKS_KEY, cbs);
-                $el.addEventListener(evt, function (e) {
+                add($el, evt, function (e) {
                     var target = e.target
                     cbs.forEach(function (cb) {
                         var fn = cb.fn,
@@ -63,7 +72,7 @@ module.exports = {
                             fn.call(el, e);
                         }
                     });
-                }, false);
+                });
             }
             // push
             cbs.push({

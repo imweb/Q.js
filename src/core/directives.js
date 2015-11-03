@@ -108,21 +108,17 @@ module.exports = {
     },
     model: {
         bind: function () {
-            var key = this.target,
-                namespace = this.namespace || '',
+            var keys = ((this.namespace || '') + this.target).split('.'),
+                key = keys.pop(),
+                namespace = keys.join('.'),
                 el = this.el,
                 vm = this.vm,
                 data = vm.data(namespace),
                 composing = false;
             _.add(el, 'input propertychange change', function (e) {
                 if (composing) return;
-                var keys = key.split('.'),
-                    field = data[keys.shift()];
-                for (var i = 0, l = keys.length - 1; i < l; ++i) {
-                    field = field[keys[i]];
-                }
-                field.$set(keys.pop(), el.value);
-            }, vm);
+                data.$set(key, el.value);
+            });
             _.add(el, 'compositionstart', function (e) {
                 composing = true;
             });

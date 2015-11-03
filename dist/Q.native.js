@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.3
+ * Q.js v1.0.4
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -339,7 +339,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DELEGATOR_CALLBACKS_KEY = '__cbs__',
 	    NO_DELEGATOR = {
 	        // prevent mouseover trigger more than one time
-	        mouseover: true
+	        mouseover: true,
+	        change: true,
+	        input: true,
+	        porpertychange: true
 	    };
 	var _extend = function (target, srcs) {
 	        srcs = [].splice.call(arguments, 1);
@@ -368,6 +371,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return (data[key] = value);
 	}
 
+	function add(el, evt, fn) {
+	    evt.split(' ').forEach(function (e) {
+	        el.addEventListener(e, fn, false);
+	    });
+	}
+
 	module.exports = {
 	    find: function (selector) {
 	        return this.slice.call(document.querySelectorAll(selector), 0);
@@ -384,15 +393,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    },
 	    add: function (el, evt, fn, vm) {
-	        if (!vm || NO_DELEGATOR[evt]) { 
-	            el.addEventListener(evt, fn);
+	        if (!vm || NO_DELEGATOR[evt]) {
+	            add(el, evt, fn);
 	        } else {
 	            var $el = vm.$el,
 	                cbs = data($el, DELEGATOR_CALLBACKS_KEY);
 	            if (!cbs) {
 	                cbs = [];
 	                data($el, DELEGATOR_CALLBACKS_KEY, cbs);
-	                $el.addEventListener(evt, function (e) {
+	                add($el, evt, function (e) {
 	                    var target = e.target
 	                    cbs.forEach(function (cb) {
 	                        var fn = cb.fn,
@@ -401,7 +410,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            fn.call(el, e);
 	                        }
 	                    });
-	                }, false);
+	                });
 	            }
 	            // push
 	            cbs.push({
@@ -1460,8 +1469,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    model: {
 	        bind: function () {
-	            var key = this.target,
-	                namespace = this.namespace || '',
+	            var keys = ((this.namespace || '') + this.target).split('.'),
+	                key = keys.pop(),
+	                namespace = keys.join('.'),
 	                el = this.el,
 	                vm = this.vm,
 	                data = vm.data(namespace),
@@ -1469,7 +1479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _.add(el, 'input propertychange change', function (e) {
 	                if (composing) return;
 	                data.$set(key, el.value);
-	            }, vm);
+	            });
 	            _.add(el, 'compositionstart', function (e) {
 	                composing = true;
 	            });

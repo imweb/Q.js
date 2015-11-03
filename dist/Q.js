@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.3
+ * Q.js v1.0.4
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1396,8 +1396,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    model: {
 	        bind: function () {
-	            var key = this.target,
-	                namespace = this.namespace || '',
+	            var keys = ((this.namespace || '') + this.target).split('.'),
+	                key = keys.pop(),
+	                namespace = keys.join('.'),
 	                el = this.el,
 	                vm = this.vm,
 	                data = vm.data(namespace),
@@ -1405,7 +1406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _.add(el, 'input propertychange change', function (e) {
 	                if (composing) return;
 	                data.$set(key, el.value);
-	            }, vm);
+	            });
 	            _.add(el, 'compositionstart', function (e) {
 	                composing = true;
 	            });
