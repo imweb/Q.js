@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.4
+ * Q.js v1.0.5
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -975,8 +975,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * get the parent of the data
 	     */
-	    $up: function () {
-	        return this._up;
+	    $up: function (num) {
+	        num = num || 1;
+	        for (var src = this; num--;) {
+	            src = src['_up'];
+	        }
+	        return src;
 	    },
 	    /**
 	     * set the value of the key

@@ -190,6 +190,54 @@ module.exports = function (Q) {
                 }
             });
         });
+
+        it('should able to use .$up to get the up data', function () {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: 'hello'
+                        }
+                    }
+                }
+            });
+
+            vm.a.b.$up().should.equal(vm.a);
+            vm.a.b.$up().should.equal(vm.a.b.$up(1));
+            vm.a.b.$up(2).should.equal(vm);
+        });
+
+        it('should able to use .$key to get a data key', function () {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: 'hello'
+                        }
+                    }
+                }
+            });
+
+            vm.a.b.$key().should.equal('b');
+            vm.a.$key().should.equal('a');
+        });
+
+        it('should able to use .$namespace to get a namespace in the model', function () {
+            var vm = new Q({
+                el: null,
+                data: {
+                    a: {
+                        b: {
+                            c: 'hello'
+                        }
+                    }
+                }
+            });
+
+            vm.a.b.$namespace().should.equal('a.b');
+        });
     });
 
 };

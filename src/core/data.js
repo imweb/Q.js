@@ -101,8 +101,12 @@ _.extend(Data.prototype, {
     /**
      * get the parent of the data
      */
-    $up: function () {
-        return this._up;
+    $up: function (num) {
+        num = num || 1;
+        for (var src = this; num--;) {
+            src = src['_up'];
+        }
+        return src;
     },
     /**
      * set the value of the key
