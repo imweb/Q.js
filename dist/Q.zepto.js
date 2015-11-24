@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.5
+ * Q.js v1.0.6
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -1499,16 +1499,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.setting.stop = true;
 
+	            function _init(value) {
+	                // no exist no bind
+	                if (hasInit || !exist || !value) return;
+	                hasInit = true;
+	                vm._templateBind(tpl, {
+	                    data: data,
+	                    namespace: namespace,
+	                    immediate: true
+	                });
+	            }
+
 	            vm.$watch(target, function (value, oldVal) {
 	                value = vm.applyFilters(value, readFilters, oldVal);
-	                if (!hasInit && value === true) {
-	                    hasInit = true;
-	                    vm._templateBind(tpl, {
-	                        data: data,
-	                        namespace: namespace,
-	                        immediate: true
-	                    });
-	                }
+
+	                _init(value);
 	                // need to init
 	                if (value === exist) return;
 	                // bind
@@ -1520,6 +1525,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    parentNode.replaceChild(ref, tpl);
 	                    exist = value;
 	                }
+
+	                _init(value);
 	            }, false, true);
 	        }
 	    },

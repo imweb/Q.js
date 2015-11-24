@@ -184,16 +184,21 @@ module.exports = {
 
             this.setting.stop = true;
 
+            function _init(value) {
+                // no exist no bind
+                if (hasInit || !exist || !value) return;
+                hasInit = true;
+                vm._templateBind(tpl, {
+                    data: data,
+                    namespace: namespace,
+                    immediate: true
+                });
+            }
+
             vm.$watch(target, function (value, oldVal) {
                 value = vm.applyFilters(value, readFilters, oldVal);
-                if (!hasInit && value === true) {
-                    hasInit = true;
-                    vm._templateBind(tpl, {
-                        data: data,
-                        namespace: namespace,
-                        immediate: true
-                    });
-                }
+
+                _init(value);
                 // need to init
                 if (value === exist) return;
                 // bind
@@ -205,6 +210,8 @@ module.exports = {
                     parentNode.replaceChild(ref, tpl);
                     exist = value;
                 }
+
+                _init(value);
             }, false, true);
         }
     },
