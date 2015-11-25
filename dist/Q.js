@@ -820,6 +820,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        [childVal] :
 	        parentVal;
 	};
+	strats.data =
 	strats.filters =
 	strats.methods =
 	strats.directives = function (parentVal, childVal) {

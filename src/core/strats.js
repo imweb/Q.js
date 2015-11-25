@@ -17,6 +17,7 @@ strats.paramAttributes = function (parentVal, childVal) {
                         [childVal] :
         parentVal;
 };
+strats.data =
 strats.filters =
 strats.methods =
 strats.directives = function (parentVal, childVal) {
