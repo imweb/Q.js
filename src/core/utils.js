@@ -25,15 +25,15 @@ var noop = function () {},
     }();
 
 function _loopPriority(el, res, setting) {
-    var attr;
+    var attr, tmp;
 
     // TODO need optimization
     for (var j = 0, l = priorities.length; j < l; j++) {
         attr = 'q-' + priorities[j];
-        if (el.getAttribute(attr)) {
+        if (tmp = el.getAttribute(attr)) {
             res.push({
                 name: attr,
-                value: el.getAttribute(attr)
+                value: tmp
             });
 
             el.removeAttribute(attr);

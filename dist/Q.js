@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.7
+ * Q.js v1.0.8
  * Inspired from vue.js
  * (c) 2015 Daniel Yang
  * Released under the MIT License.
@@ -107,15 +107,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	function _loopPriority(el, res, setting) {
-	    var attr;
+	    var attr, tmp;
 
 	    // TODO need optimization
 	    for (var j = 0, l = priorities.length; j < l; j++) {
 	        attr = 'q-' + priorities[j];
-	        if (el.getAttribute(attr)) {
+	        if (tmp = el.getAttribute(attr)) {
 	            res.push({
 	                name: attr,
-	                value: el.getAttribute(attr)
+	                value: tmp
 	            });
 
 	            el.removeAttribute(attr);
@@ -225,7 +225,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -355,7 +355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -365,11 +365,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function (_) {
 
-	    var Seed = __webpack_require__(6),
-	        events = __webpack_require__(7),
+	    var Seed = __webpack_require__(8),
+	        events = __webpack_require__(9),
 	        MARK = /\{\{(.+?)\}\}/,
-	        mergeOptions = __webpack_require__(8).mergeOptions,
-	        clas = __webpack_require__(9),
+	        mergeOptions = __webpack_require__(7).mergeOptions,
+	        clas = __webpack_require__(6),
 	        _doc = document;
 
 	    function _inDoc(ele) {
@@ -723,6 +723,154 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Modules map
+	var modules = {},
+	    mergeOptions = __webpack_require__(7).mergeOptions,
+	    listeners = {};
+
+	function _define(name, options) {
+	    if (modules[name]) return false;
+	    var module = modules[name] = this.extend(options || {});
+	    return module;
+	}
+
+	function _require(name, callback) {
+	    return modules[name] || this;
+	}
+
+	function _create(o) {
+	    function F() {}
+	    F.prototype = o;
+	    return new F();
+	}
+
+	function _extend(extendOptions) {
+	    extendOptions = extendOptions || {};
+	    var Super = this,
+	        Sub = createClass(extendOptions.name || 'QComponent');
+	    Sub.prototype = _create(Super.prototype);
+	    Sub.prototype.constructor = Sub;
+	    Sub.options = mergeOptions(
+	        Super.options,
+	        extendOptions
+	    );
+	    Sub['super'] = Super;
+	    ['extend', 'get', 'all', 'require', 'define'].forEach(function (key) {
+	        Sub[key] = Super[key];
+	    })
+	    return Sub;
+	}
+
+	function createClass (name) {
+	    return new Function(
+	        'return function ' + name +
+	        ' (options) { this._init(options) }'
+	    )();
+	}
+
+	module.exports = {
+	    /**
+	     * define
+	     * define a component
+	     * @param {String} name
+	     * @param {Object} options
+	     */
+	    define: _define,
+	    /**
+	     * require
+	     * require(name)
+	     * require(names, callback)
+	     * require a component
+	     * @param {String} name
+	     * @param {Array} names
+	     * @param {Function} callback
+	     */
+	    require: _require,
+	    /**
+	     * extend
+	     * extend the class
+	     * @param {Object} options
+	     */
+	    extend: _extend
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1);
+
+	var strats = {};
+	strats.created =
+	strats.ready =
+	strats.attached =
+	strats.detached =
+	strats.compiled =
+	strats.beforeDestroy =
+	strats.destroyed =
+	strats.paramAttributes = function (parentVal, childVal) {
+	    return childVal ?
+	        parentVal ?
+	            parentVal.concat(childVal) :
+	                Array.isArray(childVal) ?
+	                    childVal :
+	                        [childVal] :
+	        parentVal;
+	};
+	strats.data =
+	strats.filters =
+	strats.methods =
+	strats.directives = function (parentVal, childVal) {
+	  if (!childVal) return parentVal;
+	  if (!parentVal) return childVal;
+	  return _.extend({}, parentVal, childVal);
+	};
+
+	var defaultStrat = function (parentVal, childVal) {
+	    return childVal === undefined ?
+	        parentVal :
+	        childVal;
+	};
+
+	/**
+	 * Option overwriting strategies are functions that handle
+	 * how to merge a parent option value and a child option
+	 * value into the final value.
+	 *
+	 * All strategy functions follow the same signature:
+	 *
+	 * @param {*} parentVal
+	 * @param {*} childVal
+	 * @param {Vue} [vm]
+	 */
+	function mergeOptions(parent, child, vm) {
+	    var options = {}, key;
+	    for (key in parent) {
+	        merge(key);
+	    }
+	    for (key in child) {
+	        if (!(parent.hasOwnProperty(key))) {
+	            merge(key);
+	        }
+	    }
+	    function merge(key) {
+	        var strat = strats[key] || defaultStrat;
+	        options[key] = strat(parent[key], child[key], vm, key);
+	    }
+	    return options;
+	}
+
+	module.exports = {
+	    strats: strats,
+	    mergeOptions: mergeOptions
+	}
+
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1);
@@ -1083,10 +1231,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Data = __webpack_require__(6),
+	var Data = __webpack_require__(8),
 	    _ = __webpack_require__(1);
 
 	function emit(key, args, target) {
@@ -1140,159 +1288,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1);
-
-	var strats = {};
-	strats.created =
-	strats.ready =
-	strats.attached =
-	strats.detached =
-	strats.compiled =
-	strats.beforeDestroy =
-	strats.destroyed =
-	strats.paramAttributes = function (parentVal, childVal) {
-	    return childVal ?
-	        parentVal ?
-	            parentVal.concat(childVal) :
-	                Array.isArray(childVal) ?
-	                    childVal :
-	                        [childVal] :
-	        parentVal;
-	};
-	strats.data =
-	strats.filters =
-	strats.methods =
-	strats.directives = function (parentVal, childVal) {
-	  if (!childVal) return parentVal;
-	  if (!parentVal) return childVal;
-	  return _.extend({}, parentVal, childVal);
-	};
-
-	var defaultStrat = function (parentVal, childVal) {
-	    return childVal === undefined ?
-	        parentVal :
-	        childVal;
-	};
-
-	/**
-	 * Option overwriting strategies are functions that handle
-	 * how to merge a parent option value and a child option
-	 * value into the final value.
-	 *
-	 * All strategy functions follow the same signature:
-	 *
-	 * @param {*} parentVal
-	 * @param {*} childVal
-	 * @param {Vue} [vm]
-	 */
-	function mergeOptions(parent, child, vm) {
-	    var options = {}, key;
-	    for (key in parent) {
-	        merge(key);
-	    }
-	    for (key in child) {
-	        if (!(parent.hasOwnProperty(key))) {
-	            merge(key);
-	        }
-	    }
-	    function merge(key) {
-	        var strat = strats[key] || defaultStrat;
-	        options[key] = strat(parent[key], child[key], vm, key);
-	    }
-	    return options;
-	}
-
-	module.exports = {
-	    strats: strats,
-	    mergeOptions: mergeOptions
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Modules map
-	var modules = {},
-	    mergeOptions = __webpack_require__(8).mergeOptions,
-	    listeners = {};
-
-	function _define(name, options) {
-	    if (modules[name]) return false;
-	    var module = modules[name] = this.extend(options || {});
-	    return module;
-	}
-
-	function _require(name, callback) {
-	    return modules[name] || this;
-	}
-
-	function _create(o) {
-	    function F() {}
-	    F.prototype = o;
-	    return new F();
-	}
-
-	function _extend(extendOptions) {
-	    extendOptions = extendOptions || {};
-	    var Super = this,
-	        Sub = createClass(extendOptions.name || 'QComponent');
-	    Sub.prototype = _create(Super.prototype);
-	    Sub.prototype.constructor = Sub;
-	    Sub.options = mergeOptions(
-	        Super.options,
-	        extendOptions
-	    );
-	    Sub['super'] = Super;
-	    ['extend', 'get', 'all', 'require', 'define'].forEach(function (key) {
-	        Sub[key] = Super[key];
-	    })
-	    return Sub;
-	}
-
-	function createClass (name) {
-	    return new Function(
-	        'return function ' + name +
-	        ' (options) { this._init(options) }'
-	    )();
-	}
-
-	module.exports = {
-	    /**
-	     * define
-	     * define a component
-	     * @param {String} name
-	     * @param {Object} options
-	     */
-	    define: _define,
-	    /**
-	     * require
-	     * require(name)
-	     * require(names, callback)
-	     * require a component
-	     * @param {String} name
-	     * @param {Array} names
-	     * @param {Function} callback
-	     */
-	    require: _require,
-	    /**
-	     * extend
-	     * extend the class
-	     * @param {Object} options
-	     */
-	    extend: _extend
-	};
-
-
-/***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1),
-	    strats = __webpack_require__(8);
+	    strats = __webpack_require__(7);
 
 	var PROP_REG = /^(.*)\.([\w\-]+)$/
 
