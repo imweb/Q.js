@@ -1420,7 +1420,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        },
 	        update: function (value) {
-	            this.el.value = value;
+	            if (this.el.value !== value) {
+	                this.el.value = value;
+	            }
 	        }
 	    },
 	    vm: {
