@@ -7,7 +7,7 @@ Q.js
 
 #Q.js  API
 
- 
+
 [TOC]
 
 
@@ -160,25 +160,25 @@ directives: {
 
 #### 通用`directive`
 
-> 目前只提供基本的通用`directive`，可拓展 
+> 目前只提供基本的通用`directive`，可拓展
 
-#####\#q-text 
+#####\#q-text
 - 更新元素的 `textContent`。
 - 常用于文字节点上。
 ``` html
 <span q-text="variableName"></span>
 ```
 
-#####\#q-html 
+#####\#q-html
 - 更新元素的 `innerHTML`。
 - 将 q-html 绑定到用户提供的数据上会有 XSS 的风险，因此使用 v-html 时应确保数据的安全性，或通过自定义过滤器将不被信任的 HTML 内容进行预处理
 ``` html
 <div q-html="variableName"></div>
 ```
-#####\#q-show 
+#####\#q-show
 - 根据绑定值决定是否显示元素。
 ``` html
-<div q-show="isShow">show!<div> 
+<div q-show="isShow">show!<div>
 <!-- 根据isShow绑定值决定是否显示 --->
 ```
 Q实例的data中`isShow`的布尔值决定了这个节点是否显示
@@ -189,7 +189,7 @@ var vm = new Qjs({
 	}
 })
 ```
-#####\#q-attr 
+#####\#q-attr
 设置节点属性（attribute & property）
 
 ```
@@ -247,10 +247,10 @@ data: {
 ```
 
 
-#####\#q-model 
+#####\#q-model
 - 双向绑定（只支持input、textarea）
 
-#####\#q-vm 
+#####\#q-vm
 - 创建子VM(ViewModel, 一个Q对象的实例)，
 例如：
 
@@ -271,7 +271,7 @@ Q.define('d', {
 });
 ```
 
-#####\#q-ref 
+#####\#q-ref
 - 创建子VM在父级嵌套VM中的引用，例如：
 
 ```
@@ -294,7 +294,7 @@ Q.define('d', {
 
 
 
-#####\#q-if 
+#####\#q-if
 - 是否使用模版
 - 对应值为false，模版将不被渲染，为true则渲染
 
@@ -320,7 +320,7 @@ q-on="xx: method(e, this3)"
 <input id="demo" q-class="hide: isStart | ! " q-on="keyup: showMsg | key enter" />
 ```
 该例子有两个过滤器，分别
-- 过滤器 `!` 
+- 过滤器 `!`
 - 过滤器 `key`
 
 `！`是设置在vm实例上的filters，基本实现是：
@@ -332,7 +332,7 @@ var vm = new Qjs({
 		}
 	}
 })
-	
+
 ```
 `key`是其中一个通用filter，基本实现是：
 
@@ -439,7 +439,7 @@ var vm = new Q({
 var Qjs = require("Q");
 new Qjs({
   appType: 'ios',        //自定义的属性appType
-  methods:{ 
+  methods:{
 	  getAppType:function () {
                console.log(this.$options.appType) // -> 'ios'
       }}
@@ -458,19 +458,19 @@ new Qjs({
 返回当前实例的直接子实例数组。
 
 
-####\#vm.dataName /  vm.methodName  
+####\#vm.dataName /  vm.methodName
 [data / method]
 
 ###实例方法：
 
 ####\#vm.$set( key, value )
-继承Data对象的$set 
+继承Data对象的$set
 ####\#vm.$get
 继承Data对象的$get
 
 ####\#vm.$emit( event , [args...])
 参数event:：`[String]`
-参数arg:：`事件函数所需的额外参数`  **可选（optiional）**  
+参数arg:：`事件函数所需的额外参数`  **可选（optiional）**
 在当前 vm 上触发一个事件。
 ```javascript
 //目前支持两种事件emit调用方式：
@@ -480,7 +480,7 @@ vm.$emit("eventName",[args..]);
 vm.$on("datachange", function(target, [args..]){
 	console.log(target); //dataName [string]
 	//返回的是字符串-数据名
-}); 
+});
 vm.$emit("data:dataName", [args..]);
 ```
 
@@ -491,16 +491,16 @@ vm.$emit("data:dataName", [args..]);
 ```javascript
 vm.$on('applyFinished', function () {
      //do something;
-});      
+});
 ```
 ####\#vm.$once（event, callback）
-参数event ： `[String]` 
-参数callback： `[Function]` 
+参数event ： `[String]`
+参数callback： `[Function]`
 在当前 vm 上监听一个一次性的事件。
 ```javascript
 vm.$off('onceEvent', function () {
      //do something;
-});      
+});
 ```
 ####\#vm.$off([event, callback])
 参数event ： `[String]` **可选（optiional）**
@@ -509,7 +509,7 @@ vm.$off('onceEvent', function () {
 如果传递了一个事件，那么移除该事件的所有回调；
 如果事件和回调都被传递，则只移除该回调。
 ```javascript
-vm.$off('touchApple',  callback1);      
+vm.$off('touchApple',  callback1);
 // callback1 是事件touchApple绑定的函数
 ```
 
@@ -531,6 +531,8 @@ vm.$off('touchApple',  callback1);
 
 用户
 ----
+
+[![腾讯课堂](https://cloud.githubusercontent.com/assets/2292731/10385573/5d4c5114-6e7d-11e5-9aed-21c36453c9ee.png)](http://ke.qq.com/)
 
 [![齐齐互动视频](http://www.qxiu.com/2014/images/logo_qi.jpg)](http://www.qxiu.com/)
 
