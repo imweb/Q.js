@@ -30,7 +30,7 @@ function _loopPriority(el, res, setting) {
     // TODO need optimization
     for (var j = 0, l = priorities.length; j < l; j++) {
         attr = 'q-' + priorities[j];
-        if (el.hasAttribute(attr)) {
+        if (el.getAttribute(attr)) {
             res.push({
                 name: attr,
                 value: el.getAttribute(attr)
@@ -84,9 +84,9 @@ module.exports = {
         if (el.classList) {
             el.classList.add(cls);
         } else {
-            var cur = ' ' + (el.getAttribute('class') || '') + ' ';
+            var cur = ' ' + (el.className || '') + ' ';
             if (cur.indexOf(' ' + cls + ' ') < 0) {
-                el.setAttribute('class', (cur + cls).trim());
+                el.className = (cur + cls).trim();
             }
         }
     },
@@ -100,12 +100,12 @@ module.exports = {
         if (el.classList) {
             el.classList.remove(cls);
         } else {
-            var cur = ' ' + (el.getAttribute('class') || '') + ' ',
+            var cur = ' ' + (el.className || '') + ' ',
                 tar = ' ' + cls + ' ';
             while (cur.indexOf(tar) >= 0) {
                 cur = cur.replace(tar, ' ');
             }
-            el.setAttribute('class', cur.trim());
+            el.className = cur.trim();
         }
     },
     noexist: function (vm, name) {
