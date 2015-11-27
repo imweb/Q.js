@@ -73,6 +73,19 @@ module.exports = function (Q) {
             }, 100);
         });
 
+        it('should able extend data', function (done) {
+            var vm = new (Q.require('hello'))({
+                data: {}
+            });
+
+            vm.msg.should.equal('world');
+            vm.$once('say', function (word) {
+                word.should.equal('hello');
+                done();
+            });
+            vm.sayHello();
+        });
+
         // TODO later will pass the test case
         // it('should able to set the data of a children component', function (done) {
         //     var vm = Q.get('#component1');
