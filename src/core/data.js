@@ -267,6 +267,8 @@ _.extend(DataArray.prototype, Data.prototype, {
                 (this[i]._namespace = i + '');
         }
         for (;i < this.length; i++) {
+            // use __R__ mark has been removed
+            this[i].__R__ = true;
             this[i] = null;
             delete this[i];
         }

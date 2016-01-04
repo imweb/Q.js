@@ -1,7 +1,7 @@
 /*!
- * Q.js v0.5.7
+ * Q.js v0.5.8
  * Inspired from vue.js
- * (c) 2015 Daniel Yang
+ * (c) 2016 Daniel Yang
  * Released under the MIT License.
  */
 
@@ -88,7 +88,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // priority directives
 	    priorities = ['vm', 'repeat', 'if'],
 	    _qtid = 0,
-	    slice = [].slice;
+	    _slice = [].slice,
+	    slice = function () {
+	        try {
+	            _slice.call(document.body.childNodes);
+	            return _slice;
+	        } catch(e) {
+	            return function (i) {
+	                i = i || 0;
+	                var res = [],
+	                    l = this.length;
+	                for (; i < l; i++) {
+	                    res.push(this[i]);
+	                }
+	                return res;
+	            }
+	        }
+	    }();
 
 	function _loopPriority(el, res, setting) {
 	    var attr;
@@ -209,7 +225,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -339,7 +355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -1120,6 +1136,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[i]._namespace = i + '');
 	        }
 	        for (;i < this.length; i++) {
+	            // use __R__ mark has been removed
+	            this[i].__R__ = true;
 	            this[i] = null;
 	            delete this[i];
 	        }
@@ -1271,12 +1289,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PROP_REG = /^(.*)\.([\w\-]+)$/
 
 	function _setProp(vm, prop, value) {
-	    if (~prop.indexOf('.')) {
-	        prop = PROP_REG.exec(prop);
-	        vm.data(prop[1]).$set(prop[2], value);
-	    } else {
-	        vm.$set(prop, value);
-	    }
+	    vm.data(prop, value);
 	}
 
 	module.exports = {
@@ -1334,11 +1347,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    text: function (value) {
+	        var text;
 	        value !== undefined &&
-	            (this.el.textContent =
-	                value == null ?
-	                    '' :
-	                    value.toString());
+	            (text = (this.el.textContent === 'string') ?
+	                'textContent' : 'innerText') &&
+	                (this.el[text] =
+	                    value == null ?
+	                        '' :
+	                        value.toString());
 	    },
 	    html: function(value) {
 	        this.el.innerHTML = value && value.toString() || '';
@@ -1454,8 +1470,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    dataCache = value;
 	                });
 
-	            // second trigger
-	            vm.$on('datachange', function (prop, value, oldVal, patch) {
+	            function ondatachange(prop, value, oldVal, patch) {
+	                // TODO
+	                if (data.__R__) return vm.$off('datachange', ondatachange);
 	                if (this === childVm) {
 	                    if (_preventChild && prop === _preventChild) {
 
@@ -1465,7 +1482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        // prevent parent datachange
 	                        _preventParent = parentProp;
 	                        patch ?
-	                            vm[parentProp][patch.method].apply(vm[parentProp], patch.args) :
+	                            vm.data(parentProp)[patch.method].apply(vm.data(parentProp), patch.args) :
 	                            _setProp(vm, parentProp, value);
 	                    }
 	                } else if (this === vm) {
@@ -1473,7 +1490,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        // this prevent this time
 	                        _preventParent = false;
 	                    // change data need sync
-	                    } else if (!target || !prop.indexOf(target + '.')) {
+	                    // TODO
+	                    } else if (!target || (prop !== target && !prop.indexOf(target + '.'))) {
 	                        var start = target.length,
 	                            childProp;
 
@@ -1483,7 +1501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        _preventChild = childProp;
 
 	                        patch ?
-	                            childVm[childProp][patch.method].apply(childVm[childProp], patch.args) :
+	                            childVm.data(childProp)[patch.method].apply(childVm.data(childProp), patch.args) :
 	                        _setProp(childVm, childProp, value);
 	                    // maybe not need sync, check data cache if exist just sync
 	                    } else if (!target.indexOf(prop) && dataCache) {
@@ -1495,7 +1513,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        dataCache = undefined;
 	                    }
 	                }
-	            });
+	            }
+
+	            // second trigger
+	            vm.$on('datachange', ondatachange);
 	        }
 	    },
 	    'if': {
