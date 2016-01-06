@@ -50,7 +50,7 @@ function _fixKey(key, top, value) {
     target = top._target;
     var res = target ? key.substring(target.length + 1) : key;
     // merge new value
-    if (!(~res.indexOf('.'))) top[key] = value;
+    if (!(~res.indexOf('.'))) top[res] = value;
     return res;
 }
 
@@ -83,7 +83,7 @@ function Data(options) {
     // parent data container
     this._up = options.up;
     // the most top parents data container
-    this._tops = options.tops || [options.top];
+    this._tops = options.tops || [options.top || this];
     // the namespace of data
     this._namespace = options.namespace || '';
     keys.forEach(function (key) {
@@ -286,8 +286,6 @@ _.extend(DataArray.prototype, Data.prototype, {
                 (this[i]._namespace = i + '');
         }
         for (;i < this.length; i++) {
-            // use __R__ mark has been removed
-            this[i].__R__ = true;
             this[i] = null;
             delete this[i];
         }

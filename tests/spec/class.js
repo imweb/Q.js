@@ -24,6 +24,10 @@ module.exports = function (Q) {
                 <div q-vm="lala">\
                     <p q-text="msg"></p>\
                 </div>\
+            </div>\
+            <div id="component5" style="display: none">\
+                <div q-vm="haha" q-ref="haha" q-with="obj">\
+                </div>\
             </div>';
         document.body.appendChild(div);
     });
@@ -140,6 +144,28 @@ module.exports = function (Q) {
                     done();
                 }
             });
+        });
+
+        it('should able to share data', function () {
+            Q.define('haha', {
+                data: {
+                    msg: 'hello'
+                }
+            });
+
+            var vm = new Q({
+                el: '#component5',
+                data: {
+                    msg: 'hello',
+                    obj: {
+                        msg: 'nihao'
+                    }
+                }
+            });
+
+            vm.$.haha.msg.should.equal('nihao');
+            vm.obj.$set('msg', 'hello');
+            vm.$.haha.msg.should.equal('hello');
         });
     });
 

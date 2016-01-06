@@ -222,7 +222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -334,7 +334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	var DELEGATOR_CALLBACKS_KEY = '__cbs__',
 	    NO_DELEGATOR = {
@@ -983,7 +983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    target = top._target;
 	    var res = target ? key.substring(target.length + 1) : key;
 	    // merge new value
-	    if (!(~res.indexOf('.'))) top[key] = value;
+	    if (!(~res.indexOf('.'))) top[res] = value;
 	    return res;
 	}
 
@@ -1016,7 +1016,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // parent data container
 	    this._up = options.up;
 	    // the most top parents data container
-	    this._tops = options.tops || [options.top];
+	    this._tops = options.tops || [options.top || this];
 	    // the namespace of data
 	    this._namespace = options.namespace || '';
 	    keys.forEach(function (key) {
@@ -1219,8 +1219,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                (this[i]._namespace = i + '');
 	        }
 	        for (;i < this.length; i++) {
-	            // use __R__ mark has been removed
-	            this[i].__R__ = true;
 	            this[i] = null;
 	            delete this[i];
 	        }
