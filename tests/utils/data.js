@@ -139,6 +139,52 @@ describe('Data & DataArray', function () {
         data.arr[2].$key().should.equal(2);
     });
 
+    it('should able to get the right keys after push an item into array', function () {
+        var data = new Data({
+            data: {
+                arr: [{
+                    v: 1
+                }, {
+                    v: 2
+                }, {
+                    v: 3
+                }]
+            }
+        });
+
+        data.arr.push({v: 4});
+
+        data.$key().should.equal('');
+        data.arr.$key().should.equal('arr');
+        data.arr[0].$key().should.equal(0);
+        data.arr[1].$key().should.equal(1);
+        data.arr[2].$key().should.equal(2);
+        data.arr[3].$key().should.equal(3);
+        data.arr._keys.length.should.equal(4);
+    });
+
+    it('should able to get the right keys after splice an item of array', function () {
+        var data = new Data({
+            data: {
+                arr: [{
+                    v: 1
+                }, {
+                    v: 2
+                }, {
+                    v: 3
+                }]
+            }
+        });
+
+        data.arr.splice(1, 1);
+
+        data.$key().should.equal('');
+        data.arr.$key().should.equal('arr');
+        data.arr[0].$key().should.equal(0);
+        data.arr[1].$key().should.equal(1);
+        data.arr._keys.length.should.equal(2);
+    });
+
     it('should able to get the parent of a data', function () {
         var data = new Data({
             data: {

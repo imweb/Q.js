@@ -198,8 +198,8 @@ _.extend(DataArray.prototype, Data.prototype, {
         values = _.slice.call(arguments, 0);
         var res = [];
         for (var i = 0, l = values.length; i < l; i++) {
-            _prefix(this, this.length, values[i]);
             this._keys.push(this.length);
+            _prefix(this, this.length, values[i]);
             res.push(this[this.length]);
             this.length++;
         }
