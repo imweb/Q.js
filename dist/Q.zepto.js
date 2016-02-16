@@ -222,7 +222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * just a copy of: https://github.com/yyx990803/vue/blob/master/src/cache.js
@@ -378,7 +378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
@@ -900,13 +900,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Boolean} trigger or not
 	 */
 	function _prefix(up, key, value, trigger) {
-	    var tops = up._tops,
-	        top = tops[0],
+	    var top = up._top,
 	        isArray = _isArray(value),
 	        options = {
 	            data: value,
 	            up: up,
-	            tops: tops,
+	            top: top,
 	            namespace: key + '',
 	            trigger: isArray ? false : trigger
 	        },
@@ -938,22 +937,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).length;
 	}
 
-	function _fixKey(key, top, value) {
-	    target = top._target;
-	    var res = target ? key.substring(target.length + 1) : key;
-	    // merge new value
-	    if (!(~res.indexOf('.'))) top[key] = value;
-	    return res;
-	}
-
-	function _merge(target, source) {
-	    var keys = _.slice.call(source._keys);
-	    keys.push('_tops', '_keys', '_namespace', '_up');
-	    keys.forEach(function (key) {
-	        target[key] = source[key];
-	    });
-	}
-
 	/**
 	 * Data
 	 * @class
@@ -974,8 +957,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._keys = keys;
 	    // parent data container
 	    this._up = options.up;
-	    // the most top parents data container
-	    this._tops = options.tops || [options.top];
+	    // the most top parent data container
+	    this._top = options.top || this;
 	    // the namespace of data
 	    this._namespace = options.namespace || '';
 	    keys.forEach(function (key) {
@@ -1060,13 +1043,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    $change: function (key, value, oldVal, patch, type) {
 	        type = type || 0;
-	        var tops = this._tops;
-	        tops.forEach(function (top) {
-	            if (top.$emit) {
-	                ~type && top.$emit('data:' + _fixKey(key, top, value), value, oldVal, patch);
-	                type && top.$emit('deep:' + _fixKey(key, top, value), value, oldVal, patch);
-	            }
-	        });
+	        var top = this._top;
+	        if (top.$emit) {
+	            ~type && this._top.$emit('data:' + key, value, oldVal, patch);
+	            type && this._top.$emit('deep:' + key, value, oldVal, patch);
+	        }
 	    }
 	});
 
@@ -1212,16 +1193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} options
 	 */
 	function Seed(options) {
-	    // if has target means this is a child VM
-	    if ('target' in options) {
-	        this._target = options.target;
-	        _merge(this, options.data);
-	        this._tops.push(this);
-	        return;
-	    }
-	    options.top = this;
-	    // attach the properties
-	    _merge(this, new Data(options));
+	    Data.call(this, options);
 	}
 	_.extend(Seed, {
 	    Data: Data,
@@ -1489,12 +1461,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            options = {
 	                el: el,
-	                data: data,
-	                target: target,
+	                // TODO maybe need to remove
+	                data: data.$get(),
 	                _parent: vm
 	            };
 
-	            // create a child
 	            childVm = new Child(options);
 
 	            vm._children.push(childVm);
@@ -1506,6 +1477,69 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        (vm.$[ref] = [refs, childVm]) :
 	                    (vm.$[ref] = childVm);
 	            }();
+
+	            // prevent child vm data change to trigger parent vm
+	            var _preventChild = false,
+	            // prevent parent vm data change to trigger child vm
+	                _preventParent = false,
+	            // data cache
+	                dataCache;
+
+	            // first trigger
+	            target &&
+	                vm.$watch(target, function (value, oldVal, patch) {
+	                    if (_preventParent && target === _preventParent) return;
+	                    // cache the data when target change
+	                    dataCache = value;
+	                });
+
+	            function ondatachange(prop, value, oldVal, patch) {
+	                // TODO
+	                if (data.__R__) return vm.$off('datachange', ondatachange);
+	                if (this === childVm) {
+	                    if (_preventChild && prop === _preventChild) {
+
+	                        _preventChild = false;
+	                    } else {
+	                        var parentProp = _.get(target, prop);
+	                        // prevent parent datachange
+	                        _preventParent = parentProp;
+	                        patch ?
+	                            vm.data(parentProp)[patch.method].apply(vm.data(parentProp), patch.args) :
+	                            _setProp(vm, parentProp, value);
+	                    }
+	                } else if (this === vm) {
+	                    if (_preventParent) {
+	                        // this prevent this time
+	                        _preventParent = false;
+	                    // change data need sync
+	                    // TODO
+	                    } else if (!target || (prop !== target && !prop.indexOf(target + '.'))) {
+	                        var start = target.length,
+	                            childProp;
+
+	                        start && (start += 1);
+	                        childProp = prop.substring(start, prop.length);
+	                        // prevent child datachange
+	                        _preventChild = childProp;
+
+	                        patch ?
+	                            childVm.data(childProp)[patch.method].apply(childVm.data(childProp), patch.args) :
+	                        _setProp(childVm, childProp, value);
+	                    // maybe not need sync, check data cache if exist just sync
+	                    } else if (!target.indexOf(prop) && dataCache) {
+	                        // prevent child datachange
+	                        _preventChild = target;
+
+	                        childVm.$set(dataCache);
+	                        // clear the data cache
+	                        dataCache = undefined;
+	                    }
+	                }
+	            }
+
+	            // second trigger
+	            vm.$on('datachange', ondatachange);
 	        }
 	    },
 	    'if': {

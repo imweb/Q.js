@@ -8,13 +8,12 @@ var _ = require('./utils');
  * @param {Boolean} trigger or not
  */
 function _prefix(up, key, value, trigger) {
-    var tops = up._tops,
-        top = tops[0],
+    var top = up._top,
         isArray = _isArray(value),
         options = {
             data: value,
             up: up,
-            tops: tops,
+            top: top,
             namespace: key + '',
             trigger: isArray ? false : trigger
         },
@@ -46,22 +45,6 @@ function _getLength(keys) {
     }).length;
 }
 
-function _fixKey(key, top, value) {
-    target = top._target;
-    var res = target ? key.substring(target.length + 1) : key;
-    // merge new value
-    if (!(~res.indexOf('.'))) top[key] = value;
-    return res;
-}
-
-function _merge(target, source) {
-    var keys = _.slice.call(source._keys);
-    keys.push('_tops', '_keys', '_namespace', '_up');
-    keys.forEach(function (key) {
-        target[key] = source[key];
-    });
-}
-
 /**
  * Data
  * @class
@@ -82,8 +65,8 @@ function Data(options) {
     this._keys = keys;
     // parent data container
     this._up = options.up;
-    // the most top parents data container
-    this._tops = options.tops || [options.top];
+    // the most top parent data container
+    this._top = options.top || this;
     // the namespace of data
     this._namespace = options.namespace || '';
     keys.forEach(function (key) {
@@ -168,13 +151,11 @@ _.extend(Data.prototype, {
      */
     $change: function (key, value, oldVal, patch, type) {
         type = type || 0;
-        var tops = this._tops;
-        tops.forEach(function (top) {
-            if (top.$emit) {
-                ~type && top.$emit('data:' + _fixKey(key, top, value), value, oldVal, patch);
-                type && top.$emit('deep:' + _fixKey(key, top, value), value, oldVal, patch);
-            }
-        });
+        var top = this._top;
+        if (top.$emit) {
+            ~type && this._top.$emit('data:' + key, value, oldVal, patch);
+            type && this._top.$emit('deep:' + key, value, oldVal, patch);
+        }
     }
 });
 
@@ -320,16 +301,7 @@ _.extend(DataArray.prototype, Data.prototype, {
  * @param {Object} options
  */
 function Seed(options) {
-    // if has target means this is a child VM
-    if ('target' in options) {
-        this._target = options.target;
-        _merge(this, options.data);
-        this._tops.push(this);
-        return;
-    }
-    options.top = this;
-    // attach the properties
-    _merge(this, new Data(options));
+    Data.call(this, options);
 }
 _.extend(Seed, {
     Data: Data,

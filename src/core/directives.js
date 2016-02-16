@@ -153,12 +153,11 @@ module.exports = {
 
             options = {
                 el: el,
-                data: data,
-                target: target,
+                // TODO maybe need to remove
+                data: data.$get(),
                 _parent: vm
             };
 
-            // create a child
             childVm = new Child(options);
 
             vm._children.push(childVm);
@@ -170,6 +169,69 @@ module.exports = {
                         (vm.$[ref] = [refs, childVm]) :
                     (vm.$[ref] = childVm);
             }();
+
+            // prevent child vm data change to trigger parent vm
+            var _preventChild = false,
+            // prevent parent vm data change to trigger child vm
+                _preventParent = false,
+            // data cache
+                dataCache;
+
+            // first trigger
+            target &&
+                vm.$watch(target, function (value, oldVal, patch) {
+                    if (_preventParent && target === _preventParent) return;
+                    // cache the data when target change
+                    dataCache = value;
+                });
+
+            function ondatachange(prop, value, oldVal, patch) {
+                // TODO
+                if (data.__R__) return vm.$off('datachange', ondatachange);
+                if (this === childVm) {
+                    if (_preventChild && prop === _preventChild) {
+
+                        _preventChild = false;
+                    } else {
+                        var parentProp = _.get(target, prop);
+                        // prevent parent datachange
+                        _preventParent = parentProp;
+                        patch ?
+                            vm.data(parentProp)[patch.method].apply(vm.data(parentProp), patch.args) :
+                            _setProp(vm, parentProp, value);
+                    }
+                } else if (this === vm) {
+                    if (_preventParent) {
+                        // this prevent this time
+                        _preventParent = false;
+                    // change data need sync
+                    // TODO
+                    } else if (!target || (prop !== target && !prop.indexOf(target + '.'))) {
+                        var start = target.length,
+                            childProp;
+
+                        start && (start += 1);
+                        childProp = prop.substring(start, prop.length);
+                        // prevent child datachange
+                        _preventChild = childProp;
+
+                        patch ?
+                            childVm.data(childProp)[patch.method].apply(childVm.data(childProp), patch.args) :
+                        _setProp(childVm, childProp, value);
+                    // maybe not need sync, check data cache if exist just sync
+                    } else if (!target.indexOf(prop) && dataCache) {
+                        // prevent child datachange
+                        _preventChild = target;
+
+                        childVm.$set(dataCache);
+                        // clear the data cache
+                        dataCache = undefined;
+                    }
+                }
+            }
+
+            // second trigger
+            vm.$on('datachange', ondatachange);
         }
     },
     'if': {
