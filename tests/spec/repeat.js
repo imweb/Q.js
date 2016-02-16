@@ -22,13 +22,6 @@ module.exports = function (Q) {
                 <div>\
                     <p q-repeat="msgs" q-text="text"></p>\
                 </div>\
-            </div>\
-            <div id="repeat-child" style="display: none">\
-                <div q-repeat="list">\
-                    <div q-vm="yaya" q-ref="yaya">\
-                        <p q-text="msg"></p>\
-                    </div>\
-                </div>\
             </div>';
         document.body.appendChild(div);
     });
@@ -167,37 +160,6 @@ module.exports = function (Q) {
                 { msg: 'world' }
             ]);
             done();
-        });
-
-        it('should able to repeat a child component', function () {
-            Q.define('yaya', {
-                data: {
-                    msg: 'default'
-                }
-            });
-
-            var vm = new Q({
-                el: '#repeat-child',
-                data: {
-                    list: [
-                        {
-                            msg: 'hello'
-                        },
-                        {
-                            msg: 'nihao'
-                        }
-                    ]
-                }
-            });
-
-            vm.$.yaya.length.should.equal(2);
-            vm.$.yaya[0].msg.should.equal('hello');
-            vm.$.yaya[1].msg.should.equal('nihao');
-
-            vm.list[0].$set('msg', 'yeah');
-            vm.$.yaya[0].msg.should.equal('yeah');
-            console.log(vm.$.yaya[1].msg);
-            vm.$.yaya[1].msg.should.equal('nihao');
         });
     });
 

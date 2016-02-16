@@ -48,8 +48,6 @@ function _getLength(keys) {
 
 function _fixKey(key, top, value) {
     target = top._target;
-    // prvent list.1.msg change trigger list.0.msg
-    if (target && key.indexOf(target) !== 0) return false;
     var res = target ? key.substring(target.length + 1) : key;
     // merge new value
     if (!(~res.indexOf('.'))) top[res] = value;
@@ -172,10 +170,9 @@ _.extend(Data.prototype, {
         type = type || 0;
         var tops = this._tops;
         tops.forEach(function (top) {
-            var target = _fixKey(key, top, value);
-            if (top.$emit && target) {
-                ~type && top.$emit('data:' + target, value, oldVal, patch);
-                type && top.$emit('deep:' + target, value, oldVal, patch);
+            if (top.$emit) {
+                ~type && top.$emit('data:' + _fixKey(key, top, value), value, oldVal, patch);
+                type && top.$emit('deep:' + _fixKey(key, top, value), value, oldVal, patch);
             }
         });
     }

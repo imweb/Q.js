@@ -1,5 +1,5 @@
 /*!
- * Q.js v0.5.9
+ * Q.js v0.5.8
  * Inspired from vue.js
  * (c) 2016 Daniel Yang
  * Released under the MIT License.
@@ -917,8 +917,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _fixKey(key, top, value) {
 	    target = top._target;
-	    // prvent list.1.msg change trigger list.0.msg
-	    if (target && key.indexOf(target) !== 0) return false;
 	    var res = target ? key.substring(target.length + 1) : key;
 	    // merge new value
 	    if (!(~res.indexOf('.'))) top[res] = value;
@@ -1041,10 +1039,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        type = type || 0;
 	        var tops = this._tops;
 	        tops.forEach(function (top) {
-	            var target = _fixKey(key, top, value);
-	            if (top.$emit && target) {
-	                ~type && top.$emit('data:' + target, value, oldVal, patch);
-	                type && top.$emit('deep:' + target, value, oldVal, patch);
+	            if (top.$emit) {
+	                ~type && top.$emit('data:' + _fixKey(key, top, value), value, oldVal, patch);
+	                type && top.$emit('deep:' + _fixKey(key, top, value), value, oldVal, patch);
 	            }
 	        });
 	    }
