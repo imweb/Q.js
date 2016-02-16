@@ -5,12 +5,6 @@ var PROP_REG = /^(.*)\.([\w\-]+)$/
 
 function _setProp(vm, prop, value) {
     vm.data(prop, value);
-    // if (~prop.indexOf('.')) {
-    //     prop = PROP_REG.exec(prop);
-    //     vm.data(prop[1]).$set(prop[2], value);
-    // } else {
-    //     vm.$set(prop, value);
-    // }
 }
 
 module.exports = {
@@ -69,19 +63,13 @@ module.exports = {
     },
     text: function (value) {
         var text;
-        
         value !== undefined &&
             (text = (this.el.textContent === 'string') ?
                 'textContent' : 'innerText') &&
-                (this.el[text] = 
+                (this.el[text] =
                     value == null ?
                         '' :
                         value.toString());
-        // value !== undefined &&
-        //     (this.el.textContent =
-        //         value == null ?
-        //             '' :
-        //             value.toString());
     },
     html: function(value) {
         this.el.innerHTML = value && value.toString() || '';
