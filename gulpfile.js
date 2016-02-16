@@ -6,8 +6,7 @@ var gulp = require('gulp')
   , webpack = require('gulp-webpack')
   , config = require('./webpack.config');
 
-// fix error in Linux Firefox, TODOS
-process.env.TRAVIS = false;
+useFirefox = false;
 
 function Size(name) {
   this._name = name;
@@ -45,17 +44,17 @@ gulp.task('test', function (done) {
   karma.start({
     configFile: __dirname + '/native.conf.js',
     singleRun: true,
-    browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+    browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
   }, function () {
     karma.start({
       configFile: __dirname + '/jquery.conf.js',
       singleRun: true,
-      browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+      browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
     }, function () {
       karma.start({
         configFile: __dirname + '/zepto.conf.js',
         singleRun: true,
-        browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
+        browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
       });
     }, done);
   });
