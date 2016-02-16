@@ -6,6 +6,9 @@ var gulp = require('gulp')
   , webpack = require('gulp-webpack')
   , config = require('./webpack.config');
 
+// fix error in Linux Firefox, TODOS
+process.env.TRAVIS = false;
+
 function Size(name) {
   this._name = name;
   this._max = undefined;
