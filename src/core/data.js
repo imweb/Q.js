@@ -135,8 +135,8 @@ _.extend(Data.prototype, {
             res = [];
         }
         keys.forEach(function (key) {
-            res[key] = self[key] == null ?
-                self[key] :
+           res[key] = self[key] === undefined ?
+                undefined :
                 self[key].$get ?
                     self[key].$get() :
                     self[key];
@@ -262,6 +262,12 @@ _.extend(DataArray.prototype, Data.prototype, {
             args: [i, l]
         };
         for (var j = 0, k = l + i, z = this.length - l; i < z; i++, j++) {
+            // remove item between i to j
+            if (j < l) { 
+                // use __R__ mark remove
+                this[i].__R__ = true;
+                this[i]._namespace = undefined;
+            }
             this[i] = this[k + j];
             typeof this[i] === 'object' &&
                 (this[i]._namespace = i + '');
@@ -322,9 +328,11 @@ _.extend(Seed.prototype, Data.prototype, {
                 key = keys[i];
                 // key is number
                 if (+key + '' === key) key = +key;
-                if (key in data && data[key] != null) {
+                //todo
+                if (typeof(data) != 'object') return;
+                if (key in data) {
                     data = data[key];
-                } else if (value === undefined) {
+                } else if (value == null) {
                     // data is undefind
                     return undefined;
                 } else {
