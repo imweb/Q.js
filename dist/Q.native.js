@@ -1,7 +1,7 @@
 /*!
- * Q.js v1.0.8
+ * Q.js v1.0.9
  * Inspired from vue.js
- * (c) 2015 Daniel Yang
+ * (c) 2016 Daniel Yang
  * Released under the MIT License.
  */
 
@@ -86,6 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    priorities = ['vm', 'repeat', 'if'],
 	    _qtid = 0,
 	    _slice = [].slice,
+	    _alpaca = document.getElementsByTagName('html')[0],
 	    slice = function () {
 	        try {
 	            _slice.call(document.body.childNodes);
@@ -102,6 +103,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        }
 	    }();
+
+	_alpaca && (_alpaca = _alpaca.getAttribute('alpaca'));
 
 	function _loopPriority(el, res, setting) {
 	    var attr, tmp;
@@ -216,7 +219,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key && arr.push(key);
 	        return arr.join('.').replace(/^(.+\.)?\$top\./, '');
 	    },
-	    walk: walk
+	    walk: walk,
+	    /**
+	     * alpaca
+	     * just a flag
+	     */
+	    alpaca: !!_alpaca
 	};
 
 
@@ -1772,7 +1780,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    update && self.$watch(target, function (value, oldValue) {
 	                        value = self.applyFilters(value, readFilters, oldValue);
 	                        update.call(that, value, oldValue);
-	                    }, typeof tmp === 'object', typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
+	                    }, typeof tmp === 'object', _.alpaca ? false : typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
 	                    if (_.isObject(directive) && directive.bind) directive.bind.call(that);
 	                });
 	        });

@@ -37,7 +37,7 @@ module.exports = function (el, options) {
                     update && self.$watch(target, function (value, oldValue) {
                         value = self.applyFilters(value, readFilters, oldValue);
                         update.call(that, value, oldValue);
-                    }, typeof tmp === 'object', typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
+                    }, typeof tmp === 'object', _.alpaca ? false : typeof options.immediate === 'boolean' ? options.immediate : (tmp !== undefined));
                     if (_.isObject(directive) && directive.bind) directive.bind.call(that);
                 });
         });

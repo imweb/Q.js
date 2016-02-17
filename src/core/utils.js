@@ -7,6 +7,7 @@ var noop = function () {},
     priorities = ['vm', 'repeat', 'if'],
     _qtid = 0,
     _slice = [].slice,
+    _alpaca = document.getElementsByTagName('html')[0],
     slice = function () {
         try {
             _slice.call(document.body.childNodes);
@@ -23,6 +24,8 @@ var noop = function () {},
             };
         }
     }();
+
+_alpaca && (_alpaca = _alpaca.getAttribute('alpaca'));
 
 function _loopPriority(el, res, setting) {
     var attr, tmp;
@@ -137,5 +140,10 @@ module.exports = {
         key && arr.push(key);
         return arr.join('.').replace(/^(.+\.)?\$top\./, '');
     },
-    walk: walk
+    walk: walk,
+    /**
+     * alpaca
+     * just a flag
+     */
+    alpaca: !!_alpaca
 };
