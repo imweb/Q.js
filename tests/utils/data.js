@@ -530,7 +530,39 @@ describe('Data & DataArray', function () {
             arr[i].v.should.equal(i);
             arr[i].$key().should.equal(i);
         }
+        arr.$get().should.eql([{
+            v: 0
+        }, {
+            v: 1
+        }, {
+            v: 2
+        }]);
+    });
 
+    it('should able to remove multi-item using splice for a object array', function () {
+        var arr = (new Data({
+            data: {
+                arr: [{
+                    v: 0
+                }, {
+                    v: 8
+                },{
+                    v: 9
+                }, {
+                    v: 1
+                }, {
+                    v: 2
+                }]
+            }
+        })).arr;
+
+        arr.splice(1, 2);
+
+        arr.length.should.equal(3);
+        for (var i = 0, l = arr.length; i < l; i++) {
+            arr[i].v.should.equal(i);
+            arr[i].$key().should.equal(i);
+        }
         arr.$get().should.eql([{
             v: 0
         }, {

@@ -78,7 +78,7 @@ module.exports = {
     text: function (value) {
         var text;
         value !== undefined &&
-            (text = (this.el.textContent === 'string') ?
+            (text = (typeof this.el.textContent === 'string') ?
                 'textContent' : 'innerText') &&
                 (this.el[text] =
                     value == null ?
@@ -207,7 +207,7 @@ module.exports = {
 
                         _preventChild = false;
                     } else {
-                        var parentProp = _.get(target, prop);
+                        var parentProp = _.get(data.$namespace(), prop);
                         // prevent parent datachange
                         _preventParent = parentProp;
                         patch ?
