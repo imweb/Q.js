@@ -6,8 +6,6 @@ var gulp = require('gulp')
   , webpack = require('gulp-webpack')
   , config = require('./webpack.config');
 
-useFirefox = false;
-
 function Size(name) {
   this._name = name;
   this._max = undefined;
@@ -44,17 +42,17 @@ gulp.task('test', function (done) {
   karma.start({
     configFile: __dirname + '/native.conf.js',
     singleRun: true,
-    browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
+    browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
   }, function () {
     karma.start({
       configFile: __dirname + '/jquery.conf.js',
       singleRun: true,
-      browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
+      browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
     }, function () {
       karma.start({
         configFile: __dirname + '/zepto.conf.js',
         singleRun: true,
-        browsers: [(useFirefox && process.env.TRAVIS) ? 'Firefox' : 'Chrome', 'PhantomJS']
+        browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
       });
     }, done);
   });
