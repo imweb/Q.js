@@ -8,6 +8,8 @@ require('./spec/directive')(Q);
 require('./spec/repeat')(Q);
 require('./spec/model')(Q);
 require('./spec/filters')(Q);
+require('./spec/alpaca')(Q);
+require('./spec/cloak')(Q);
 
 
 _.extend(utils, _);

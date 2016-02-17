@@ -9,6 +9,7 @@ require('./spec/repeat')(Q);
 require('./spec/model')(Q);
 require('./spec/filters')(Q);
 require('./spec/alpaca')(Q);
+require('./spec/cloak')(Q);
 
 // extend _
 _.extend(utils, _);
