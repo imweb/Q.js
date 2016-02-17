@@ -193,7 +193,7 @@ module.exports = {
 
                         _preventChild = false;
                     } else {
-                        var parentProp = _.get(target, prop);
+                        var parentProp = _.get(data.$namespace(), prop);
                         // prevent parent datachange
                         _preventParent = parentProp;
                         patch ?
