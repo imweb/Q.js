@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.9
+ * Q.js v1.0.10
  * Inspired from vue.js
  * (c) 2016 Daniel Yang
  * Released under the MIT License.
@@ -1328,9 +1328,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PROP_REG = /^(.*)\.([\w\-]+)$/
 
 	module.exports = {
+	    cloak: {
+	        bind: function () {
+	            var vm = this.vm,
+	                el = this.el;
+
+	            // after ready
+	            vm.$once('hook:ready', function () {
+	                // if data change
+	                vm.$once('datachange', function () {
+	                    el.removeAttribute('q-cloak');
+	                });
+	            });
+	        }
+	    },
 	    show: function (value) {
 	        var el = this.el;
-	        // TODO refactor & compatibility later
 	        if (value) {
 	            el.style.display = '';
 	            var display = el.currentStyle ?

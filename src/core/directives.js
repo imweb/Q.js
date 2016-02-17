@@ -4,9 +4,22 @@ var _ = require('./utils'),
 var PROP_REG = /^(.*)\.([\w\-]+)$/
 
 module.exports = {
+    cloak: {
+        bind: function () {
+            var vm = this.vm,
+                el = this.el;
+
+            // after ready
+            vm.$once('hook:ready', function () {
+                // if data change
+                vm.$once('datachange', function () {
+                    el.removeAttribute('q-cloak');
+                });
+            });
+        }
+    },
     show: function (value) {
         var el = this.el;
-        // TODO refactor & compatibility later
         if (value) {
             el.style.display = '';
             var display = el.currentStyle ?
