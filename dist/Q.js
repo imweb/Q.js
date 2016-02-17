@@ -1301,6 +1301,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = {
+	    cloak: {
+	        bind: function () {
+	            var vm = this.vm,
+	                el = this.el;
+
+	            // after ready
+	            vm.$once('hook:ready', function () {
+	                // if data change
+	                vm.$once('datachange', function () {
+	                    el.removeAttribute('q-cloak');
+	                });
+	            });
+	        }
+	    },
 	    show: function (value) {
 	        var el = this.el;
 	        if (value) el.style.display = 'block';
