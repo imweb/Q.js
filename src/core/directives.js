@@ -64,7 +64,7 @@ module.exports = {
     text: function (value) {
         var text;
         value !== undefined &&
-            (text = (this.el.textContent === 'string') ?
+            (text = (typeof this.el.textContent === 'string') ?
                 'textContent' : 'innerText') &&
                 (this.el[text] =
                     value == null ?
