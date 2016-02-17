@@ -42,17 +42,17 @@ gulp.task('test', function (done) {
   karma.start({
     configFile: __dirname + '/native.conf.js',
     singleRun: true,
-    browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
+    browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
   }, function () {
     karma.start({
       configFile: __dirname + '/jquery.conf.js',
       singleRun: true,
-      browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
+      browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
     }, function () {
       karma.start({
         configFile: __dirname + '/zepto.conf.js',
         singleRun: true,
-        browsers: [process.env.TRAVIS ? 'PhantomJS' : 'Chrome', 'PhantomJS']
+        browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome', 'PhantomJS']
       });
     }, done);
   });
