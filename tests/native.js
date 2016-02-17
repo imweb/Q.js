@@ -7,6 +7,7 @@ require('./spec/class')(Q);
 require('./spec/directive')(Q);
 require('./spec/repeat')(Q);
 require('./spec/filters')(Q);
+require('./spec/cloak')(Q);
 
 // extend _
 _.extend(utils, _);
