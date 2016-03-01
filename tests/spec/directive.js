@@ -38,6 +38,10 @@ module.exports = function (Q) {
             <div id="on7" style="display: none">\
                 <button q-on="click: onclick(10086)">hello</button>\
             </div>\
+            <div id="on8" style="display: none">\
+                <button q-on="click: clickTrue(true)">hello</button>\
+                <button q-on="click: clickFalse(false)">hello</button>\
+            </div>\
             <div id="class1" style="display: none">\
                 <div class="toggle-me" q-class="toggle-me: toggle"></div>\
             </div>\
@@ -359,6 +363,22 @@ module.exports = function (Q) {
                 }
             });
             $('button', '#on7')[0].click();
+        });
+        it('should able bind event with boolean param', function (done) {
+            new Q({
+                el: '#on8',
+                methods: {
+                    clickTrue: function (arg) {
+                        arg.should.equal(true);
+                    },
+                    clickFalse: function(arg) {
+                        arg.should.equal(false);
+                        done();
+                    }
+                }
+            });
+            $('button', '#on8')[0].click();
+            $('button', '#on8')[1].click();
         });
     });
 
