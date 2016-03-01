@@ -31,9 +31,12 @@ module.exports = function (Q) {
             <div id="on6" style="display: none">\
                 <ul>\
                     <li q-repeat="msgs">\
-                        <button q-on="click: clickItem(this, e, text, xx)">hello</button>\
+                        <button q-on="click: clickItem(this, e, text, xx, 315)">hello</button>\
                     </li>\
                 </ul>\
+            </div>\
+            <div id="on7" style="display: none">\
+                <button q-on="click: onclick(10086)">hello</button>\
             </div>\
             <div id="class1" style="display: none">\
                 <div class="toggle-me" q-class="toggle-me: toggle"></div>\
@@ -327,11 +330,12 @@ module.exports = function (Q) {
                     ]
                 },
                 methods: {
-                    clickItem: function (data, e, text, errParam) {
+                    clickItem: function (data, e, text, errParam, num) {
                         data.should.equal(this.msgs[0]);
                         e.target.tagName.should.equal('BUTTON');
                         text.should.equal('hello');
                         (errParam === undefined).should.be.true;
+                        num.should.equal(315);
                         done();
                     }
                 }
@@ -343,6 +347,18 @@ module.exports = function (Q) {
                 buttons[0].click();
             }, 100);
 
+        });
+        it('should able bind event with number param', function (done) {
+            new Q({
+                el: '#on7',
+                methods: {
+                    onclick: function (num) {
+                        num.should.equal(10086);
+                        done();
+                    }
+                }
+            });
+            $('button', '#on7')[0].click();
         });
     });
 

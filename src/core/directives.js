@@ -106,6 +106,7 @@ module.exports = {
                     param.forEach(function (arg) {
                         if (arg === 'e') args.push(e);
                         else if (arg === 'this') args.push(data);
+                        else if (+arg + '' === arg) args.push(+arg);
                         else if (arg.match(/^(['"]).*\1$/)) args.push(arg.slice(1, -1));
                         else args.push(self.data(arg));
                     }) :
