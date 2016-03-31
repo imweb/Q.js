@@ -14,6 +14,34 @@ module.exports = function (Q) {
                     </li>\
                 </ul>\
             </div>\
+            <div id="on3" style="display: none">\
+                <button q-on="click: onclick(e, this)">hello</button>\
+            </div>\
+            <div id="on4" style="display: none">\
+                <button q-on="click: onclick(\'test\')">hello</button>\
+            </div>\
+            <div id="on5" style="display: none">\
+                <button q-on="click: onclick(this)">hello</button>\
+                <ul>\
+                    <li q-repeat="msgs">\
+                        <button q-on="click: clickItem(text, xx)">hello</button>\
+                    </li>\
+                </ul>\
+            </div>\
+            <div id="on6" style="display: none">\
+                <ul>\
+                    <li q-repeat="msgs">\
+                        <button q-on="click: clickItem(this, e, text, xx, 315)">hello</button>\
+                    </li>\
+                </ul>\
+            </div>\
+            <div id="on7" style="display: none">\
+                <button q-on="click: onclick(10086)">hello</button>\
+            </div>\
+            <div id="on8" style="display: none">\
+                <button q-on="click: clickTrue(true)">hello</button>\
+                <button q-on="click: clickFalse(false)">hello</button>\
+            </div>\
             <div id="class1" style="display: none">\
                 <div class="toggle-me" q-class="toggle-me: toggle"></div>\
             </div>\
@@ -211,7 +239,7 @@ module.exports = function (Q) {
             $('button', '#on1')[0].click();
         });
 
-        it('should able bind event', function (done) {
+        it('should able bind event in array', function (done) {
             new Q({
                 el: '#on2',
                 data: {
@@ -239,6 +267,118 @@ module.exports = function (Q) {
                 buttons[1].click();
             }, 100);
 
+        });
+        it('should able bind event with param', function (done) {
+            new Q({
+                el: '#on3',
+                methods: {
+                    onclick: function (e, data) {
+                        e.target.tagName.should.equal('BUTTON');
+                        data.should.equal(this);
+                        done();
+                    }
+                }
+            });
+            $('button', '#on3')[0].click();
+        }); 
+        it('should able bind event with string param', function (done) {
+            new Q({
+                el: '#on4',
+                methods: {
+                    onclick: function (str) {
+                        str.should.equal('test');
+                        done();
+                    }
+                }
+            });
+            $('button', '#on4')[0].click();
+        });
+        it('should able bind event with property of data', function (done) {
+            new Q({
+                el: '#on5',
+                data: {
+                    msgs: [
+                        {
+                            text: 'hello'
+                        }
+                    ]
+                },
+                methods: {
+                    onclick: function (data) {
+                        data.should.equal(this);
+                    },
+                    clickItem: function (data, errParam) {
+                        data.should.equal('hello');
+                        (errParam === undefined).should.be.true;
+                        done();
+                    }
+                }
+            });
+
+
+            setTimeout(function () {
+                var buttons = $('button', '#on5');
+                buttons[0].click();
+                buttons[1].click();
+            }, 100);
+
+        });
+        it('should able bind event with all type of param', function (done) {
+            new Q({
+                el: '#on6',
+                data: {
+                    msgs: [
+                        {
+                            text: 'hello'
+                        }
+                    ]
+                },
+                methods: {
+                    clickItem: function (data, e, text, errParam, num) {
+                        data.should.equal(this.msgs[0]);
+                        e.target.tagName.should.equal('BUTTON');
+                        text.should.equal('hello');
+                        (errParam === undefined).should.be.true;
+                        num.should.equal(315);
+                        done();
+                    }
+                }
+            });
+
+
+            setTimeout(function () {
+                var buttons = $('button', '#on6');
+                buttons[0].click();
+            }, 100);
+
+        });
+        it('should able bind event with number param', function (done) {
+            new Q({
+                el: '#on7',
+                methods: {
+                    onclick: function (num) {
+                        num.should.equal(10086);
+                        done();
+                    }
+                }
+            });
+            $('button', '#on7')[0].click();
+        });
+        it('should able bind event with boolean param', function (done) {
+            new Q({
+                el: '#on8',
+                methods: {
+                    clickTrue: function (arg) {
+                        arg.should.equal(true);
+                    },
+                    clickFalse: function(arg) {
+                        arg.should.equal(false);
+                        done();
+                    }
+                }
+            });
+            $('button', '#on8')[0].click();
+            $('button', '#on8')[1].click();
         });
     });
 
