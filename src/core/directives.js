@@ -121,7 +121,7 @@ module.exports = {
     },
     model: {
         bind: function () {
-            var keys = ((this.namespace || '') + this.target).split('.'),
+            var keys = ((this.namespace ? this.namespace + '.' : '') + this.target).split('.'),
                 key = keys.pop(),
                 namespace = keys.join('.'),
                 el = this.el,

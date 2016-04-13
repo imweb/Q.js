@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.10
+ * Q.js v1.0.11
  * Inspired from vue.js
  * (c) 2016 Daniel Yang
  * Released under the MIT License.
@@ -1445,7 +1445,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    model: {
 	        bind: function () {
-	            var keys = ((this.namespace || '') + this.target).split('.'),
+	            var keys = ((this.namespace ? this.namespace + '.' : '') + this.target).split('.'),
 	                key = keys.pop(),
 	                namespace = keys.join('.'),
 	                el = this.el,
