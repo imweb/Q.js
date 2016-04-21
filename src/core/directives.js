@@ -227,7 +227,7 @@ module.exports = {
                 }
 
                 _init(value);
-            }, false, true);
+            }, typeof this.data(key) === 'object', true);
         }
     },
     el: {

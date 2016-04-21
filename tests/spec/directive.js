@@ -29,6 +29,9 @@ module.exports = function (Q) {
             <div id="if3" style="display: none">\
                 <button q-if="exist" q-on="click: click"></button>\
             </div>\
+            <div id="if4" style="display: none">\
+                <button q-if="exist | isExist" q-on="click: click"></button>\
+            </div>\
             <div id="custom1" style="display: none;">\
                 <p q-msg="msg"></p>\
             </div>\
@@ -159,6 +162,32 @@ module.exports = function (Q) {
             });
 
             $('#if3 button')[0].click();
+        });
+
+        it('should trigger if directive with object data', function () {
+            var vm = new Q({
+                el: '#if4',
+                data: {
+                    exist: {
+                        flag: true
+                    }
+                },
+                filters: {
+                    isExist: function (v) {
+                        console.log('123', v);
+                        return v.flag;
+                    }
+                },
+                methods: {
+                    click: function () {
+                        this.exist.$set('flag', false);
+                    }
+                }
+            });
+
+            $('#if4 button').length.should.equal(1);
+            $('#if4 button')[0].click();
+            $('#if4 button').length.should.equal(0);
         });
     });
 
