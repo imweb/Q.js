@@ -1,5 +1,5 @@
 /*!
- * Q.js v1.0.11
+ * Q.js v1.0.12
  * Inspired from vue.js
  * (c) 2016 Daniel Yang
  * Released under the MIT License.
@@ -1436,6 +1436,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    param.forEach(function (arg) {
 	                        if (arg === 'e') args.push(e);
 	                        else if (arg === 'this') args.push(data);
+	                        else if (arg === 'true') args.push(true);
+	                        else if (arg === 'false') args.push(false);
+	                        else if (+arg + '' === arg) args.push(+arg);
+	                        else if (arg.match(/^(['"]).*\1$/)) args.push(arg.slice(1, -1));
+	                        else args.push(self.data(arg));
 	                    }) :
 	                    args.push(e);
 
@@ -1551,7 +1556,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                _init(value);
-	            }, false, true);
+	            }, typeof this.data(key) === 'object', true);
 	        }
 	    },
 	    el: {
